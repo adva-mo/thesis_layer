@@ -1,0 +1,20 @@
+# Input files — property data, brochures, screenshots (not tracked)
+input/brochures/*
+input/screenshots/*
+input/urls/*
+!input/brochures/.gitkeep
+!input/screenshots/.gitkeep
+!input/urls/.gitkeep
+
+# Generated output — not tracked in version control
+output/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
