@@ -15,6 +15,34 @@ If `[MISSING]` fields exist, decide whether to continue or stop and get the miss
 
 ---
 
+## Global Writing Rules
+
+These apply to every content type, every language, every format.
+
+**Do not use "-" or "—" as a mid-sentence separator or thought-break.**
+
+Not allowed:
+המחיר - לא מאומת
+היא — אחד הפרטים החשובים
+תשואה — זה לא מספר אחד
+
+Use "," or ":" instead:
+המחיר: לא מאומת
+היא אחד הפרטים החשובים
+תשואה: זה לא מספר אחד
+
+"-" is allowed only in:
+- Hyphenated terms: re-branding, buy-to-let, off-plan
+- Dates: 12-12-2011, 2025-03-01
+- Markdown list bullets at the start of a line (- item)
+
+"—" is allowed only in:
+- The extraction warning block (metadata, not body content)
+
+If "-" or "—" appears mid-sentence: rewrite.
+
+---
+
 ## Production Sequence
 
 Run in this order. Each step uses the PROJECT DATA block as input.
@@ -110,6 +138,30 @@ Append to each language's LinkedIn file as a separate section. Hebrew CTAs → H
 
 ---
 
+### Step 8 — Hebrew Naturalizer Pass
+
+Reference: `templates/languages/hebrew-naturalizer.md`
+
+Run after all content steps are complete. This is a mandatory explicit step — not an assumed check done while writing.
+
+**Applies to:** every Hebrew public-facing file generated in Steps 1–7.
+
+**Does not apply to:** English files, Analysis Mode outputs.
+
+For each Hebrew file:
+
+1. Read the file in full
+2. Run the naturalizer workflow against it
+3. Write the naturalizer sign-off at the bottom of the file with one of these outputs:
+   - `_Naturalizer: No meaningful language issues._`
+   - `_Naturalizer: [list of changes made]_`
+
+**The sign-off must reflect an actual pass, not an assumption.** If the sign-off is written before the check is done, it is invalid.
+
+Do not mark any Hebrew file `status: ready` until the naturalizer sign-off is present and verified.
+
+---
+
 ## Repurposing Pass (Optional but Recommended)
 
 After completing Steps 1-7, run a quick repurposing pass:
@@ -169,7 +221,12 @@ Before marking any file `status: ready`, check:
 - [ ] No "Dubai is booming" or equivalent clichés
 - [ ] Tone is calm and analytical — not broker-urgent
 
+**Naturalizer**
+- [ ] Every Hebrew file has a naturalizer sign-off at the bottom
+- [ ] Sign-off was written after an explicit pass — not assumed during writing
+
 **Structure**
+- [ ] No "-" used as a mid-sentence separator — use "," or ":" instead (see Global Writing Rules)
 - [ ] Each piece has exactly one CTA
 - [ ] CTA tier matches the platform
 - [ ] Investor summary is under 200 words
