@@ -67,15 +67,14 @@ Save to `output/[project-slug]/[language]/carousel/` — see CLAUDE.md §12.
 
 ---
 
-### Step 4 — Generate 1 LinkedIn Post
+### Step 4 — Generate 1 LinkedIn Post per language
 
 Reference: `templates/linkedin/linkedin-template.md`
 
-One post per language. Investor-grade, analytical, 700-1000 characters.
+Each language gets its own separate file in its own directory. Do not combine languages in one file.
 
-Structure: Hook → Context → Data → Investment Angle → Risk Note → CTA (Tier 1).
-
-Save to `output/[project-slug]/[language]/linkedin/` — see CLAUDE.md §12.
+- Hebrew post → `output/[project-slug]/hebrew/linkedin/[project-slug]-he-linkedin.md`
+- English post → `output/[project-slug]/english/linkedin/[project-slug]-en-linkedin.md`
 
 ---
 
@@ -99,17 +98,15 @@ Structure: Project → Location → Key Numbers → Investment Angle → Honest 
 
 Suitable for emails and PDF lead magnets. Write it once — repurpose everywhere.
 
-Include in the LinkedIn output file as a separate section at the bottom.
+Append to each language's LinkedIn file as a separate section at the bottom. Hebrew summary → Hebrew LinkedIn file. English summary → English LinkedIn file.
 
 ---
 
 ### Step 7 — Generate 3 CTA Variations
 
-Produce one CTA per tier (Soft / Medium / Direct), each in Hebrew and English.
+Produce one CTA per tier (Soft / Medium / Direct).
 
-Include a context note for each: "Best for: [platform/use case]"
-
-Include in the LinkedIn output file as a separate section.
+Append to each language's LinkedIn file as a separate section. Hebrew CTAs → Hebrew LinkedIn file. English CTAs → English LinkedIn file.
 
 ---
 
@@ -156,15 +153,25 @@ If any PROJECT DATA field was `[MISSING]`, add this block immediately after the 
 
 ## Quality Checklist
 
+**Pipeline note:** All content decisions must be finalized here before the Hebrew Naturalizer runs. The Naturalizer is a language-only pass — it will not catch or fix content issues.
+
 Before marking any file `status: ready`, check:
 
+**Data integrity**
 - [ ] No `[MISSING]` fields in published content
 - [ ] No hallucinated data (prices, returns, percentages)
-- [ ] Hebrew reads naturally — not like translated English
+- [ ] Every assertion is traceable to the PROJECT DATA block
+- [ ] Extraction warning present if data was partial
+
+**Tone and trust**
+- [ ] No urgency language without a specific, verifiable trigger — banned phrases: "לפני שזה יעלה", "הזדמנות", "כניסה מוקדמת", "לא יחזור", "פספסת", "נגמר מהר"
+- [ ] No scarcity claims unless unit count is confirmed and sourced
+- [ ] No "Dubai is booming" or equivalent clichés
+- [ ] Tone is calm and analytical — not broker-urgent
+
+**Structure**
 - [ ] Each piece has exactly one CTA
 - [ ] CTA tier matches the platform
-- [ ] No "Dubai is booming" or equivalent clichés
-- [ ] Extraction warning present if data was partial
 - [ ] Investor summary is under 200 words
 - [ ] LinkedIn post is 700-1000 characters
 - [ ] Each hook is under 280 characters
