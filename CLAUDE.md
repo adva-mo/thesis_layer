@@ -49,6 +49,10 @@ For full brand positioning, visual identity, and voice calibration table, see `a
 
 See `market.md` — Calibration Test section.
 
+### Voice examples:
+
+Before generating any content, read `examples/voice-examples.md`. Use one example per output as a voice calibration reference — for tone, pacing, and reasoning style only. Do not imitate examples directly or repeat their sentence formulas.
+
 ---
 
 ## 4. Language Writing Rules

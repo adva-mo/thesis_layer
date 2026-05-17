@@ -1,219 +1,514 @@
-# Carousel Template
+# Carousel Template — ThesisLayer
 
-Standard 7-slide carousel. Fixed structure — do not reorder slides. Each slide: 1-3 lines of text + a visual note in brackets.
+Standard 7-slide carousel.
 
-The carousel is the most repurposable format. A good carousel can become a reel script and a LinkedIn post with minimal editing.
+Fixed structure — do not reorder slides.
+
+Each slide:
+
+- 1–3 short lines of text
+- one visual note in brackets
+
+Goal:
+Build an investment idea through a project.
+
+NOT:
+Present a property brochure.
+
+The project should support a thesis.
+
+A strong carousel should feel:
+
+“an investor explaining something useful”
+
+NOT:
+
+“a broker presenting inventory”
+
+The carousel should be repurposable into:
+
+- reel script
+- LinkedIn post
+- WhatsApp explanation
 
 ---
 
 ## Slide Structure
 
-```
-Slide 1  →  Hook (stop the scroll)
-Slide 2  →  Project Introduction
-Slide 3  →  Key Numbers
-Slide 4  →  Area / Infrastructure Angle
-Slide 5  →  Who This Is For
-Slide 6  →  Reality Check (builds trust)
-Slide 7  →  CTA
+```text
+Slide 1 → Hook
+Slide 2 → Why This Matters
+Slide 3 → Key Numbers
+Slide 4 → Investment Thesis
+Slide 5 → Who This Is For
+Slide 6 → Reality Check
+Slide 7 → CTA
 ```
 
 ---
 
 ## Slide 1 — Hook
 
-**Goal:** Stop the scroll. Create a question in the reader's mind that the rest of the carousel answers.
+### Goal
 
-Use hook categories H1, H2, H3, or H7 (curiosity, price anchor, payment math, or investment psychology).
+Stop the scroll.
 
+Create an investment question.
+
+Hooks should create curiosity around:
+
+- timing
+- pricing
+- payment structure
+- investor behavior
+- market shifts
+- hidden assumptions
+
+Avoid generic curiosity.
+
+The hook should make the reader think:
+
+“Wait — what does that mean?”
+
+### Format
+
+```text
+[VISUAL: Large bold text on branded background. No image.]
+
+[1 strong line]
+[Optional second line]
 ```
-[VISUAL: Bold text on dark/branded background. No image.]
 
-SLIDE TEXT:
-[1 strong hook line — max 12 words]
-[Optional: 1 supporting line that deepens the tension]
+### Examples
 
-Example (Hebrew):
-"קניתם פעם נכס עם 20% בלבד?
-זה בדיוק מה ש-Sky Gardens מציע."
+**Style 1 — Contrarian**
 
-Example (English):
-"Most people think Dubai real estate requires millions.
-The actual entry point is very different."
+```text
+כולם מסתכלים על Wynn.
+מעט אנשים מסתכלים סביבו.
 ```
 
 ---
 
-## Slide 2 — Project Introduction
+**Style 2 — Smart Question**
 
-**Goal:** Answer the "what is this?" question clearly and quickly.
-
+```text
+70% בתחילה.
+זה לא סתם מספר.
 ```
-[VISUAL: Project render or name on branded card]
 
-SLIDE TEXT:
-[Project Name]
-[Developer] | [Area], Dubai
-[One-line description: unit type, scale, or community type]
+---
 
-Example (Hebrew):
-Sky Gardens
-Emaar Properties | Dubai Hills Estate, דובאי
-קהילה מתוכננת של 450 יחידות עם גישה לפארק ולמסחר
+**Style 3 — Pricing Logic**
 
-Example (English):
-Sky Gardens
-Emaar Properties | Dubai Hills Estate, Dubai
-A 450-unit master-planned community with park access and retail
+```text
+765,000 AED ב-JVC.
+השאלה היא מה מסתתר מאחורי המחיר.
+```
+
+---
+
+**Style 4 — Investor Psychology**
+
+```text
+לפעמים הסיכון
+לא נמצא במחיר.
+
+הוא נמצא בפרטים הקטנים.
+```
+
+---
+
+## Slide 2 — Why This Matters
+
+### Goal
+
+Explain the bigger story.
+
+Do NOT introduce the project immediately.
+
+Explain:
+
+Why should the reader care?
+
+Good inputs:
+
+- infrastructure
+- demand drivers
+- payment signals
+- market positioning
+- rental demand
+- developer behavior
+- pricing gaps
+
+The reader should think:
+
+“I didn't think about it this way.”
+
+### Format
+
+```text
+[VISUAL: Infrastructure visual, area image, concept graphic]
+
+[1–3 short lines explaining the broader idea]
+```
+
+### Examples
+
+**Costa Mare Example**
+
+```text
+Wynn נפתח ב-2027.
+
+השאלה היא לא אם הוא יצליח.
+
+השאלה היא אם המחירים סביבו כבר יודעים את זה.
+```
+
+---
+
+**Sierra Example**
+
+```text
+כשפרויקט מבקש 70% בתחילה —
+לפעמים זה אומר משהו.
+
+לא על המחיר.
+על שלב הבנייה.
+```
+
+---
+
+**Pearl House Example**
+
+```text
+JVC כבר הוכיחה ביקוש לשכירות.
+
+השאלה היא:
+האם הכניסה הזו באמת עושה היגיון?
 ```
 
 ---
 
 ## Slide 3 — Key Numbers
 
-**Goal:** Deliver the data that matters to an investor in the fewest possible words.
+### Goal
 
+Only show numbers that support the thesis.
+
+Avoid information dumping.
+
+Do NOT list everything.
+
+Choose only:
+
+- entry point
+- payment plan
+- handover
+- one differentiator
+
+### Format
+
+```text
+[VISUAL: Clean branded data card]
+
+כניסה:
+[AED]
+
+תשלומים:
+[structure]
+
+מסירה:
+[Q# YYYY]
+
+[1 supporting detail]
 ```
-[VISUAL: Data card — numbers large, labels small. Clean layout.]
 
-SLIDE TEXT:
-Starting price:   [AED amount]
-Payment plan:     [structure — e.g., 60/40]
-Handover:         [Q# YYYY]
-Unit types:       [studio / 1BR / 2BR / etc.]
+### Example
 
-Example (Hebrew):
-מחיר כניסה:      850,000 AED
-תשלומים:        60% בנייה / 40% מסירה
-מסירה:           Q4 2027
-סוגי יחידות:     1BR | 2BR | 3BR
+```text
+כניסה:
+765,000 AED
+
+תשלומים:
+70 / 20 / 10
+
+מסירה:
+לא פורסם
+
+מרוהטת
 ```
 
 ---
 
-## Slide 4 — Area / Infrastructure Angle
+## Slide 4 — Investment Thesis
 
-**Goal:** Sell the location. Investors don't buy apartments — they buy exposure to an area's trajectory.
+### Goal
 
-Use hook category H4 (infrastructure growth) as the framing.
+This is the most important slide.
 
+Explain:
+
+Why investors should care.
+
+Focus on:
+
+- timing
+- pricing logic
+- demand
+- market inefficiency
+- payment signals
+- positioning
+
+NOT:
+infrastructure list.
+
+Ask:
+
+“What is the real investment logic here?”
+
+### Format
+
+```text
+[VISUAL: Area map, pricing logic visual, thesis graphic]
+
+[1–3 short lines]
 ```
-[VISUAL: Area map or infrastructure callout graphic]
 
-SLIDE TEXT:
-[Area name]: [1-line positioning of why it matters]
-• [Infrastructure point 1]
-• [Infrastructure point 2]
-• [Infrastructure point 3 — demand driver]
+### Examples
 
-Example (Hebrew):
-Dubai Hills Estate: הקהילה המתוכננת הגדולה של Emaar
-• בית חולים Mediclinic בהליכה
-• Dubai Hills Mall — כבר פתוח
-• גישה לפארק 180 דונם
+**Costa Mare**
 
-Example (English):
-Dubai Hills Estate — Emaar's flagship master community
-• Mediclinic City Hospital on-site
-• Dubai Hills Mall open and operational
-• 180-acre park within walking distance
+```text
+Costa Mare מעניין
+לא בגלל הבריכה.
+
+אלא בגלל השאלה:
+
+האם Wynn כבר מתומחר?
+```
+
+---
+
+**Sierra**
+
+```text
+לפעמים תוכנית התשלומים
+מספרת יותר
+מהברושור.
+
+70% בתחילה
+מעלה שאלה שצריך לבדוק.
+```
+
+---
+
+**Pearl House**
+
+```text
+מרוהטת זה לא רק nice to have.
+
+זה אומר:
+פחות זמן עד שוכר.
 ```
 
 ---
 
 ## Slide 5 — Who This Is For
 
-**Goal:** Help the reader self-select. Specific is better than broad.
+### Goal
 
+Help people self-select.
+
+Specific beats broad.
+
+Exclude people.
+
+Trust grows when content feels selective.
+
+### Format
+
+```text
+[VISUAL: Clean checklist or persona card]
+
+זה רלוונטי אם:
+
+• [criterion]
+• [criterion]
+• [criterion]
+• [criterion]
 ```
-[VISUAL: Simple list or persona card]
 
-SLIDE TEXT:
-This project fits if:
-• [Criterion 1 — financial/entry level]
-• [Criterion 2 — investment goal]
-• [Criterion 3 — timeline/horizon]
-• [Criterion 4 — lifestyle or risk profile]
+### Example
 
-Example (Hebrew):
-הפרויקט הזה מתאים אם:
-• יש לך 170,000 AED לdowpayment ראשוני
-• אתה מחפש השקעה לטווח 3-7 שנים
-• אתה מעדיף קהילה מוכחת על פני מיקום ספקולטיבי
-• חשוב לך שם של יזם עם היסטוריית מסירה
+```text
+זה רלוונטי אם:
 
-Example (English):
-This fits if you're:
-• Looking for entry-level exposure to Dubai real estate
-• Investing with a 3-7 year horizon
-• Want a proven developer, not a spec play
-• Prefer community infrastructure over location gamble
+• אתה חושב 3–5 שנים קדימה
+• נוח לך עם אוף-פלאן
+• אתה מחפש שכירות יציבה
+• לא חייב נזילות מיידית
 ```
 
 ---
 
 ## Slide 6 — Reality Check
 
-**Goal:** Build trust by being honest about what this project is NOT or what risks exist. This slide is the one that makes the carousel credible.
+### Goal
 
-Do not skip this slide. Do not soften it into meaninglessness.
+Build trust.
 
-```
-[VISUAL: Honest tone — slightly different color or "reality check" label]
+Never soften risk.
 
-SLIDE TEXT:
-Worth knowing:
-[Risk 1 — honest, specific]
-[Risk 2 — honest, specific]
-[Risk 3 or context note — how to think about the risk]
+Never pretend certainty.
 
-Example (Hebrew):
+This slide makes the carousel credible.
+
+### Format
+
+```text
+[VISUAL: Slightly different tone. “Reality Check” label.]
+
 כדאי לדעת:
-מסירה Q4 2027 — עיכובים בבנייה קורים, גם אצל Emaar
-נכס אוף-פלאן לא נזיל — לא תמכור מחר
-תשואת שכירות תלויה בביקוש מקומי — לא בטוחה
 
-Example (English):
-Worth knowing:
-Q4 2027 is the target — Emaar has a strong track record, but delays happen
-Off-plan is illiquid — this is a 3+ year commitment minimum
-Rental yield is market-dependent — not guaranteed
+[risk]
+
+[risk]
+
+[how to think about it]
+```
+
+### Example
+
+```text
+כדאי לדעת:
+
+IMAN הוא יזם צעיר יחסית.
+
+70% upfront
+דורש להבין באיזה שלב הפרויקט.
+
+ומועד המסירה עדיין לא פורסם.
 ```
 
 ---
 
 ## Slide 7 — CTA
 
-**Goal:** One clear next step. Tier 2 CTA. One action only.
+### Goal
 
+One clear next step.
+
+Tier 2 CTA only.
+
+Simple.
+
+Low pressure.
+
+Never sound like a broker.
+
+### Format
+
+```text
+[VISUAL: High contrast branded CTA card]
+
+[One CTA]
+
+[One action]
 ```
-[VISUAL: Branded CTA card — high contrast, simple]
 
-SLIDE TEXT:
-[Single CTA line]
-[Contact method or action]
+### Example
 
-Example (Hebrew):
-רוצה את ניתוח ההשקעה המלא?
-שלח לי "דובאי" בפרטי ואשלח לך את כל הפרטים.
+```text
+רוצה לראות
+את כל המספרים?
 
-Example (English):
-Want the full investment breakdown?
-DM me "DUBAI" and I'll send you everything.
+כתוב לי "SIERRA"
+ואשלח את הניתוח.
 ```
 
 ---
 
 ## Caption Template
 
+Avoid identical caption structure across projects.
+
+Vary cadence.
+
+Possible structures:
+
+### Option 1 — Hook First
+
+```text
+[Hook]
+
+[1 insight]
+
+[1 risk]
+
+[CTA]
 ```
-[1-line hook mirroring Slide 1]
 
-[Slide 3 numbers — condensed to 1-2 lines]
+---
 
-[One honest line from Slide 6]
+### Option 2 — Question First
 
-[CTA from Slide 7]
+```text
+[Smart investor question]
 
-[Hashtags]
+[Short explanation]
+
+[Key number]
+
+[CTA]
 ```
+
+---
+
+### Option 3 — Contrarian
+
+```text
+[Common belief]
+
+[Counter insight]
+
+[Reality check]
+
+[CTA]
+```
+
+---
+
+## Variation Rule
+
+Do NOT imitate examples directly.
+
+Examples demonstrate:
+
+- tone
+- pacing
+- reasoning
+
+Avoid repeating:
+
+- sentence formulas
+- cadence
+- rhetorical structure
+
+Every carousel should feel individually written.
+
+---
+
+## Final Check
+
+Before output ask:
+
+Does this feel like:
+
+“an investor teaching something useful”
+
+OR:
+
+“a project brochure”?
+
+If brochure → rewrite.
