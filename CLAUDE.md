@@ -32,6 +32,7 @@ At the start of every session, before doing anything else, read these files:
 If a project is already active (e.g., resuming work), also read:
 
 4. `output/[project-slug]/thesis.md` — thesis statement, key numbers, risk register, CTA keyword
+5. `input/[project-slug]/project-data.md` — raw extracted project data (if exists; skip if not yet produced)
 
 These files are referenced throughout the system from multiple templates. Reading them once here eliminates per-template re-reads and prevents "see market.md" pointers from triggering repeated loads of the same file during CTA, hashtag, and language sections.
 

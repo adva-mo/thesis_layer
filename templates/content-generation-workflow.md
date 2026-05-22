@@ -143,11 +143,25 @@ Each language gets its own separate file in its own directory. Do not combine la
 - Hebrew post → `output/[project-slug]/hebrew/linkedin/[project-slug]-he-linkedin.md`
 - English post → `output/[project-slug]/english/linkedin/[project-slug]-en-linkedin.md`
 
+After writing the Hebrew LinkedIn file (including Investor Summary and CTA Variations), append a **Pitch Block** section:
+
+```
+## Pitch Block
+
+[3–5 sentence natural spoken Hebrew paragraph: project name + developer + location, entry price, payment structure, one-sentence investment angle. Written in WhatsApp register: short, personal, natural. This is the paragraph WhatsApp will adapt — not a LinkedIn section.]
+```
+
+The Pitch Block is the distilled, publication-ready project description. Write it once; WhatsApp adapts it three times.
+
 ---
 
 ### Step 5 — Generate 3 WhatsApp Messages
 
 Reference: `templates/whatsapp/whatsapp-template.md`
+
+**Before writing:** Read the Pitch Block section from `output/[project-slug]/hebrew/linkedin/[project-slug]-he-linkedin.md`.
+
+Use the Pitch Block as the core project description in all 3 variants. Adapt only the greeting, relationship framing (cold / warm / re-engagement), and closing question per variant. Do not re-compose the project description from scratch.
 
 Three variants: cold outreach, warm follow-up, re-engagement.
 

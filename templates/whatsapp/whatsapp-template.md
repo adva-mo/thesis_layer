@@ -11,6 +11,8 @@ Three message variants per project. Hebrew-first. Conversational, direct, never 
 
 **Language note (Hebrew):** WhatsApp is Tier 3 — direct and personal. Hebrew must sound like a real person, not a sales template. `primary_language.md` is loaded at session init — no re-read needed here.
 
+**Before writing:** Read the Pitch Block from `output/[project-slug]/hebrew/linkedin/[project-slug]-he-linkedin.md` — the `## Pitch Block` section at the bottom of the file. Use it as the core project description in all 3 variants. Only adapt the opening, relationship context, and closing question per variant. Do not re-write the project pitch from scratch.
+
 ---
 
 ## Variant 1 — Cold Outreach

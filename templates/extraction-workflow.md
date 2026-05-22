@@ -142,6 +142,47 @@ Extraction Notes: Source: developer brochure PDF. Prices as of brochure date —
 
 ---
 
+## Step 3 — Save Project Data
+
+After producing and validating the PROJECT DATA block, save it to:
+
+`input/[project-slug]/project-data.md`
+
+Use this format — the frontmatter records source, date, and status so future sessions can assess freshness without reading the full block:
+
+```markdown
+---
+project: [Project Name]
+developer: [Developer]
+slug: [project-slug]
+source-url: [url or "brochure" / "user notes"]
+fetched: [YYYY-MM-DD]
+extraction-status: COMPLETE / PARTIAL
+---
+
+PROJECT DATA
+============
+Project Name:    
+Developer:       
+Location:        
+Starting Price:  
+Payment Plan:    
+Handover Date:   
+Key Amenities:   
+Investment Angle:
+
+EXTRACTION STATUS: [COMPLETE / PARTIAL]
+Missing Fields:  
+Extraction Notes:
+```
+
+**Resume rule:** If `input/[project-slug]/project-data.md` already exists at the start of a session, read it instead of re-running WebFetch. Only re-extract if:
+- The user explicitly requests a fresh fetch
+- The file is older than 30 days
+- The user provides a new or updated source URL
+
+---
+
 ## Edge Case Reference
 
 | Situation | Action |

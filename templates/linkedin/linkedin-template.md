@@ -310,6 +310,22 @@ RAK is still a younger market than Dubai. Outcomes are more dependent on executi
 
 Happy to share the full breakdown if you're looking at RAK seriously.
 
+## Pitch Block
+
+Append this section to the Hebrew LinkedIn file after CTA Variations. This is a WhatsApp source block — not a LinkedIn section.
+
+```
+## Pitch Block
+
+[3–5 sentence spoken Hebrew paragraph: project name + developer + location, entry price, payment structure, one-sentence investment angle. Written in WhatsApp register: short, personal, direct. This paragraph is consumed by Step 5 (WhatsApp) — the three variants adapt the opening, framing, and closing question, but do not rewrite this description.]
+```
+
+**Register:** Natural spoken Hebrew, not LinkedIn formal. The Pitch Block should sound like something a person would actually say in a chat message — not a post excerpt.
+
+**Do not include** extraction warnings, caveats, or risk register items. Those live in the post body. The Pitch Block is a clean, confident project description only.
+
+---
+
 ## Final Check
 
 Before output ask:
