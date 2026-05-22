@@ -382,3 +382,33 @@ See `templates/positioning-framework.md` for categories, decision logic, and con
 ## 15. Brand Voice
 
 See `assets/branding/brand-guidelines.md` for this brand's voice, tone, and writing style.
+
+---
+
+## 16. Asset Collection
+
+After generating reel scripts (Step 2 in `templates/content-generation-workflow.md`), append a Visual Evidence Plan to each reel and execute automated asset collection.
+
+Reference: `templates/asset-collection.md` for full execution rules.
+
+**Key rules:**
+
+- Every `[VISUAL:]` tag requiring a real image must have a row in the Visual Evidence Plan
+- Generated cards (text overlays, CTA cards, graphics) are skipped — not collected
+- Every asset is stored once in `assets/[project-slug]/canonical/` — never duplicated per output
+- Reuse canonical assets across reels, carousels, and PDFs via the manifest `used_in` field
+- Thesis type × beat type determines source priority — see source matrix in `templates/asset-collection.md`
+- A reel is not ready for editing if any `prove` or `reinforce` asset is MISSING
+- Vision-rejected assets go to `assets/[project-slug]/raw/rejected/` — never deleted
+
+**Folder structure per project:**
+
+```
+assets/[project-slug]/
+├── manifest.md
+├── canonical/
+├── raw/
+└── raw/rejected/
+```
+
+**Manifest location:** `assets/[project-slug]/manifest.md`

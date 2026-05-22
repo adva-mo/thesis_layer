@@ -9,6 +9,10 @@ input/urls/*
 # Generated output — not tracked in version control
 output/
 
+# Project assets (all except branding)
+assets/*
+!assets/branding/
+
 # OS
 .DS_Store
 Thumbs.db
