@@ -9,6 +9,8 @@ Three message variants per project. Hebrew-first. Conversational, direct, never 
 - Never open with "היי, אני מציע לך..."
 - Sound like a message from a knowledgeable friend, not a sales rep
 
+**Language note (Hebrew):** WhatsApp is Tier 3 — direct and personal. Hebrew must sound like a real person, not a sales template. Before finalizing, read `primary_language.md` — Practical Rules and CTA Examples.
+
 ---
 
 ## Variant 1 — Cold Outreach
@@ -51,7 +53,7 @@ Worth a look?
 ```
 היי [שם],
 
-ראיתי שאהבת את הפוסט על [topic they engaged with]. חשבתי שתרצה לראות משהו ספציפי.
+ראיתי שאהבת את הפוסט על [topic they engaged with]. חשבתי שתרצה לראות משהו מעניין.
 
 [Project Name] בדובאי הילס — זה בדיוק מה שדיברנו עליו. Emaar, אזור מוכח, מחיר כניסה של 850K AED עם תשלומים נוחים. המסירה Q4 2027 — עוד בזמן שניתן להיכנס בתנאי פרי-לאנץ'.
 
