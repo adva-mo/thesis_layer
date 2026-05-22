@@ -1,151 +1,340 @@
-# LinkedIn Post Template
+# LinkedIn Post Template — ThesisLayer
 
-One investor-grade post per project. Analytical, clean, no emojis in the first line.
+One investor-grade post per project.
 
-**Character target:** 700–1,000 characters (LinkedIn shows "see more" after ~210 characters — put the hook before that cut)
+Goal:
+Thoughtful investment insight.
+
+NOT:
+project brochure.
+
+The project should be used as evidence for a broader market thesis.
+
+---
+
+## Core Principle
+
+LinkedIn posts should feel like:
+
+"an intelligent investor sharing an observation"
+
+NOT:
+
+"a property summary with numbers"
+
+---
+
+## Content Objective
+
+Every post should:
+
+- teach something
+- challenge an assumption
+- explain market dynamics
+- improve investor thinking
+- build trust
+- position ThesisLayer as intelligent analysis
+
+The project is supporting evidence.
+
+Not the main story.
 
 ---
 
 ## Structure
 
-```
-[Line 1]   Hook — standalone, tweet-worthy, no emojis
-[Line 2]   Empty line (forces "see more" click on mobile)
-[Lines 3-5] Context — market or area insight
-[Line 6]   Empty line
-[Lines 7-10] Project data — structured, scannable
-[Line 11]  Empty line
-[Lines 12-14] Investment angle — why the math works
-[Line 15]  Empty line
-[Line 16]  Risk note — one honest sentence
-[Line 17]  Empty line
-[Line 18]  CTA — Tier 1 (soft)
-```
-
----
-
-## Hebrew Template
-
-```
-[Hook — bold statement, no emojis, max 15 words]
-
-[Context — 2-3 sentences. Why this area/project matters now. Use a data point.]
-
----
-
-[Project Name] | [Developer] | [Area]
-
-מחיר כניסה: [AED]
-תשלומים: [structure]
-מסירה: [Q# YYYY]
-[Key amenity or differentiator]
-
----
-
-[Investment angle — 2-3 sentences. What makes the numbers work. Specific, not generic.]
-
-[Risk note — 1 honest sentence about the main risk]
-
-[Tier 1 CTA — ends with a question or invitation]
-```
-
-**Hebrew example:**
-
-```
-המשקיעים שמגיעים לפני שהתשתית מגיעה — הם אלה שמרוויחים מהתשתית.
-
-Dubai Hills Estate הייתה אזור ריק ב-2015. היום יש שם בית חולים, קניון, פארק 180 דונם, ובית ספר בינלאומי. כל אחד מהם הביא ביקוש שכירות. Emaar בנתה קהילה שלמה — לא רק דירות.
-
----
-
-Sky Gardens | Emaar | Dubai Hills Estate
-
-מחיר כניסה: 850,000 AED (~231,000$)
-תשלומים: 60% בזמן הבנייה / 40% במסירה
-מסירה: Q4 2027
-בריכת אינפיניטי, גינות מינץ', גישה לפארק
-
----
-
-עם 20% downpayment — זה 170,000 AED לכניסה. השאר משולם בשלבים לאורך הבנייה. בשוק שבו תשואות שכירות ל-1BR בדובאי הילס עומדות על 6-8%, המספרים עובדים — אם מחזיקים לטווח של 3+ שנים.
-
-שימו לב: מסירות יכולות להתעכב. אוף-פלאן הוא נכס לא נזיל עד לגמר הבנייה.
-
-רוצה את הניתוח המלא? אשמח לשלוח.
+```text
+[Opening Observation]
+↓
+[Market Dynamic / Insight]
+↓
+[Project Example]
+↓
+[Balanced Investment Thesis]
+↓
+[Honest Risk]
+↓
+[Soft CTA]
 ```
 
 ---
 
-## English Template
+## Required Flow
 
-```
-[Hook — no emojis, strong claim or specific data point, max 15 words]
+### 1. Opening Observation (Hook)
 
-[Context — 2-3 sentences on market or area dynamics. One data point minimum.]
+Start with:
 
----
+- an insight
+- a market contradiction
+- a surprising observation
+- a question smart investors ask
 
-[Project Name] | [Developer] | [Location]
+Good examples:
 
-Entry price: [AED] / [USD]
-Payment plan: [structure]
-Handover: [Q# YYYY]
-[Key differentiator]
+"כולם מסתכלים על Wynn. מעט אנשים מסתכלים על מה שקורה סביבו."
 
----
+"ברוב שווקי הנדל״ן — הכסף לא נכנס כשהתשתית נפתחת. הוא נכנס לפני."
 
-[Investment angle — 2-3 sentences. Specific math or logic. Avoid "great opportunity".]
+"יש הבדל בין פרויקט יפה לבין thesis טוב."
 
-[Risk note — 1 honest sentence]
+Avoid:
 
-[Tier 1 CTA]
-```
-
-**English example:**
-
-```
-The investors who arrive before the infrastructure do are the ones who benefit from it.
-
-Dubai Hills Estate was undeveloped land in 2015. Today: Mediclinic City Hospital, Dubai Hills Mall, a championship golf course, and a 180-acre public park. Each drove rental demand. Emaar built a community, not just a building.
+- generic hooks
+- hard selling
+- forced urgency
+- "opportunity of a lifetime"
 
 ---
 
-Sky Gardens | Emaar Properties | Dubai Hills Estate, Dubai
+### 2. Market Context
 
-Entry price: AED 850,000 / ~USD 231,000
-Payment plan: 60% during construction / 40% at handover
-Handover: Q4 2027
-Infinity pool, landscaped gardens, park access, retail promenade
+Explain:
+Why this matters.
+
+Use:
+
+- infrastructure
+- demand drivers
+- macro shifts
+- location dynamics
+- rental demand
+- developer quality
+
+The goal:
+help the reader think.
+
+Not sell.
 
 ---
 
-At 20% down, entry is AED 170,000. The rest follows the construction schedule. 1BR gross yields in Dubai Hills are tracking 6-8% based on comparable Emaar completions — making this a viable buy-and-hold for a 3-5 year horizon.
+### 3. Project Example
 
-Honest caveat: off-plan is illiquid until handover, and delays happen even with tier-1 developers.
+Introduce the project naturally.
 
-Happy to share the full breakdown — just message me.
-```
+Use it as:
+
+- proof point
+- example
+- case study
+
+Example:
+
+"זה גם מה שהופך כרגע את Costa Mare של Ellington למעניין יותר ממה שנראה במבט ראשון."
+
+Avoid brochure formatting.
+
+Avoid long spec lists.
+
+Only include:
+
+- 2–4 relevant facts
+
+Allowed:
+
+- payment structure
+- handover timing
+- pricing (if verified)
+- differentiator
+
+---
+
+### 4. Investment Thesis
+
+Explain:
+
+Why investors might care.
+
+Focus on:
+
+- timing
+- demand drivers
+- pricing logic
+- payment structure
+- risk/reward profile
+
+Preferred phrasing:
+
+"יכול להיות מעניין עבור..."
+
+"השאלה שמעניינת משקיעים כאן היא..."
+
+"אם מסתכלים 3–5 שנים קדימה..."
+
+Avoid:
+
+- guaranteed returns
+- certainty language
+- hype
+- exaggerated upside
+
+Never say:
+
+- "can't miss"
+- "before prices explode"
+- "guaranteed yield"
+- "prices will go up"
+
+---
+
+### 5. Honest Risk
+
+Always include one honest caveat.
+
+Examples:
+
+"RAK עדיין שוק צעיר יותר מדובאי — עם פחות נתוני עבר."
+
+"Off-plan הוא כסף שלא נזיל עד המסירה."
+
+"תלות גבוהה בתרחיש פתיחת Wynn בזמן."
+
+Risk builds trust.
+
+Never hide it.
+
+---
+
+### 6. Soft CTA
+
+Tone:
+conversational.
+
+Good:
+
+"רוצה את הניתוח המלא? אשמח לשלוח."
+
+"סקרן לראות את המספרים המלאים? תכתוב לי."
+
+"Happy to share the breakdown."
+
+Avoid:
+
+- aggressive sales CTA
+- booking pressure
+- urgency tactics
+
+---
+
+## Hebrew Style Rules
+
+Hebrew should feel:
+
+- natural
+- intelligent
+- modern
+- conversational
+- Israeli
+- slightly contrarian
+
+Avoid:
+
+- translated English
+- robotic wording
+- brochure tone
+- perfect corporate structure
+
+Prefer:
+short paragraphs.
+
+Let insights stand alone.
+
+Example:
+
+Bad:
+"הנכסים באזור עדיין לא משקפים תמחור אחרי פתיחה"
+
+Good:
+"השאלה היא אם השוק כבר מתמחר את מה שיקרה אחרי הפתיחה."
 
 ---
 
 ## Formatting Rules
 
-- Never open with "I" — starts weak
-- One empty line between every section
-- No bullet points in the main body (bullets = lazy LinkedIn, not analytical)
-- Use em dash (—) instead of colon for inline data
-- Data table uses | as separator — readable without markdown rendering
-- Never end with "Like and share if you found this useful"
-- Never use "game-changing", "world-class", "booming", "unprecedented"
+- Empty line between ideas
+- Short paragraphs
+- No bullet points in body
+- No markdown tables
+- Avoid information dumping
+- Do not overload with specs
+
+Less data.
+More signal.
 
 ---
 
-## Hashtag Guidance (LinkedIn)
+## Character Target
 
-Keep to 3-5 hashtags. No keyword stuffing.
+700–1200 characters.
 
-**Hebrew post:**
-`#נדלן_דובאי #השקעות_נדלן #דובאי #אוף_פלאן`
+Prioritize:
+quality > length.
 
-**English post:**
-`#DubaiRealEstate #OffPlanDubai #RealEstateInvesting #DubaiInvestment`
+---
+
+## English example
+
+Most investors are watching Wynn.
+
+Fewer are watching what happens around it.
+
+In real estate, the biggest pricing moves often happen before infrastructure is fully operational — not after.
+
+That's part of what makes Al Marjan Island interesting right now.
+
+RAK is still earlier in its development cycle than Dubai. Less liquidity, less historical data, fewer institutional buyers — but also a market still figuring out how to price future demand.
+
+Costa Mare Tower III by Ellington is an interesting example.
+
+Not because it's beachfront.
+
+Not because of the renderings.
+
+But because it sits a short distance from Wynn Al Marjan Island — while using a payment structure that lowers upfront capital requirements compared to fully built beachfront inventory.
+
+20% at signing.
+Construction-linked payments.
+Q3 2028 handover.
+
+The real question isn't:
+
+“Will Wynn matter?”
+
+It's:
+
+“Has the market already priced in what Wynn could do to tourism, short-term rental demand, and pricing?”
+
+Honest caveat:
+
+RAK is still a younger market than Dubai. Outcomes are more dependent on execution, and off-plan remains illiquid until handover.
+
+Happy to share the full breakdown if you're looking at RAK seriously.
+
+## Pitch Block
+
+Append this section to the Hebrew LinkedIn file after CTA Variations. This is a WhatsApp source block — not a LinkedIn section.
+
+```
+## Pitch Block
+
+[3–5 sentence spoken Hebrew paragraph: project name + developer + location, entry price, payment structure, one-sentence investment angle. Written in WhatsApp register: short, personal, direct. This paragraph is consumed by Step 5 (WhatsApp) — the three variants adapt the opening, framing, and closing question, but do not rewrite this description.]
+```
+
+**Register:** Natural spoken Hebrew, not LinkedIn formal. The Pitch Block should sound like something a person would actually say in a chat message — not a post excerpt.
+
+**Do not include** extraction warnings, caveats, or risk register items. Those live in the post body. The Pitch Block is a clean, confident project description only.
+
+---
+
+## Final Check
+
+Before output ask:
+
+Does this feel like:
+"an investor sharing a thoughtful observation"
+
+OR:
+
+"a property brochure"?
+
+If brochure → rewrite.

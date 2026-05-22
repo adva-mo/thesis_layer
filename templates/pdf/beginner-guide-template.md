@@ -1,175 +1,144 @@
 # PDF Template — Beginner's Guide
 
-**Title format:** "The [Israeli/Investor] Guide to [Specific Topic] in Dubai"
+Educational lead magnet.
 
-This template generates educational lead magnets. Markdown-based — render to PDF using Pandoc or md-to-pdf.
+Markdown-based — render to PDF using Pandoc or md-to-pdf.
 
-**Tone:** Like a well-researched article in TheMarker or Calcalist. Not a brochure. Not a pitch deck.
+Goal:
+Teach readers how to think better about Dubai real estate.
 
----
+NOT:
+Sell a project.
 
-```markdown
----
-title: "איך השקעות אוף-פלאן בדובאי עובדות — המדריך לישראלים"
-subtitle: "כל מה שצריך לדעת לפני שמחליטים"
-date: [YYYY]
-language: he
-type: beginner-guide
----
+A strong ThesisLayer PDF should feel like:
 
-# איך השקעות אוף-פלאן בדובאי עובדות
+“A smart, well-researched article explaining how investors think.”
 
-**מי צריך לקרוא את המדריך הזה?**
-ישראלים שמתעניינים בנדל"ן דובאי אבל לא בטוחים איך זה עובד, מה הסיכונים, ומה השאלות הנכונות לשאול — לפני שפוגשים מישהו שמנסה למכור להם.
+NOT:
+
+“A real estate brochure”
+OR
+“a sales guide”
 
 ---
 
-## פרק 1: מה זה אוף-פלאן?
+## Before Generation
 
-**[100-200 מילים]**
+Read:
 
-"אוף-פלאן" (off-plan) פירושו: רכישת נכס לפני שהוא נבנה.
+`examples/voice-examples.md`
 
-אתם חותמים על חוזה עם היזם כשהנכס עדיין על הנייר — לפעמים לפני שיש אפילו שלד. בתמורה, אתם מקבלים:
-- מחיר כניסה נמוך יותר ממחיר השוק לאחר הבנייה
-- תוכנית תשלומים שמפרסת את התשלום על פני שנות הבנייה
-- יכולת "לנעול" מחיר היום ולמסור את היתרה עם השלמת הבנייה
+Voice calibration applies to all PDFs.
 
-זה שונה ממה שמכירים בישראל. בישראל, רוב הרכישות הן של נכסים קיימים. בדובאי, אוף-פלאן הוא השוק הדומיננטי — לפי נתוני DLD (Dubai Land Department), מעל 50% מעסקאות הנדל"ן ב-2023 היו אוף-פלאן.
+PDFs should sound:
 
-**מה מקבלים בתמורה?** ותשלומים נוחים, מחיר פרי-לאנץ', ונכס שמסופק בעוד 2-4 שנים.
+- analytical
+- calm
+- nuanced
+- trust-building
+- educational
+- investor-minded
+- thoughtful
 
-**מה הסיכון?** הנכס עדיין לא קיים — ועד שהוא ייבנה, יש לא מעט שיכול להשתנות.
+The reader should feel:
 
----
+“I understand this topic better now.”
 
-## פרק 2: איך תוכנית התשלומים עובדת?
+NOT:
 
-**[100-200 מילים]**
+“Someone is trying to convince me to buy.”
 
-תוכנית תשלומים אוף-פלאן נראית בדרך כלל ככה:
+In Hebrew, writing should feel:
 
-| שלב | אחוז | מתי |
-|-----|------|-----|
-| Downpayment | 10-20% | בחתימה |
-| תשלומי ביניים | 40-60% | לפי אבני דרך בבנייה |
-| תשלום סיום | 20-40% | במסירה |
+- natural
+- intelligent
+- lightly polished
+- journalistic
+- Israeli
+- readable
 
-**דוגמה: תוכנית 60/40**
-- 20% בחתימה
-- 40% לאורך הבנייה (לפי שלבים)
-- 40% במסירה
+Avoid Hebrew that feels:
 
-**מה שרוב האנשים לא שמים לב:**
-תשלומי הביניים הם לפי אבני דרך — לא לפי תאריכים קבועים. אם הבנייה מתעכבת, התשלום מתעכב גם הוא. זה לא תמיד רע.
+- translated from English
+- corporate
+- brochure-like
+- overly formal
+- sales-heavy
 
-**חשוב לבדוק:**
-האם יש ריבית פיגורים אם לא משלמים בזמן? מה קורה אם רוצים לצאת מהעסקה לפני המסירה?
+Tone reference:
 
----
+Like a strong long-form article in:
 
-## פרק 3: הסיכונים האמיתיים
+- TheMarker
+- Calcalist
 
-**[100-200 מילים]**
+NOT:
 
-אוף-פלאן הוא לא ללא סיכון. הנה הסיכונים שצריך להבין:
+- broker brochure
+- investment guru thread
+- clickbait finance content
 
-**1. עיכוב במסירה**
-גם יזמים מובילים כמו Emaar ו-Damac עיכבו פרויקטים בעבר. עיכוב של 6-18 חודשים הוא לא חריג. אם אתם צריכים את הנכס בתאריך מסוים — אוף-פלאן עלול לאכזב.
+Prefer:
 
-**2. חוסר נזילות**
-אוף-פלאן לא מתנהג כמו מניה. לא תמיד ניתן למכור לפני המסירה, וגם אם כן — יש עלויות עסקה ותלות בשוק.
+- mental models
+- smart investor questions
+- nuanced explanations
+- practical frameworks
+- honest caveats
+- specific examples
 
-**3. שינוי בשוק**
-אם שוק הנדל"ן בדובאי ירד עד לאחר המסירה — ייתכן שהנכס יהיה שווה פחות ממה שחתמתם עליו. זה קרה ב-2009 וב-2020.
+Examples should demonstrate:
 
-**4. חוסר ניסיון של היזם**
-לא כל יזם שמשווק בישראל הוא אמין. יש יזמים שפשטו רגל, עיכבו פרויקטים ב-5 שנים, או שינו תוכניות. בדקו את ההיסטוריה.
+- pacing
+- sentence rhythm
+- explanation style
 
-**מה שמקטין את הסיכון:** בחירה ביזם מוכח (Emaar, Damac, Sobha), רישום ב-DLD ב-Escrow account, ועבודה עם עורך דין.
+Do NOT imitate examples directly.
 
----
+Read:
 
-## פרק 4: איך להעריך פרויקט
+`exmples/voice-examples.md`
 
-**[100-200 מילים]**
+for:
 
-לפני שחותמים — בדקו:
-
-**יזם**
-- כמה פרויקטים הם סיימו?
-- מה אחוז העיכובים בפרויקטים קודמים?
-- האם הם רשומים ב-RERA (Real Estate Regulatory Authority)?
-
-**מיקום**
-- מה קיים כבר באזור? (תשתית, תחבורה, שירותים)
-- מה מתוכנן? (תחנת מטרו, שדה תעופה, פיתוח מסחרי)
-- מה תשואת השכירות של נכסים קיימים באזור?
-
-**מחיר**
-- מה מחיר השוק לנכסים מסופקים באותו אזור?
-- האם מחיר הפרי-לאנץ' עדיין מציע פרמיה הגיונית?
-
-**תוכנית תשלומים**
-- מה ה-downpayment בפועל?
-- האם יש Escrow account רשום ב-DLD?
-- מה קורה אם לא משלמים תשלום ביניים?
-
-**חוזה**
-- האם קראתם אותו? (כן, כולם שואלים אם תרצו לקרוא)
-- האם יש עורך דין UAE שבדק?
+- tone
+- pacing
+- reasoning style
+- sentence variety
 
 ---
 
-## פרק 5: שאלות שכדאי לשאול
+## Core Writing Principle
 
-**[100-200 מילים]**
+Do not just explain Dubai real estate.
 
-לפני שחותמים על כל פרויקט, שאלו:
+Teach:
 
-1. **מה אחוז ההשלמה של הפרויקט?** (10% = סיכון גבוה יותר מ-80%)
-2. **האם ה-Escrow account רשום ב-DLD?** (חובה חוקית — אם לא, זה דגל אדום)
-3. **מה קורה אם היזם פושט רגל?** (יש הגנת DLD — הבינו אותה)
-4. **מה עלויות הניהול החודשיות (Service Charge) לאחר המסירה?**
-5. **האם ניתן למכור לפני המסירה (flip)?** ואם כן — מה עלויות העסקה?
-6. **מה תשואת השכירות ההיסטורית בפרויקטים דומים של אותו יזם?**
+**How to think about Dubai real estate.**
 
-אם המשיב לא יודע לענות על השאלות האלה — זה לא בהכרח בעיה. אבל אתם צריכים לדעת את התשובות לפני שחותמים.
+Every chapter should answer:
 
----
+“What should a smart investor understand here?”
 
-## פרק 6: צעדים הבאים
+NOT:
 
-**[80-120 מילים]**
-
-אם אחרי כל זה אתם עדיין מתעניינים — הנה מה שכדאי לעשות:
-
-1. **בחרו 2-3 פרויקטים ספציפיים** שמתאימים לפרופיל שלכם (מחיר, אזור, יזם)
-2. **קבלו ניתוח כתוב** לכל פרויקט — לא רק מצגת
-3. **בדקו את היזם ב-RERA** (rera.ae) — זה ציבורי וחינמי
-4. **דברו עם עורך דין UAE** לפני חתימה — עלות: 3,000-5,000 AED
-5. **אל תמהרו** — שוק אוף-פלאן דובאי מציע פרויקטים כל הזמן. אם פרויקט אחד "נגמר", תמיד יש עוד.
+“What information exists?”
 
 ---
 
-*המידע במסמך זה הוא כללי ואינו מהווה ייעוץ השקעות פרטני. לפני כל החלטה השקעתית, פנו לייעוץ מקצועי.*
+## Title Format
 
-*רוצים לקבל ניתוח ספציפי על פרויקט שמעניין אתכם? [Contact method]*
-```
+Use:
 
----
+"The Israeli Guide to [Topic]"
 
-## Rendering Notes
+OR
 
-To convert to PDF:
-```bash
-pandoc input.md -o output.pdf --pdf-engine=wkhtmltopdf
-# or
-md-to-pdf input.md
-```
+"How to Think About [Topic] in Dubai"
 
-For RTL Hebrew PDFs, add to frontmatter:
-```yaml
-lang: he
-dir: rtl
-```
+Avoid:
+
+- clickbait
+- hype
+- “ultimate guide”
+- guru language

@@ -2,6 +2,8 @@
 
 10 hook frameworks. Generate one per category for every project. Each hook should use specific data from the PROJECT DATA block.
 
+**Language note (primary language):** Apply naturalizer inline while writing. `primary_language.md` is loaded at session init — no re-read needed here.
+
 ---
 
 ## H1 — Curiosity Gap
@@ -12,7 +14,7 @@
 > "[Surprising or counterintuitive fact about the project or area]. Most people haven't caught on yet."
 
 **Hebrew example:**
-> "דובאי הילס אסטייט מייצרת תשואות שכירות גבוהות מתל אביב — ועם שליש ממחיר הכניסה. רוב הישראלים עדיין לא מסתכלים לשם."
+> "דובאי הילס אסטייט מייצרת תשואות שכירות גבוהות מתל אביב, ועם שליש ממחיר הכניסה. רוב הישראלים עדיין לא מסתכלים לשם."
 
 **English example:**
 > "Dubai Hills Estate generates higher rental yields than most Tel Aviv neighborhoods — at a third of the entry price. Most investors aren't looking there yet."
@@ -133,7 +135,7 @@
 > "Most investors focus on [wrong/incomplete thing]. The ones who do well focus on [better thing]."
 
 **Hebrew example:**
-> "רוב האנשים שואלים 'כמה זה עולה?'. המשקיעים שמרוויחים שואלים 'מה תשואת השכירות ביחס למחיר הכניסה?' — ובדובאי הילס התשובה מעניינת."
+> "רוב האנשים שואלים 'כמה זה עולה?'. המשקיעים שמרוויחים שואלים 'מה תשואת השכירות ביחס למחיר הכניסה?' ובדובאי הילס התשובה מעניינת."
 
 **English example:**
 > "Most buyers ask: 'What's the price?' Experienced investors ask: 'What's the gross yield at entry, and what does the payment plan do to my effective cost of capital?' Those are different questions."
@@ -153,7 +155,7 @@
 > "Everyone's focused on [obvious thing]. Almost nobody is looking at [less obvious, more interesting angle]."
 
 **Hebrew example:**
-> "כולם מדברים על דאון-טאון דובאי. כמעט אף אחד לא מסתכל על הצד השני של המשוואה — הקהילות המתוכננות שמציעות את אותה איכות חיים עם פחות תחרות על הנכסים."
+> "כולם מדברים על דאון-טאון דובאי. כמעט אף אחד לא מסתכל על הצד השני של המשוואה: הקהילות המתוכננות שמציעות את אותה איכות חיים עם פחות תחרות על הנכסים."
 
 **English example:**
 > "Everyone's looking at Downtown Dubai and Marina. The investors getting the best entry points right now are looking at master communities where the infrastructure is already in — but the price still hasn't caught up."

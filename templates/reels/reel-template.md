@@ -1,266 +1,744 @@
-# Reel Script Template
+# Reel Script Template — ThesisLayer
 
-5 reel formats. Each is structured as a complete script: hook → body → CTA → caption.
+5 reel formats.
 
-**Script conventions:**
-- `[VISUAL:]` = what's on screen (text card, footage, graphic)
-- `[VO:]` = voiceover or on-screen text if no voice
-- `[PAUSE]` = beat for emphasis
-- Duration is a target, not a hard limit
-- Write as a script, not an essay — talking points and cues, not paragraphs
+Each reel is a complete script:
+
+Hook → Insight → Implication → Reality Check → CTA
+
+Goal:
+Teach one interesting investment idea through a project.
+
+NOT:
+Pitch a property.
+
+A strong ThesisLayer reel should feel like:
+
+“someone smart explaining a signal most people miss”
+
+NOT:
+
+“Dubai real estate creator content”
+
+The reel should feel:
+
+- analytical
+- calm
+- insightful
+- investor-minded
+- slightly contrarian
+- trust-building
 
 ---
 
-## Format 1 — Data Drop (30s)
+## Before Generation
 
-**Purpose:** Deliver one surprising, specific data point with full context. Builds credibility fast.
+Voice calibration applies to all reel formats. `examples/voice-examples.md` is loaded at session init — no re-read needed here.
 
-**Structure:**
+Reels should sound:
+
+- analytical
+- calm
+- insightful
+- investor-minded
+- slightly contrarian
+- trust-building
+- conversational, not scripted
+
+The viewer should feel:
+
+“I’m learning how to think better about investing.”
+
+NOT:
+
+“Someone is trying to sell me a property.”
+
+In Hebrew, reels should sound:
+
+- spoken
+- natural
+- Israeli
+- conversational
+- lightly polished
+- human
+
+Avoid Hebrew that feels:
+
+- translated from English
+- brochure-like
+- corporate
+- overly formal
+- scripted
+
+Avoid:
+
+- loud creator energy
+- sales-heavy language
+- hype-driven phrasing
+- luxury influencer tone
+- finance guru certainty
+- fake urgency
+- hard claims without reasoning
+
+Prefer:
+
+- smart investor questions
+- mental models
+- signals
+- nuanced thinking
+- calm explanations
+- honest uncertainty
+
+Examples:
+
+Instead of:
+
+"This project is an amazing opportunity."
+
+Prefer:
+
+"השאלה המעניינת היא אם המחיר כבר משקף את זה."
+
+Instead of:
+
+"Dubai is booming."
+
+Prefer:
+
+"השאלה היא איך ייראה הביקוש בעוד שלוש שנים."
+
+Instead of:
+
+"Luxury projects are safer."
+
+Prefer:
+
+"יוקרה לא תמיד אומרת היגיון השקעה טוב יותר."
+
+---
+
+## Script Conventions
+
+- `[VISUAL:]` = what appears on screen
+- `[VO:]` = spoken line or text overlay
+- `[PAUSE]` = short beat
+- Duration target is flexible
+- Write like spoken language
+- Short sentences
+- Natural pacing
+- One idea per reel
+- No long paragraphs
+- No brochure language
+- No hard-selling tone
+
+Visual pacing:
+
+- change visual every 2–5 seconds
+- no long static sections
+- visual must support the thesis
+- text on screen should be short and readable
+
+---
+
+# Format 1 — Market Signal (30s)
+
+### Purpose
+
+Take one signal.
+
+Explain what it suggests.
+
+Best for:
+
+- payment plans
+- infrastructure
+- pricing
+- rental demand
+- developer behavior
+- absorption signals
+
+### Structure
+
+```text
+[0–3s]   Hook
+[3–12s]  What the signal means
+[12–22s] Why investors care
+[22–27s] Project connection
+[27–30s] CTA
 ```
-[0-3s]   Hook — one unexpected number or fact
-[3-18s]  Context — why this number matters, what most people miss
-[18-26s] Connection — how this applies to the specific project
-[26-30s] CTA
-```
 
-**Script scaffold:**
+### Script Scaffold
 
-```
-[VISUAL: Bold number on dark background]
-[VO]: "[Surprising stat or data point]."
+```text
+[VISUAL: Strong text hook]
+
+[VO]
+"[Interesting signal]."
 
 [PAUSE]
 
-[VISUAL: Context graphic or text]
-[VO]: "Most people see this and think [wrong interpretation].
-But what it actually means is [correct interpretation]."
+[VISUAL: Supporting visual]
+
+[VO]
+"The interesting part isn't [surface thing].
+
+It's what this might suggest."
+
+[VISUAL: Explanation graphic]
+
+[VO]
+"[Explain the signal in plain language]."
 
 [VISUAL: Project connection]
-[VO]: "In [Project Name] — [specific application of the data].
-[Payment plan or price that makes this relevant]."
 
-[VISUAL: CTA card]
-[VO]: "[Tier 2 CTA — e.g., DM me DUBAI for the full breakdown]"
-```
-
-**Caption template:**
-```
-[1-line hook that mirrors the reel's opening]
-
-[2-3 sentences expanding on the context — for those who didn't watch]
-
-[Tier 2 CTA]
-
-[Hashtags]
-```
-
-**Hebrew hashtags:** #נדלן_דובאי #השקעות_נדלן #אוף_פלאן #דובאי
-**English hashtags:** #DubaiRealEstate #DubaiInvestment #OffPlanDubai
-
----
-
-## Format 2 — Investment Case (45s)
-
-**Purpose:** Build the full investment argument for one project. Best for warm audiences who already know you.
-
-**Structure:**
-```
-[0-3s]   Hook — frame the decision, not the pitch
-[3-15s]  The opportunity — project + area context
-[15-30s] The numbers — price, payment plan, yield potential
-[30-40s] The risk — honest, one paragraph
-[40-45s] CTA
-```
-
-**Script scaffold:**
-
-```
-[VISUAL: Question or decision frame]
-[VO]: "Here's what I'd want to know if I were looking at [Project Name] for the first time."
-
-[VISUAL: Area map or project render]
-[VO]: "[Project Name] by [Developer] is in [specific area].
-[1-2 sentences on why the area matters — infrastructure, demand drivers]."
-
-[VISUAL: Numbers breakdown]
-[VO]: "Starting at [price]. Payment plan: [structure].
-Handover: [date]. That means [specific implication — e.g., 'you're building equity before the unit exists']."
-
-[VISUAL: Risk card]
-[VO]: "The honest risk: [one real risk — construction delay, market shift, liquidity].
-How to think about it: [one-sentence mitigation or context]."
+[VO]
+"In [Project Name],
+that's what makes this interesting."
 
 [VISUAL: CTA]
-[VO]: "[Tier 2 CTA]"
+
+[VO]
+"[Tier 2 CTA]"
 ```
 
-**Caption template:**
-```
-The full investment case for [Project Name].
+### Hebrew Example — Sierra
 
-[3-4 sentence summary of the argument]
+```text
+[VO]
+"70% בחתימה.
 
-The risk: [honest one-liner]
-
-[Tier 2 CTA]
-
-[Hashtags]
-```
-
----
-
-## Format 3 — Myth Bust (30s)
-
-**Purpose:** Destroy a common misconception about Dubai investing. Builds trust through honesty and authority.
-
-**Structure:**
-```
-[0-3s]   State the myth (as if you believe it momentarily)
-[3-20s]  The bust — what's actually true + why
-[20-27s] The implication for the investor
-[27-30s] CTA
-```
-
-**Script scaffold:**
-
-```
-[VISUAL: Myth statement in quotes]
-[VO]: "'You need to be rich to invest in Dubai.'"
+זה לא רק תשלום."
 
 [PAUSE]
 
-[VISUAL: Bust graphic]
-[VO]: "Let's look at the actual numbers.
-[Specific data that contradicts the myth].
-[What 'accessible' actually looks like — payment plan, entry price]."
+[VO]
+"לפעמים תוכנית תשלומים
+מספרת יותר מהברושור."
 
-[VISUAL: Implication]
-[VO]: "So the real question isn't whether you can afford Dubai.
-It's whether [specific actionable question the viewer should ask]."
+[VO]
+"אם יזם מבקש את רוב הכסף מוקדם —
+שווה לשאול למה."
 
-[VISUAL: CTA]
-[VO]: "[Tier 2 CTA]"
-```
+[VO]
+"וזאת אחת השאלות
+שהייתי בודקת ב-Sierra."
 
-**Myth bank (use one per reel):**
-- "You need to live in Dubai to own property there"
-- "Only luxury buyers invest in Dubai"
-- "Off-plan is always riskier than ready properties"
-- "Dubai is a bubble that keeps popping"
-- "You need a Dubai bank account to buy"
-- "The payment plan is just deferred full payment"
-
-**Caption template:**
-```
-[Myth in quotes] — let's check that.
-
-[The actual truth in 2-3 sentences]
-
-[What this means for someone considering it]
-
-[Tier 2 CTA]
-
-[Hashtags]
+[VO]
+"כתבו לי SIERRA
+ואשלח את הניתוח."
 ```
 
 ---
 
-## Format 4 — Area Spotlight (45s)
+# Format 2 — Investment Thesis (45s)
 
-**Purpose:** Sell the area before selling the project. Investors buy location first.
+### Purpose
 
-**Structure:**
+Build one clear investment thesis.
+
+NOT:
+Full project pitch.
+
+Focus on:
+
+“What is the actual investment logic here?”
+
+Best for:
+
+- appreciation plays
+- macro trends
+- pricing inefficiencies
+- area transformation
+- tourism or infrastructure demand
+
+### Structure
+
+```text
+[0–4s]   Hook
+[4–15s]  Bigger idea
+[15–28s] Why this project matters
+[28–38s] Reality check
+[38–45s] CTA
 ```
-[0-3s]   Area hook — one specific thing most people don't know about this area
-[3-20s]  Area story — what makes it interesting (infrastructure, demographics, trajectory)
-[20-35s] Why now — timing argument (what's changing, what's already happened)
-[35-42s] Project connection — how this project fits into the area story
-[42-45s] CTA
+
+### Script Scaffold
+
+```text
+[VISUAL: Strong hook]
+
+[VO]
+"The interesting question here isn't [obvious thing]."
+
+[VISUAL: Market context]
+
+[VO]
+"[Explain bigger market dynamic]."
+
+[VISUAL: Project connection]
+
+[VO]
+"[Project Name]
+gets interesting if you believe [thesis]."
+
+[VISUAL: Reality check]
+
+[VO]
+"The honest risk:
+[real risk]."
+
+[VISUAL: CTA]
+
+[VO]
+"[Tier 2 CTA]"
 ```
 
-**Script scaffold:**
+### Hebrew Example — Costa Mare
 
+```text
+[VO]
+"כולם מסתכלים על Wynn.
+
+פחות אנשים מסתכלים
+על מה שקורה סביבו."
+
+[VO]
+"בנדל״ן,
+המחיר הרבה פעמים זז
+לפני שהתשתית נפתחת."
+
+[VO]
+"זה מה שהופך את Costa Mare
+למעניין."
+
+[VO]
+"לא בלי סיכון.
+
+RAK עדיין שוק צעיר יותר מדובאי."
+
+[VO]
+"כתבו לי RAK
+ואשלח את הניתוח המלא."
 ```
-[VISUAL: Area name, bold]
-[VO]: "[Area name]. Here's what most people looking at Dubai real estate miss about it."
 
-[VISUAL: Area context — map, stats, or render]
-[VO]: "[Specific infrastructure or demographic fact].
-[How this differs from the commonly discussed areas].
-[Concrete signal of demand — occupancy, rental rates, or expat population data]."
+---
+
+# Format 3 — Myth Bust (30s)
+
+### Purpose
+
+Challenge a bad assumption.
+
+Best for:
+
+- beginner education
+- trust building
+- authority
+
+Avoid generic myths.
+
+Prefer investor myths.
+
+### Myth Bank
+
+- "Luxury projects are safer"
+- "Cheap entry price = better investment"
+- "High yield means good investment"
+- "Beachfront always wins"
+- "Payment plans make projects affordable"
+- "Branded residence = good investment"
+- "New area = early opportunity"
+
+### Structure
+
+```text
+[0–3s]   Myth
+[3–18s]  Reality
+[18–26s] Investor implication
+[26–30s] CTA
+```
+
+### Script Scaffold
+
+```text
+[VISUAL: Myth statement]
+
+[VO]
+"'[Myth]'"
+
+[PAUSE]
+
+[VISUAL: Contradiction]
+
+[VO]
+"Sometimes true.
+
+Often not."
+
+[VISUAL: Explanation]
+
+[VO]
+"[Explain what actually matters]."
+
+[VISUAL: Investor implication]
+
+[VO]
+"The better question is:
+[actionable investor question]."
+
+[VISUAL: CTA]
+
+[VO]
+"[Tier 2 CTA]"
+```
+
+### Hebrew Example
+
+```text
+[VO]
+"'יוקרה אומרת השקעה בטוחה יותר.'"
+
+[PAUSE]
+
+[VO]
+"לפעמים.
+
+אבל יוקרה
+לא מגינה עליך
+מלשלם יותר מדי."
+
+[VO]
+"השאלה המעניינת:
+מה כבר מתומחר?"
+
+[VO]
+"כתבו לי DUBAI
+ואשלח את הניתוח."
+```
+
+---
+
+# Format 4 — Area Thesis (45s)
+
+### Purpose
+
+Help investors understand an area.
+
+NOT:
+Sell an area.
+
+Focus on:
+
+- demand drivers
+- infrastructure
+- pricing
+- timing
+- investor behavior
+
+### Structure
+
+```text
+[0–4s]   Hook
+[4–18s]  What most people miss
+[18–32s] Why now
+[32–40s] Project connection
+[40–45s] CTA
+```
+
+### Script Scaffold
+
+```text
+[VISUAL: Area name]
+
+[VO]
+"[Area Name].
+
+Here's what most investors miss."
+
+[VISUAL: Area context]
+
+[VO]
+"[Demand driver / pricing story / infrastructure]."
 
 [VISUAL: Timing signal]
-[VO]: "[What's happening now that changes the calculus].
-[Historical comparable — 'similar to what happened in X area Y years ago']."
+
+[VO]
+"[Why this matters now]."
 
 [VISUAL: Project connection]
-[VO]: "[Project Name] is one of the only [unit type] projects launching in this area right now.
-[Price point that makes it an early-entry opportunity]."
+
+[VO]
+"[Project Name]
+only matters if you believe this thesis."
 
 [VISUAL: CTA]
-[VO]: "[Tier 2 CTA]"
+
+[VO]
+"[Tier 2 CTA]"
 ```
 
-**Caption template:**
-```
-[Area name] — the case for it in under a minute.
+### Hebrew Example — JVC
 
-[2-3 sentence summary of the area argument]
+```text
+[VO]
+"JVC לא מעניין
+כי הוא טרנדי."
 
-[Project Name] is [one-line position in the area story]
+[VO]
+"הוא מעניין
+כי הביקוש לשכירות
+כבר קיים."
 
-[Tier 2 CTA]
+[VO]
+"וזה משנה
+איך מסתכלים
+על דירות מרוהטות."
 
-[Hashtags]
+[VO]
+"בגלל זה פרויקטים כמו Pearl House
+שווים בדיקה."
+
+[VO]
+"כתבו לי JVC
+ואשלח את הניתוח."
 ```
 
 ---
 
-## Format 5 — Payment Plan Breakdown (30s)
+# Format 5 — Payment Plan Thinking (30s)
 
-**Purpose:** Demystify the off-plan payment plan. This is the most common point of confusion for first-time investors.
+### Purpose
 
-**Structure:**
+Teach how to think about payment plans.
+
+NOT:
+Explain mechanics only.
+
+Payment structure = signal.
+
+### Structure
+
+```text
+[0–4s]   Hook
+[4–15s]  Breakdown
+[15–24s] What this suggests
+[24–30s] CTA
 ```
-[0-3s]   Hook — payment plan presented as surprising or accessible
-[3-20s]  Breakdown — step-by-step explanation of how this specific plan works
-[20-27s] What this means — financial implication in plain language
-[27-30s] CTA
-```
 
-**Script scaffold:**
+### Script Scaffold
 
-```
-[VISUAL: Payment plan graphic — timeline or table]
-[VO]: "This is the [Project Name] payment plan. Let me break it down in 30 seconds."
+```text
+[VISUAL: Payment plan timeline]
 
-[VISUAL: Step 1]
-[VO]: "[X]% on signing. That's [AED amount] — your commitment to enter."
+[VO]
+"[X]% upfront.
 
-[VISUAL: Step 2]
-[VO]: "Then [Y]% over the construction period.
-[Frequency — e.g., '1% per month'] until handover in [date]."
+Let's talk about what that might mean."
 
-[VISUAL: Step 3]
-[VO]: "[Z]% on handover. That's when you own the unit outright."
+[VISUAL: Breakdown]
 
-[VISUAL: Implication]
-[VO]: "What this means: you're not paying [full price] today.
-You're buying time — and using that time to [lock in price / let the market move / arrange financing]."
+[VO]
+"[Explain structure briefly]."
+
+[VISUAL: Interpretation]
+
+[VO]
+"The interesting part isn't the math.
+
+It's what this may suggest
+about the project."
 
 [VISUAL: CTA]
-[VO]: "[Tier 2 CTA]"
+
+[VO]
+"[Tier 2 CTA]"
 ```
 
-**Caption template:**
+### Hebrew Example
+
+```text
+[VO]
+"20% בחתימה
+נשמע נגיש."
+
+[VO]
+"אבל זה לא תמיד
+החלק המעניין."
+
+[VO]
+"השאלה הטובה יותר:
+מה קורה
+עד המסירה?"
+
+[VO]
+"כתבו לי PLAN
+ואשלח את הניתוח."
 ```
-The [Project Name] payment plan — no jargon, no spin.
 
-[X]% down → [Y]% during construction → [Z]% at handover
+---
 
-That's [AED monthly/quarterly amount] to stay in the deal while the developer builds.
+## Caption Rules
 
-[Tier 2 CTA]
+Do NOT repeat the reel word-for-word.
 
-[Hashtags]
+The caption should:
+
+- deepen one idea
+- add nuance
+- add one risk
+- invite discussion
+
+Possible structures:
+
+### Option 1 — Question
+
+```text
+[Question]
+
+[Insight]
+
+[Reality check]
+
+[CTA]
 ```
+
+### Option 2 — Contrarian
+
+```text
+[Common belief]
+
+[Counterpoint]
+
+[Implication]
+
+[CTA]
+```
+
+### Option 3 — Signal-Based
+
+```text
+[Signal]
+
+[What it may mean]
+
+[What to verify]
+
+[CTA]
+```
+
+---
+
+## Spoken Voice Rule
+
+Reels are spoken content.
+
+Every sentence must sound natural when spoken out loud.
+
+Before finalizing any reel script:
+
+Read the VO as if someone is actually saying it.
+
+If a sentence feels awkward to say,
+too written,
+too formal,
+or too structurally perfect:
+
+rewrite it.
+
+The voice should feel:
+
+- spoken
+- natural
+- confident
+- intelligent
+- easy to say out loud
+
+NOT:
+
+- written for reading
+- over-structured
+- poetic in an AI way
+- consultant-like
+
+### Spoken test
+
+Ask:
+
+"Would a smart Israeli naturally say this out loud in one take?"
+
+If not:
+rewrite.
+
+Examples:
+
+Bad:
+"ולפעמים, בדיוק כשזה נראה הכי פחות ברור."
+
+Better:
+"ודווקא כשעוד לא לגמרי ברור מה קורה."
+
+Bad:
+"המחיר סביבו כבר זז בגלל זה, או עדיין לא."
+
+Better:
+"המחיר סביבו כבר זז. או שעוד לא."
+
+Bad:
+"כל ה-Thesis תלוי ש-Wynn יפתח בזמן ויביא ביקוש אמיתי."
+
+Better:
+"ה-Thesis עובד אם Wynn נפתח בזמן, ומביא ביקוש אמיתי."
+
+---
+
+## Visual Evidence Plan
+
+Every reel output file must include a Visual Evidence Plan section immediately after the Caption section of each reel script.
+
+### What requires a row
+
+Every `[VISUAL:]` tag that requires a real collected image needs a row in the plan.
+
+Skip these — they are generated, not collected:
+- Text cards and title overlays
+- CTA cards
+- Timeline or data graphics
+- Screen text overlays (`[SCREEN:]`)
+
+### Table format
+
+```markdown
+### Visual Evidence Plan — Reel [N]
+
+Thesis type: [appreciation / infrastructure | yield / rental | tourism | luxury / lifestyle | entry-level / accessible]
+Anti-collect: [3–5 specific things NOT to collect — be explicit about what looks relevant but isn't]
+
+| Segment | Beat | Critical | File | Collect | Source | Copyright tier |
+|---|---|---|---|---|---|---|
+| [timestamp] | [establish / prove / reinforce / texture] | [yes / no] | canonical/a[NNN]_[description].jpg | [what to search for] | [source per matrix in asset-collection.md] | [A / B / C] |
+```
+
+For reused assets (already in canonical/ from another reel): write `reuse — canonical/[filename]` in the File column. No new download.
+
+### After the table
+
+Run `templates/asset-collection.md` against the plan.
+
+Append the Collection Status Report block immediately after the table.
+
+Do not mark a reel `status: ready` in the file frontmatter until the Collection Status Report shows `READY` or `USABLE — MINOR GAPS`.
+
+---
+
+## Final Check
+
+Before output ask:
+
+Does this feel like:
+
+“someone teaching me how to think better about investing”?
+
+OR:
+
+“real estate creator content”?
+
+If creator → rewrite.
