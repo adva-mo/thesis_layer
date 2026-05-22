@@ -631,6 +631,69 @@ Possible structures:
 
 ---
 
+## Spoken Voice Rule
+
+Reels are spoken content.
+
+Every sentence must sound natural when spoken out loud.
+
+Before finalizing any reel script:
+
+Read the VO as if someone is actually saying it.
+
+If a sentence feels awkward to say,
+too written,
+too formal,
+or too structurally perfect:
+
+rewrite it.
+
+The voice should feel:
+
+- spoken
+- natural
+- confident
+- intelligent
+- easy to say out loud
+
+NOT:
+
+- written for reading
+- over-structured
+- poetic in an AI way
+- consultant-like
+
+### Spoken test
+
+Ask:
+
+"Would a smart Israeli naturally say this out loud in one take?"
+
+If not:
+rewrite.
+
+Examples:
+
+Bad:
+"ולפעמים, בדיוק כשזה נראה הכי פחות ברור."
+
+Better:
+"ודווקא כשעוד לא לגמרי ברור מה קורה."
+
+Bad:
+"המחיר סביבו כבר זז בגלל זה, או עדיין לא."
+
+Better:
+"המחיר סביבו כבר זז. או שעוד לא."
+
+Bad:
+"כל ה-Thesis תלוי ש-Wynn יפתח בזמן ויביא ביקוש אמיתי."
+
+Better:
+"ה-Thesis עובד אם Wynn נפתח בזמן, ומביא ביקוש אמיתי."
+
+---
+
 ## Final Check
 
 Before output ask:
