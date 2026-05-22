@@ -8,9 +8,10 @@ The master production workflow. Run this after you have a confirmed PROJECT DATA
 
 Before starting:
 - [ ] PROJECT DATA block is complete (or has documented `[MISSING]` fields)
-- [ ] CLAUDE.md has been read in this session
+- [ ] CLAUDE.md has been read in this session — `market.md`, `examples/voice-examples.md`, and `primary_language.md` loaded at session init
 - [ ] Language confirmed: Hebrew / English / Both
 - [ ] `output/[project-slug]/thesis.md` exists — produced by `templates/positioning-framework.md` after positioning is confirmed
+- [ ] `output/[project-slug]/thesis.md` is loaded now — read it once here, do not re-read per step below
 
 If `thesis.md` is missing: run positioning first, produce thesis.md, then return here.
 
@@ -184,21 +185,19 @@ Append to each language's LinkedIn file as a separate section. Hebrew CTAs → H
 
 Reference: `templates/languages/hebrew-naturalizer.md`
 
-Run after all content steps are complete. This is a mandatory explicit step — not an assumed check done while writing.
+Apply the naturalizer **inline during generation** — not as a separate post-generation re-read pass.
 
 **Applies to:** every Hebrew public-facing file generated in Steps 1–7.
 
 **Does not apply to:** English files, Analysis Mode outputs.
 
-For each Hebrew file:
+As you write each Hebrew file, apply naturalizer rules from `templates/languages/hebrew-naturalizer.md`. Do not re-read output files after writing — run the check as you draft each section.
 
-1. Read the file in full
-2. Run the naturalizer workflow against it
-3. Write the naturalizer sign-off at the bottom of the file with one of these outputs:
-   - `_Naturalizer: No meaningful language issues._`
-   - `_Naturalizer: [list of changes made]_`
+Write the naturalizer sign-off at the bottom of each file:
+- `_Naturalizer applied: [date] — No meaningful language issues._`
+- `_Naturalizer applied: [date] — [list of changes made]_`
 
-**The sign-off must reflect an actual pass, not an assumption.** If the sign-off is written before the check is done, it is invalid.
+**The sign-off must reflect an actual pass, not an assumption.**
 
 Do not mark any Hebrew file `status: ready` until the naturalizer sign-off is present and verified.
 

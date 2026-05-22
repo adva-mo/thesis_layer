@@ -33,11 +33,7 @@ The reel should feel:
 
 ## Before Generation
 
-Read:
-
-`examples/voice-examples.md`
-
-Voice calibration applies to all reel formats.
+Voice calibration applies to all reel formats. `examples/voice-examples.md` is loaded at session init — no re-read needed here.
 
 Reels should sound:
 

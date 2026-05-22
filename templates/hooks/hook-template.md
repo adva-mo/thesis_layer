@@ -2,7 +2,7 @@
 
 10 hook frameworks. Generate one per category for every project. Each hook should use specific data from the PROJECT DATA block.
 
-**Language note (primary language):** Before generating hooks in Hebrew, read `primary_language.md` — Voice Markers and Phrasing to Catch. After generating, run `templates/languages/hebrew-naturalizer.md`.
+**Language note (primary language):** Apply naturalizer inline while writing. `primary_language.md` is loaded at session init — no re-read needed here.
 
 ---
 

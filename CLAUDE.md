@@ -21,6 +21,22 @@ Claude is the engine. The templates are scaffolds. This file is the law.
 
 ---
 
+## 1.5 Session Init — Load These Files at Session Start
+
+At the start of every session, before doing anything else, read these files:
+
+1. `market.md` — business context, CTAs, hashtag rules, language settings, audience framing
+2. `examples/voice-examples.md` — voice calibration (applies to all content types)
+3. `primary_language.md` — Hebrew writing rules (skip if primary language is English)
+
+If a project is already active (e.g., resuming work), also read:
+
+4. `output/[project-slug]/thesis.md` — thesis statement, key numbers, risk register, CTA keyword
+
+These files are referenced throughout the system from multiple templates. Reading them once here eliminates per-template re-reads and prevents "see market.md" pointers from triggering repeated loads of the same file during CTA, hashtag, and language sections.
+
+---
+
 ## 2. Brand Identity
 
 The brand is an intelligent real estate intelligence source, not an agency. A curated intelligence layer between raw market data and investor decisions — analytical, trustworthy, beginner-friendly, never salesy or hype-driven.
