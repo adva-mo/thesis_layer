@@ -8,8 +8,12 @@ The master production workflow. Run this after you have a confirmed PROJECT DATA
 
 Before starting:
 - [ ] PROJECT DATA block is complete (or has documented `[MISSING]` fields)
-- [ ] CLAUDE.md has been read in this session
+- [ ] CLAUDE.md has been read in this session — `market.md`, `examples/voice-examples.md`, and `primary_language.md` loaded at session init
 - [ ] Language confirmed: Hebrew / English / Both
+- [ ] `output/[project-slug]/thesis.md` exists — produced by `templates/positioning-framework.md` after positioning is confirmed
+- [ ] `output/[project-slug]/thesis.md` is loaded now — read it once here, do not re-read per step below
+
+If `thesis.md` is missing: run positioning first, produce thesis.md, then return here.
 
 If `[MISSING]` fields exist, decide whether to continue or stop and get the missing data first. Price missing? Proceed with caution. Developer missing? Stop and find it — it affects credibility.
 
@@ -70,16 +74,42 @@ Save to `output/[project-slug]/[language]/hooks/` — see CLAUDE.md §12 for nam
 
 Reference: `templates/reels/reel-template.md`
 
+Before writing: read `output/[project-slug]/thesis.md`.
+
 Produce 5 reel scripts, one per format (Data Drop, Investment Case, Myth Bust, Area Spotlight, Payment Plan Breakdown).
 
 Each script includes:
 - Format name + duration
 - Hook line (first 3 seconds)
-- Body (bullet points or talking points)
-- Closing CTA (Tier 2)
-- Caption (2-3 sentences + hashtags)
+- Insight segment `[4–15s]`: use thesis.md Thesis Statement as the source — do not re-derive the investment logic, adapt the language for spoken delivery
+- Body (timestamp segments with `[VISUAL:]` tags, VO lines)
+- Reality check segment `[28–38s]`: draw from thesis.md Risk Register — do not independently re-derive risks
+- Voice style: use thesis.md Voice Style — do not select per-reel
+- Closing CTA (Tier 2): use thesis.md CTA Keyword
+- Caption (2–3 sentences + hashtags)
 
 Save to `output/[project-slug]/[language]/reels/` — see CLAUDE.md §12.
+
+---
+
+### Step 2.5 — Asset Collection
+
+Reference: `templates/asset-collection.md`
+
+Prerequisites: Step 2 complete. API keys present in `.env`: `UNSPLASH_ACCESS_KEY`, `GOOGLE_MAPS_KEY`.
+
+For each reel generated in Step 2:
+1. Append a Visual Evidence Plan section to the reel file (see format in `templates/reels/reel-template.md` — Visual Evidence Plan)
+   - Anti-collect list: copy from `output/[project-slug]/thesis.md` — Anti-Collect Guidance. Do not write per-reel from scratch.
+2. Execute `templates/asset-collection.md` against that plan
+3. Save validated assets to `assets/[project-slug]/canonical/`
+4. Move vision-rejected assets to `assets/[project-slug]/raw/rejected/`
+5. Update `assets/[project-slug]/manifest.md`
+6. Append the Collection Status Report to the reel file
+
+If API keys are absent: generate Visual Evidence Plans and search terms only. Mark each reel `PARTIAL — AWAITING API KEYS`. Execute collection when keys are available.
+
+Step 2.5 is skipped for: PDF-only projects, LinkedIn-only outputs, or any project with no reel scripts.
 
 ---
 
@@ -87,7 +117,16 @@ Save to `output/[project-slug]/[language]/reels/` — see CLAUDE.md §12.
 
 Reference: `templates/carousel/carousel-template.md`
 
+Before writing: read `output/[project-slug]/thesis.md`.
+
 Produce 7 slides. Follow the fixed structure (Hook → Project → Numbers → Area → Audience → Reality Check → CTA).
+
+Slide sourcing:
+- **Slide 2 (Why This Matters):** use thesis.md Thesis Statement as the source — adapt for carousel format, do not re-derive
+- **Slide 3 (Key Numbers):** use thesis.md Key Numbers block verbatim — do not reformat from context
+- **Slide 4 (Investment Thesis):** use thesis.md Thesis Statement — second adaptation, different angle from Slide 2
+- **Slide 6 (Reality Check):** draw from thesis.md Risk Register — do not independently re-derive risks
+- **Slide 7 (CTA):** use thesis.md CTA Keyword
 
 Each slide: slide text (1-3 lines) + visual note in brackets.
 
@@ -104,11 +143,25 @@ Each language gets its own separate file in its own directory. Do not combine la
 - Hebrew post → `output/[project-slug]/hebrew/linkedin/[project-slug]-he-linkedin.md`
 - English post → `output/[project-slug]/english/linkedin/[project-slug]-en-linkedin.md`
 
+After writing the Hebrew LinkedIn file (including Investor Summary and CTA Variations), append a **Pitch Block** section:
+
+```
+## Pitch Block
+
+[3–5 sentence natural spoken Hebrew paragraph: project name + developer + location, entry price, payment structure, one-sentence investment angle. Written in WhatsApp register: short, personal, natural. This is the paragraph WhatsApp will adapt — not a LinkedIn section.]
+```
+
+The Pitch Block is the distilled, publication-ready project description. Write it once; WhatsApp adapts it three times.
+
 ---
 
 ### Step 5 — Generate 3 WhatsApp Messages
 
 Reference: `templates/whatsapp/whatsapp-template.md`
+
+**Before writing:** Read the Pitch Block section from `output/[project-slug]/hebrew/linkedin/[project-slug]-he-linkedin.md`.
+
+Use the Pitch Block as the core project description in all 3 variants. Adapt only the greeting, relationship framing (cold / warm / re-engagement), and closing question per variant. Do not re-compose the project description from scratch.
 
 Three variants: cold outreach, warm follow-up, re-engagement.
 
@@ -123,6 +176,10 @@ Save to `output/[project-slug]/hebrew/whatsapp/` — see CLAUDE.md §12.
 150-200 words. No hype. Pure signal.
 
 Structure: Project → Location → Key Numbers → Investment Angle → Honest Risk Note.
+
+Before writing: read `output/[project-slug]/thesis.md`.
+- Key Numbers section: use thesis.md Key Numbers block — do not reformat from context
+- Honest Risk Note: draw from thesis.md Risk Register — include 2–3 of the listed risks
 
 Suitable for emails and PDF lead magnets. Write it once — repurpose everywhere.
 
@@ -142,21 +199,19 @@ Append to each language's LinkedIn file as a separate section. Hebrew CTAs → H
 
 Reference: `templates/languages/hebrew-naturalizer.md`
 
-Run after all content steps are complete. This is a mandatory explicit step — not an assumed check done while writing.
+Apply the naturalizer **inline during generation** — not as a separate post-generation re-read pass.
 
 **Applies to:** every Hebrew public-facing file generated in Steps 1–7.
 
 **Does not apply to:** English files, Analysis Mode outputs.
 
-For each Hebrew file:
+As you write each Hebrew file, apply naturalizer rules from `templates/languages/hebrew-naturalizer.md`. Do not re-read output files after writing — run the check as you draft each section.
 
-1. Read the file in full
-2. Run the naturalizer workflow against it
-3. Write the naturalizer sign-off at the bottom of the file with one of these outputs:
-   - `_Naturalizer: No meaningful language issues._`
-   - `_Naturalizer: [list of changes made]_`
+Write the naturalizer sign-off at the bottom of each file:
+- `_Naturalizer applied: [date] — No meaningful language issues._`
+- `_Naturalizer applied: [date] — [list of changes made]_`
 
-**The sign-off must reflect an actual pass, not an assumption.** If the sign-off is written before the check is done, it is invalid.
+**The sign-off must reflect an actual pass, not an assumption.**
 
 Do not mark any Hebrew file `status: ready` until the naturalizer sign-off is present and verified.
 

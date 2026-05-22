@@ -139,3 +139,48 @@ Content should emphasize:
 ## Internal-Only Logic
 
 Positioning analysis is internal system intelligence. Use it to improve content quality without explicitly exposing the internal reasoning in public-facing outputs.
+
+---
+
+## Required Output — `thesis.md`
+
+After confirming positioning, produce `output/[project-slug]/thesis.md` before starting any content generation.
+
+This file is consumed by: reel scripts (insight segment, reality check, voice style), Visual Evidence Plans (anti-collect), carousel (Slides 2, 3, 4), and Investor Summary (key numbers, risk note).
+
+```markdown
+# Thesis — [Project Name]
+
+## Thesis Type
+[appreciation / infrastructure | yield / rental | luxury / lifestyle | tourism | entry-level / accessible]
+
+## Thesis Statement
+[2–3 sentences: what the investment logic is, in plain language — written as you would say it to a smart investor friend, not as an analyst]
+
+## Key Numbers
+- Entry: [AED amount] ([unit type, sqft])
+- Payment: [structure, e.g., 10/70/20]
+- Handover: [month YYYY]
+- Units: [count]
+- Developer: [name]
+
+## Risk Register
+- [Risk 1 — specific, not generic]
+- [Risk 2]
+- [Risk 3]
+
+## Anti-Collect Guidance
+Do NOT collect: [3–5 specific image types that look relevant but contradict the thesis — be explicit]
+
+## CTA Keyword
+[The word used in Tier 2 reels/carousel CTA, e.g., CLUB, COSTA, SIERRA]
+
+## Voice Style
+[Style N from examples/voice-examples.md — one choice, applies to all reels for this project]
+```
+
+**Rules:**
+- Thesis Statement must be in plain language, not analyst register — it will be used verbatim as reel insight copy
+- Risk Register items must be specific to this project — "off-plan risk" is not acceptable; "473 units hitting the market simultaneously in December 2028" is
+- Anti-Collect Guidance must name specific image types, not categories — "luxury hotel lobby" not just "luxury images"
+- Do not save this file until positioning is confirmed — thesis.md and positioning must agree

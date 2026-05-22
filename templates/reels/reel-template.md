@@ -33,11 +33,7 @@ The reel should feel:
 
 ## Before Generation
 
-Read:
-
-`examples/voice-examples.md`
-
-Voice calibration applies to all reel formats.
+Voice calibration applies to all reel formats. `examples/voice-examples.md` is loaded at session init — no re-read needed here.
 
 Reels should sound:
 
@@ -691,6 +687,45 @@ Bad:
 
 Better:
 "ה-Thesis עובד אם Wynn נפתח בזמן, ומביא ביקוש אמיתי."
+
+---
+
+## Visual Evidence Plan
+
+Every reel output file must include a Visual Evidence Plan section immediately after the Caption section of each reel script.
+
+### What requires a row
+
+Every `[VISUAL:]` tag that requires a real collected image needs a row in the plan.
+
+Skip these — they are generated, not collected:
+- Text cards and title overlays
+- CTA cards
+- Timeline or data graphics
+- Screen text overlays (`[SCREEN:]`)
+
+### Table format
+
+```markdown
+### Visual Evidence Plan — Reel [N]
+
+Thesis type: [appreciation / infrastructure | yield / rental | tourism | luxury / lifestyle | entry-level / accessible]
+Anti-collect: [3–5 specific things NOT to collect — be explicit about what looks relevant but isn't]
+
+| Segment | Beat | Critical | File | Collect | Source | Copyright tier |
+|---|---|---|---|---|---|---|
+| [timestamp] | [establish / prove / reinforce / texture] | [yes / no] | canonical/a[NNN]_[description].jpg | [what to search for] | [source per matrix in asset-collection.md] | [A / B / C] |
+```
+
+For reused assets (already in canonical/ from another reel): write `reuse — canonical/[filename]` in the File column. No new download.
+
+### After the table
+
+Run `templates/asset-collection.md` against the plan.
+
+Append the Collection Status Report block immediately after the table.
+
+Do not mark a reel `status: ready` in the file frontmatter until the Collection Status Report shows `READY` or `USABLE — MINOR GAPS`.
 
 ---
 

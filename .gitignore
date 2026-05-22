@@ -6,8 +6,15 @@ input/urls/*
 !input/screenshots/.gitkeep
 !input/urls/.gitkeep
 
+# Project-specific input folders (raw source files per project)
+input/*/
+
 # Generated output — not tracked in version control
 output/
+
+# Project assets (all except branding)
+assets/*
+!assets/branding/
 
 # OS
 .DS_Store

@@ -21,6 +21,23 @@ Claude is the engine. The templates are scaffolds. This file is the law.
 
 ---
 
+## 1.5 Session Init — Load These Files at Session Start
+
+At the start of every session, before doing anything else, read these files:
+
+1. `market.md` — business context, CTAs, hashtag rules, language settings, audience framing
+2. `examples/voice-examples.md` — voice calibration (applies to all content types)
+3. `primary_language.md` — Hebrew writing rules (skip if primary language is English)
+
+If a project is already active (e.g., resuming work), also read:
+
+4. `output/[project-slug]/thesis.md` — thesis statement, key numbers, risk register, CTA keyword
+5. `output/[project-slug]/project-data.md` — extracted project data (if exists; skip if not yet produced)
+
+These files are referenced throughout the system from multiple templates. Reading them once here eliminates per-template re-reads and prevents "see market.md" pointers from triggering repeated loads of the same file during CTA, hashtag, and language sections.
+
+---
+
 ## 2. Brand Identity
 
 The brand is an intelligent real estate intelligence source, not an agency. A curated intelligence layer between raw market data and investor decisions — analytical, trustworthy, beginner-friendly, never salesy or hype-driven.
@@ -382,3 +399,33 @@ See `templates/positioning-framework.md` for categories, decision logic, and con
 ## 15. Brand Voice
 
 See `assets/branding/brand-guidelines.md` for this brand's voice, tone, and writing style.
+
+---
+
+## 16. Asset Collection
+
+After generating reel scripts (Step 2 in `templates/content-generation-workflow.md`), append a Visual Evidence Plan to each reel and execute automated asset collection.
+
+Reference: `templates/asset-collection.md` for full execution rules.
+
+**Key rules:**
+
+- Every `[VISUAL:]` tag requiring a real image must have a row in the Visual Evidence Plan
+- Generated cards (text overlays, CTA cards, graphics) are skipped — not collected
+- Every asset is stored once in `assets/[project-slug]/canonical/` — never duplicated per output
+- Reuse canonical assets across reels, carousels, and PDFs via the manifest `used_in` field
+- Thesis type × beat type determines source priority — see source matrix in `templates/asset-collection.md`
+- A reel is not ready for editing if any `prove` or `reinforce` asset is MISSING
+- Vision-rejected assets go to `assets/[project-slug]/raw/rejected/` — never deleted
+
+**Folder structure per project:**
+
+```
+assets/[project-slug]/
+├── manifest.md
+├── canonical/
+├── raw/
+└── raw/rejected/
+```
+
+**Manifest location:** `assets/[project-slug]/manifest.md`
