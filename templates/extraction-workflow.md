@@ -146,7 +146,7 @@ Extraction Notes: Source: developer brochure PDF. Prices as of brochure date —
 
 After producing and validating the PROJECT DATA block, save it to:
 
-`input/[project-slug]/project-data.md`
+`output/[project-slug]/project-data.md`
 
 Use this format — the frontmatter records source, date, and status so future sessions can assess freshness without reading the full block:
 
@@ -176,7 +176,7 @@ Missing Fields:
 Extraction Notes:
 ```
 
-**Resume rule:** If `input/[project-slug]/project-data.md` already exists at the start of a session, read it instead of re-running WebFetch. Only re-extract if:
+**Resume rule:** If `output/[project-slug]/project-data.md` already exists at the start of a session, read it instead of re-running WebFetch. Only re-extract if:
 - The user explicitly requests a fresh fetch
 - The file is older than 30 days
 - The user provides a new or updated source URL
