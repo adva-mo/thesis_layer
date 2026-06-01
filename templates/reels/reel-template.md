@@ -119,24 +119,103 @@ Prefer:
 
 ## Script Conventions
 
-- `[VISUAL:]` = what appears on screen
-- `[VO:]` = spoken line or text overlay
-- `[PAUSE]` = short beat
-- Duration target is flexible
-- Write like spoken language
-- Short sentences
-- Natural pacing
-- One idea per reel
-- No long paragraphs
-- No brochure language
-- No hard-selling tone
+### Tags (current format)
+
+- `[VISUAL_INTENT:]` = what the scene should visually show — written at script time, abstract intent only. No asset paths here. Asset paths are assigned later via Visual Evidence Plan (Step 2.5).
+- `[MOTION_STYLE:]` = camera movement and style direction for Kling generation. e.g. "slow cinematic push-in, stable camera, warm light". Omit for generated graphic scenes.
+- `[TEXT_CARD:]` = explicit text on screen. Use sparingly — CTA, number breakdowns, risk disclaimers only. Subtitles handle everything else. No default text overlays.
+- `[VO:]` = spoken voiceover (ElevenLabs). Write as natural spoken Hebrew.
+- `[PAUSE]` = short dramatic beat between lines.
+
+### Visual intent format
+
+For real image scenes:
+```
+[VISUAL_INTENT: what the scene should show — specific, thesis-linked visual context]
+[MOTION_STYLE: camera movement and style for Kling]
+```
+
+For generated graphic scenes (no image asset needed):
+```
+[VISUAL_INTENT: generated — brief description of the graphic (timeline, payment plan, etc.)]
+```
+
+The word "generated" at the start signals: no Kling clip, create the graphic in Canva or programmatically.
+
+For CTA / text card scenes only:
+```
+[TEXT_CARD: exact text to display on screen]
+```
+
+### What NOT to write
+
+- Do not write `[SCREEN:]` — deprecated. Use `[TEXT_CARD:]` only for explicit cards.
+- Do not write `[VISUAL:]` — deprecated. Use `[VISUAL_INTENT:]`.
+- Do not write asset file paths in `[VISUAL_INTENT:]` — those come from the Visual Evidence Plan.
+- Do not add text overlays as a default — subtitles render the VO text.
+
+### Legacy format (backwards compatible)
+
+Old files using `[VISUAL:]` and `[SCREEN:]` still parse correctly. No migration needed.
+
+---
+
+### TTS VO Rules
+
+These apply to every `[VO:]` block before saving the reel .md. They exist because ElevenLabs reads the raw text — what you write is exactly what the model hears.
+
+**Rule 0 — Word budget (check this first)**
+
+ElevenLabs at current settings (1.35× speed + 1.1× ffmpeg) speaks at roughly 3–3.5 Hebrew words per second. Use this table before writing any [VO:] block:
+
+| Timestamp target | Beat type | Max words | Max sentences |
+|---|---|---|---|
+| 3–5s | Hook | 8–12 | 1–2 |
+| 6–10s | Hook / setup | 14–22 | 2–3 |
+| 10–15s | Insight / body | 22–32 | 3–4 |
+| 13–18s | Prove / area | 28–40 | 3–5 |
+| 8–12s | Reality check | 18–26 | 2–3 |
+| 4–6s | CTA | 6–10 | 1 |
+
+Self-check:
+1. Note the timestamp span — that is your duration target
+2. Draft the VO
+3. Count the words
+4. If over budget: **rewrite the thought in fewer words** — never cut mid-sentence or trim arbitrarily. The idea must still land complete. If it cannot fit the budget, reduce the number of ideas, not the quality of the one that stays.
+
+**Rule A — כתיב מלא (full spelling)**
+Always prefer the full-spelled form when a vowel letter (י, ו) can be added — but only when adding the letter does not change the word's meaning or grammatical form.
+- `הגיון` → `היגיון`
+- Do NOT apply mechanically: `כשמשהו` = "when something" — adding י produces `כשמישהו` = "when someone", a different word. Meaning-changing substitutions are forbidden.
+- Test: would a Hebrew spellchecker add a י or ו here with no change in meaning? Only then apply.
+
+**Rule B — No abbreviations**
+TTS cannot expand abbreviations. Spell everything out inside `[VO:]` blocks.
+- `מ"ר` → `מטר רבוע`
+- `ד"ר` → `דוקטור`
+- Any `X"Y` pattern → write the full word(s)
+
+**Rule C — Spoken sentence structure**
+Write VO as flowing speech, not as line-broken page text. Use commas to guide natural pauses. Use a newline only for a genuine dramatic beat — maximum one per segment.
+- Bad: `"ויש בזה הגיון.\n\nכי רוב ההזדמנויות הן כשמשהו עוד לא קרה.\n\nאבל זה גם הסיכון:"`
+- Good: `"ויש בזה היגיון, כי ההזדמנויות הכי טובות הן כשמשהו עוד לא קרה. אבל, זה גם הסיכון:"`
+
+**Rule D — No em dashes in VO**
+Do not use `—` in `[VO:]` blocks. ElevenLabs handles em dashes inconsistently and they become subtitle artifacts (a standalone `—` token with its own time slot). Use comma `,` for a natural pause within a sentence.
+- Bad: `"הסיכון — שהתשתית לא תגיע בזמן"`
+- Good: `"הסיכון, שהתשתית לא תגיע בזמן"`
+
+**Rule E — No ALL-CAPS English words in VO**
+ElevenLabs spells out all-caps words letter by letter ("C-L-U-B" instead of "Club"). Use Title Case for any English word meant to be pronounced as a word.
+- Bad: `"כתבו לי CLUB"`
+- Good: `"כתבו לי Club"`
 
 Visual pacing:
 
 - change visual every 2–5 seconds
 - no long static sections
 - visual must support the thesis
-- text on screen should be short and readable
+- text on screen only for explicit TEXT_CARD scenes
 
 ---
 

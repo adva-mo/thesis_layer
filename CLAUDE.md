@@ -34,6 +34,10 @@ If a project is already active (e.g., resuming work), also read:
 4. `output/[project-slug]/thesis.md` — thesis statement, key numbers, risk register, CTA keyword
 5. `output/[project-slug]/project-data.md` — extracted project data (if exists; skip if not yet produced)
 
+If the session involves reel generation (rendering, scripting, or pipeline work), also read:
+
+6. `docs/reel-pipeline.md` — full technical reference for the reel generation pipeline (scripts, workflow, commands)
+
 These files are referenced throughout the system from multiple templates. Reading them once here eliminates per-template re-reads and prevents "see market.md" pointers from triggering repeated loads of the same file during CTA, hashtag, and language sections.
 
 ---
