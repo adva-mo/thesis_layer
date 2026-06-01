@@ -84,6 +84,11 @@ Calque patterns that signal English-structured thinking. The naturalizer will fi
 - `המחיר יודע / מגלם / משקף` in social register → `המחיר כבר זז` / `המחיר כבר הקדים`
 - `ספציפית` as a precision qualifier → almost never sounds natural; drop it
 
+**TTS / VO text — additional rules (applies to all [VO:] blocks in reel scripts):**
+- Use כתיב מלא wherever the vowel letter does not change meaning: `הגיון` → `היגיון`. Never substitute when meaning would change (e.g. `כשמשהו` ≠ `כשמישהו`).
+- Spell out all abbreviations — TTS cannot expand them: `מ"ר` → `מטר רבוע`, `ד"ר` → `דוקטור`
+- Write VO as spoken flow with commas, not as line-broken page text
+
 ---
 
 ## Typography

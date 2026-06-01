@@ -162,6 +162,18 @@ Rule: break dense relative-clause chains into short active sentences.
 
 ---
 
+## TTS / VO Pass
+
+Run this check on every `[VO:]` block in reel scripts. These rules exist because ElevenLabs reads raw text — the model has no inference layer for abbreviations or defective spelling.
+
+**כתיב מלא (full spelling):** Apply word-by-word with meaning awareness. Safe automatic fix: `הגיון` → `היגיון`. Never substitute when adding a vowel letter changes the meaning — `כשמשהו` ("when something") must never become `כשמישהו` ("when someone").
+
+**Abbreviations:** Expand all `X"Y` patterns inside VO blocks. `מ"ר` → `מטר רבוע`. `ד"ר` → `דוקטור`. No abbreviations may remain inside a `[VO:]` string.
+
+**Spoken flow:** VO text should read as flowing speech. Commas guide pauses. Newlines only for genuine dramatic beats (max one per segment). Not page-formatted poetry.
+
+---
+
 ## Style Rules
 
 Prefer minimal edits.
