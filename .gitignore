@@ -26,5 +26,28 @@ Thumbs.db
 *.swp
 *.swo
 
+# Kling I2V clip cache
+.cache/
+
 # Claude Code local state
 .claude/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+
+# Logs and temp
+*.log
+tmp/
