@@ -137,10 +137,37 @@ For real image scenes:
 
 For generated graphic scenes (no image asset needed):
 ```
-[VISUAL_INTENT: generated — brief description of the graphic (timeline, payment plan, etc.)]
+[VISUAL_INTENT: generated — brief description of the graphic (payment plan, etc.)]
 ```
 
 The word "generated" at the start signals: no Kling clip, create the graphic in Canva or programmatically.
+
+For timeline / argument sequence scenes, use the structured format:
+```
+[VISUAL_INTENT: timeline — <label 1> → <label 2> → <label 3>]
+```
+
+4-step variant:
+```
+[VISUAL_INTENT: timeline — <label 1> → <label 2> → <label 3> → <label 4>]
+```
+
+Timeline label rules:
+- 1–3 words per label — no full sentences
+- Max 4 labels
+- Labels are visual support only; VO + subtitles carry the explanation
+- Do not add `[TEXT_CARD:]` for timeline scenes — the labels are embedded in the VISUAL_INTENT
+
+Label selection — source from the VO (applies to all generated graphic scenes):
+1. Reuse keywords that already appear in the VO
+2. If possible, reuse the exact phrasing from the VO
+3. Only invent new labels if the VO contains no suitable terms
+4. Do not introduce a different framing than the one used in the narration
+
+Bad: VO says "תשתית תגיע בזמן ותביא ביקוש אמיתי" → visual uses הבטחה → שנים → מציאות (introduces different concepts)
+Good: same VO → visual uses תשתית → המתנה → ביקוש אמיתי (compresses what's already spoken)
+
+The visual should feel like a compression of the spoken argument, not a separate layer of analysis.
 
 For CTA / text card scenes only:
 ```
@@ -153,6 +180,7 @@ For CTA / text card scenes only:
 - Do not write `[VISUAL:]` — deprecated. Use `[VISUAL_INTENT:]`.
 - Do not write asset file paths in `[VISUAL_INTENT:]` — those come from the Visual Evidence Plan.
 - Do not add text overlays as a default — subtitles render the VO text.
+- Do not write `[VISUAL_INTENT: Timeline graphic — ...]` — deprecated. Use `timeline — label → label → label` instead.
 
 ### Legacy format (backwards compatible)
 
