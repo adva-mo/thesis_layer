@@ -1,13 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;700&display=swap");
 
-@page { size: A4; margin: 14mm 18mm; }
+@page {
+  size: A4;
+  margin: 14mm 18mm;
+}
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-html, body { direction: rtl; }
+html,
+body {
+  direction: rtl;
+}
 
 body {
-  font-family: 'Heebo', Arial, sans-serif;
+  font-family: "Heebo", Arial, sans-serif;
   font-size: 13px;
   line-height: 1.75;
   color: #1a1a1a;
@@ -65,7 +75,7 @@ pre {
   background: #f5f5f5;
   border-right: 3px solid #1a1a1a;
   padding: 14px 16px;
-  font-family: 'Heebo', monospace;
+  font-family: "Heebo", monospace;
   font-size: 13px;
   line-height: 1.9;
   margin: 16px 0;
@@ -75,7 +85,10 @@ pre {
   page-break-inside: avoid;
 }
 
-code { background: transparent; font-family: inherit; }
+code {
+  background: transparent;
+  font-family: inherit;
+}
 
 table {
   width: 100%;
@@ -100,7 +113,9 @@ td {
   vertical-align: top;
 }
 
-tr:nth-child(even) td { background: #fafafa; }
+tr:nth-child(even) td {
+  background: #fafafa;
+}
 
 img {
   width: 100%;
@@ -122,8 +137,33 @@ blockquote {
   page-break-inside: avoid;
 }
 
-hr { border: none; border-top: 1px solid #e0e0e0; margin: 20px 0; }
-span[dir="ltr"] { unicode-bidi: isolate; direction: ltr; }
-ul, ol { padding-right: 20px; margin-bottom: 12px; }
-li { margin-bottom: 4px; }
-strong { font-weight: 700; }
+.brand-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: #aaa;
+  text-transform: uppercase;
+  text-align: right;
+  margin-bottom: 2px;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 20px 0;
+}
+span[dir="ltr"] {
+  unicode-bidi: isolate;
+  direction: ltr;
+}
+ul,
+ol {
+  padding-right: 20px;
+  margin-bottom: 12px;
+}
+li {
+  margin-bottom: 4px;
+}
+strong {
+  font-weight: 700;
+}

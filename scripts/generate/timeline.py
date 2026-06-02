@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Generate animated timeline card for scene 2 (הבטחה → שנים → מציאות).
+Generate an animated timeline card (stacked boxes with reveal animation).
 
 Each box + arrow reveals sequentially with a fade-in + upward slide, then holds.
 Uses identical visual constants to graphic_generator.py.
 
 Usage:
-    python3 scripts/gen_scene02_timeline.py
-    python3 scripts/gen_scene02_timeline.py --duration 9.7 --output output/.../scene02_timeline.mp4
+    python3 scripts/generate/timeline.py --duration 9.7 --output output/.../scene02_timeline.mp4
+    python3 scripts/generate/timeline.py --items "הבטחה,זמן,מציאות,הפער קצר יותר" --duration 9.7 --output ...
 """
 
 import argparse
@@ -41,10 +41,6 @@ FONT_PATH  = Path("/System/Library/Fonts/Supplemental/Arial Unicode.ttf")
 
 ITEMS = ["הבטחה", "שנים", "מציאות"]
 
-# ── Animation schedule ────────────────────────────────────────────
-# Each entry: (start_time, duration) for box[i] and arrow[i]
-BOX_SCHEDULE   = [(0.30, 0.45), (1.25, 0.45), (2.20, 0.45)]
-ARROW_SCHEDULE = [(0.85, 0.30), (1.80, 0.30)]
 SLIDE_PX = 20    # px upward slide distance
 
 
@@ -63,12 +59,13 @@ def _progress(t: float, start: float, dur: float) -> float:
 
 def render_frame(t: float, font_text: ImageFont.FreeTypeFont,
                  font_arrow: ImageFont.FreeTypeFont,
-                 box_x: int, start_y: int) -> Image.Image:
+                 box_x: int, start_y: int,
+                 items: list, box_schedule: list, arrow_schedule: list) -> Image.Image:
     base = Image.new("RGB", (WIDTH, HEIGHT), BG_COLOR)
 
-    n = len(ITEMS)
-    for i, item in enumerate(ITEMS):
-        p = _progress(t, *BOX_SCHEDULE[i])
+    n = len(items)
+    for i, item in enumerate(items):
+        p = _progress(t, *box_schedule[i])
         if p <= 0:
             continue
 
@@ -101,7 +98,7 @@ def render_frame(t: float, font_text: ImageFont.FreeTypeFont,
 
         # Arrow below (not after last item)
         if i < n - 1:
-            pa = _progress(t, *ARROW_SCHEDULE[i])
+            pa = _progress(t, *arrow_schedule[i])
             if pa > 0:
                 a_alpha = int(255 * pa)
                 arrow = "↓"
@@ -127,6 +124,16 @@ def generate(output: Path, duration: float) -> None:
         font_text = font_arrow = ImageFont.load_default()
 
     n = len(ITEMS)
+    # Spread reveal across 85% of scene so the viewer feels time passing.
+    # Arrows appear 0.5s before the next box as a transition cue.
+    first_start     = 0.30
+    box_dur         = 0.45
+    arrow_adv       = 0.50
+    last_reveal_end = duration * 0.85
+    interval        = (last_reveal_end - box_dur - first_start) / max(n - 1, 1)
+    box_schedule    = [(first_start + i * interval, box_dur) for i in range(n)]
+    arrow_schedule  = [(box_schedule[i + 1][0] - arrow_adv, arrow_adv) for i in range(n - 1)]
+
     stack_h = n * BOX_H + (n - 1) * ARROW_GAP
     start_y = int(HEIGHT * 0.40) - stack_h // 2
     box_x   = (WIDTH - BOX_W) // 2
@@ -147,7 +154,8 @@ def generate(output: Path, duration: float) -> None:
 
     for f in range(total_frames):
         t = f / FPS
-        frame = render_frame(t, font_text, font_arrow, box_x, start_y)
+        frame = render_frame(t, font_text, font_arrow, box_x, start_y,
+                             ITEMS, box_schedule, arrow_schedule)
         writer.stdin.write(frame.tobytes())
 
     writer.stdin.close()
@@ -161,10 +169,15 @@ def generate(output: Path, duration: float) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate animated timeline card for scene 2.")
+    global ITEMS
+    parser = argparse.ArgumentParser(description="Generate animated timeline card.")
     parser.add_argument("--output",   default=str(REPO_ROOT / "output/club-place-dubai-hills/clips/scene02_timeline.mp4"))
     parser.add_argument("--duration", type=float, default=9.7)
+    parser.add_argument("--items",    default=None,
+                        help="Comma-separated labels, e.g. 'הבטחה,זמן,מציאות'")
     args = parser.parse_args()
+    if args.items:
+        ITEMS = [s.strip() for s in args.items.split(",") if s.strip()]
     generate(Path(args.output), args.duration)
 
 

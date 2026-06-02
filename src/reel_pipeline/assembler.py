@@ -75,9 +75,14 @@ def assemble_reel(
             action = "stretch" if clip_dur < duration else "trim"
             print(f"    Visual:   clip override → {override.name} ({clip_dur:.1f}s → {duration:.1f}s, {action})")
             existing_clip_to_clip(override, duration, base_clip, width, height)
-        elif scene.image_path:
-            print(f"    Visual:   image → {scene.image_path.name}")
-            image_to_clip(scene.image_path, duration, base_clip, width, height)
+        elif scene.asset_type == "video":
+            clip_dur = get_clip_duration(scene.asset_path)
+            action = "stretch" if clip_dur < duration else "trim"
+            print(f"    Visual:   video → {scene.asset_path.name} ({clip_dur:.1f}s → {duration:.1f}s, {action})")
+            existing_clip_to_clip(scene.asset_path, duration, base_clip, width, height)
+        elif scene.asset_type == "image":
+            print(f"    Visual:   image → {scene.asset_path.name}")
+            image_to_clip(scene.asset_path, duration, base_clip, width, height)
         else:
             gtype = detect_type(scene.visual_intent)
             print(f"    Visual:   generated graphic ({gtype})")

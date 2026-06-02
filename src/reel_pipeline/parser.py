@@ -20,11 +20,11 @@ class Scene:
     index: int
     start_s: float
     end_s: float
-    visual_intent: str          # [VISUAL_INTENT:] or [VISUAL:] fallback
-    motion_style: Optional[str] # [MOTION_STYLE:] — new field
-    text_card: Optional[str]    # [TEXT_CARD:] or [SCREEN:] fallback (CTA, data, risk only)
-    image_path: Optional[Path]  # resolved canonical asset (from VEP table or legacy VISUAL ref)
-    is_generated: bool          # True when no real image asset needed
+    visual_intent: str           # [VISUAL_INTENT:] or [VISUAL:] fallback
+    motion_style: Optional[str]  # [MOTION_STYLE:]
+    text_card: Optional[str]     # [TEXT_CARD:] or [SCREEN:] fallback
+    asset_type: str              # "image" | "video" | "generated"
+    asset_path: Optional[Path]   # resolved canonical asset; None when generated
 
 
 def _parse_timestamp(ts: str) -> tuple[float, float]:
@@ -34,44 +34,39 @@ def _parse_timestamp(ts: str) -> tuple[float, float]:
     return float(parts[0]), float(parts[1])
 
 
-def _is_generated(visual_intent: str) -> bool:
-    """Scenes marked 'generated' in VISUAL_INTENT have no real image asset."""
-    return visual_intent.lower().startswith("generated")
-
-
-def _resolve_image_from_text(visual: str, assets_dir: Optional[Path]) -> Optional[Path]:
+def _resolve_asset_from_text(visual: str, assets_dir: Optional[Path]) -> tuple[str, Optional[Path]]:
     """Legacy: resolve canonical/filename referenced inside old [VISUAL:] text."""
-    m = re.search(r"canonical/([\w\-]+\.(?:jpg|jpeg|png|webp))", visual, re.IGNORECASE)
+    m = re.search(r"canonical/([\w\-]+\.(?:jpg|jpeg|png|webp|mp4|mov))", visual, re.IGNORECASE)
     if not m:
-        return None
+        return "generated", None
     filename = m.group(1)
     if assets_dir:
         p = assets_dir / filename
         if p.exists():
-            return p
-    return None
+            atype = "video" if filename.lower().endswith((".mp4", ".mov")) else "image"
+            return atype, p
+    return "generated", None
 
 
-def _parse_vep_table(body: str, assets_dir: Optional[Path]) -> dict[str, Path]:
+def _parse_vep_table(body: str, assets_dir: Optional[Path]) -> tuple[dict[str, Path], dict[str, Path]]:
     """
-    Parse the Visual Evidence Plan table (added in Step 2.5) to extract
-    timestamp → canonical asset path mappings.
+    Parse the Visual Evidence Plan table to extract timestamp → canonical asset path mappings.
 
-    Returns dict like {"15–28s": Path("assets/.../a001_dh-golf-course-community.jpg")}
+    Returns (image_mapping, clip_mapping) where keys are normalized timestamp strings
+    like "15–28s" and values are resolved Paths.
     """
-    mapping: dict[str, Path] = {}
+    image_mapping: dict[str, Path] = {}
+    clip_mapping:  dict[str, Path] = {}
 
     vep_match = re.search(r"### Visual Evidence Plan", body)
     if not vep_match:
-        return mapping
+        return image_mapping, clip_mapping
 
     vep_body = body[vep_match.start():]
-    # Table rows: | timestamp | beat | critical | file | ... |
     for row in re.finditer(r"^\|([^|]+)\|([^|]+)\|([^|]+)\|([^|]+)\|", vep_body, re.MULTILINE):
         ts_cell   = row.group(1).strip()
         file_cell = row.group(4).strip()
 
-        # Skip header and separator rows
         if not re.search(r"\d+[–—-]\d+s", ts_cell):
             continue
         if not file_cell or file_cell in ("—", "-", "File", "file"):
@@ -80,8 +75,7 @@ def _parse_vep_table(body: str, assets_dir: Optional[Path]) -> dict[str, Path]:
         # Handle "reuse — canonical/filename" format
         file_cell = re.sub(r"^reuse\s*[–—-]\s*", "", file_cell).strip()
 
-        # Extract canonical/filename
-        m = re.search(r"canonical/([\w\-]+\.(?:jpg|jpeg|png|webp))", file_cell, re.IGNORECASE)
+        m = re.search(r"canonical/([\w\-]+\.(?:jpg|jpeg|png|webp|mp4|mov))", file_cell, re.IGNORECASE)
         if not m:
             continue
 
@@ -89,11 +83,13 @@ def _parse_vep_table(body: str, assets_dir: Optional[Path]) -> dict[str, Path]:
         if assets_dir:
             p = assets_dir / filename
             if p.exists():
-                # Normalize timestamp for lookup key
                 ts_key = re.sub(r"[–—]", "–", ts_cell)
-                mapping[ts_key] = p
+                if filename.lower().endswith((".mp4", ".mov")):
+                    clip_mapping[ts_key] = p
+                else:
+                    image_mapping[ts_key] = p
 
-    return mapping
+    return image_mapping, clip_mapping
 
 
 def _ts_key(start_s: float, end_s: float) -> str:
@@ -104,7 +100,6 @@ def _ts_key(start_s: float, end_s: float) -> str:
 def parse_reel_file(md_path: Path, reel_number: int = 1, assets_dir: Optional[Path] = None) -> list[Scene]:
     content = md_path.read_text(encoding="utf-8")
 
-    # Split on reel headings: ## Reel N — ...
     reel_splits = re.split(r"^## (Reel \d+ — .+?)$", content, flags=re.MULTILINE)
 
     target_heading_idx = None
@@ -118,12 +113,9 @@ def parse_reel_file(md_path: Path, reel_number: int = 1, assets_dir: Optional[Pa
         raise ValueError(f"Reel {reel_number} not found in {md_path}")
 
     full_reel_body = reel_splits[target_heading_idx + 1]
-
-    # Script body (for segment blocks): stop at Caption
     script_body = re.split(r"^### Caption", full_reel_body, maxsplit=1, flags=re.MULTILINE)[0]
 
-    # VEP table may be in script_body or further in full_reel_body
-    vep_mapping = _parse_vep_table(full_reel_body, assets_dir)
+    image_mapping, clip_mapping = _parse_vep_table(full_reel_body, assets_dir)
 
     blocks = re.split(r"\n---+\n", script_body)
 
@@ -133,7 +125,6 @@ def parse_reel_file(md_path: Path, reel_number: int = 1, assets_dir: Optional[Pa
         if not ts_match:
             continue
 
-        # Visual intent: new tag first, then legacy [VISUAL:] fallback
         vi_match = re.search(r"\[VISUAL_INTENT:\s*(.*?)\]", block, re.DOTALL)
         if not vi_match:
             vi_match = re.search(r"\[VISUAL:\s*(.*?)\]", block, re.DOTALL)
@@ -143,23 +134,24 @@ def parse_reel_file(md_path: Path, reel_number: int = 1, assets_dir: Optional[Pa
         visual_intent = vi_match.group(1).strip()
         start_s, end_s = _parse_timestamp(ts_match.group(1))
 
-        # Motion style (new field, no fallback)
         ms_match = re.search(r"\[MOTION_STYLE:\s*(.*?)\]", block, re.DOTALL)
         motion_style = ms_match.group(1).strip() if ms_match else None
 
-        # Text card: new tag first, then [SCREEN:] fallback
         tc_match = re.search(r"\[TEXT_CARD:\s*(.*?)\]", block)
         if not tc_match:
             tc_match = re.search(r"\[SCREEN:\s*(.*?)\]", block)
         text_card = tc_match.group(1).strip() if tc_match else None
 
-        # Asset resolution: VEP table first, then legacy inline reference
+        # Asset resolution: VEP table first (clips, then images), then legacy inline fallback
         ts_key = _ts_key(start_s, end_s)
-        image_path = vep_mapping.get(ts_key)
-        if image_path is None:
-            image_path = _resolve_image_from_text(visual_intent, assets_dir)
-
-        generated = _is_generated(visual_intent) or image_path is None
+        if ts_key in clip_mapping:
+            asset_type, asset_path = "video", clip_mapping[ts_key]
+        elif ts_key in image_mapping:
+            asset_type, asset_path = "image", image_mapping[ts_key]
+        else:
+            asset_type, asset_path = _resolve_asset_from_text(visual_intent, assets_dir)
+            if asset_path is None:
+                asset_type = "generated"
 
         scenes.append(Scene(
             index=len(scenes) + 1,
@@ -168,8 +160,8 @@ def parse_reel_file(md_path: Path, reel_number: int = 1, assets_dir: Optional[Pa
             visual_intent=visual_intent,
             motion_style=motion_style,
             text_card=text_card,
-            image_path=image_path,
-            is_generated=generated,
+            asset_type=asset_type,
+            asset_path=asset_path,
         ))
 
     return scenes
