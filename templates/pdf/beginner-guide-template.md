@@ -212,6 +212,10 @@ Examples:
 * What could break the thesis
 * Area maturity score
 * Demand logic map
+* Payment timeline
+* Capital flow timeline
+* Supply risk framework
+* Demand drivers framework
 
 The visual should explain the investment logic faster than paragraphs.
 
@@ -402,13 +406,13 @@ Avoid unless directly required by the thesis:
 
 ### Count rule
 
-**Target: 2–4 images. Hard maximum: 4. No minimum.**
+**Target: 1–3 images. Hard maximum: 4. Zero is valid.**
 
 If no suitable asset exists for a slot, skip it. Do not substitute weak images to fill a slot.
 
-PDF generation never fails due to missing images.
+A PDF with zero images is a fully acceptable output if the manifest has no strong thesis-aligned assets. Do not force images.
 
-If more than 4 suitable images exist: select the 4 strongest by thesis alignment, not by visual quality.
+If more than 4 suitable images exist: select the strongest 3 by thesis alignment, not by visual quality.
 
 ### PDF Image Plan
 
@@ -424,7 +428,7 @@ Rules:
 - `PDF Section`: the section name where the image will appear
 - `Why It Supports the Thesis`: one sentence — must reference the specific thesis, not just describe the image
 - Cross-check every selected asset against the Anti-Collect Guidance in `thesis.md` — if an image matches the anti-list, reject it even if it looks strong
-- Total rows: 2–4
+- Total rows: 0–4 (zero rows is valid)
 
 ### Placement rules
 
@@ -435,3 +439,27 @@ Caption every image with one sentence that states thesis relevance, not a descri
 Bad caption: "Golf course at Dubai Hills Estate."
 
 Good caption: "The Dubai Hills Golf Course has been operational since 2018 — one of the few amenities in the project's marketing materials that actually exists."
+
+---
+
+## Success Criteria
+
+The PDF should feel like:
+
+* a research report
+* an investment memo
+* a decision framework
+
+Not:
+
+* a brochure
+* a sales presentation
+* a marketing asset
+
+The reader should leave with a better understanding of **how to think about the opportunity** — not simply what the opportunity is.
+
+If all images are removed, the PDF should still feel premium.
+
+If the frameworks are removed and only images remain, the PDF should feel weak.
+
+That asymmetry is the target.

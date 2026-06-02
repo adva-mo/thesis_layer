@@ -123,6 +123,7 @@ blockquote {
 }
 
 hr { border: none; border-top: 1px solid #e0e0e0; margin: 20px 0; }
+span[dir="ltr"] { unicode-bidi: isolate; direction: ltr; }
 ul, ol { padding-right: 20px; margin-bottom: 12px; }
 li { margin-bottom: 4px; }
 strong { font-weight: 700; }

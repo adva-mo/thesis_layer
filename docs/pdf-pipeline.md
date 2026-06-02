@@ -52,3 +52,27 @@ Currently embedded inline in each HTML file. If styles diverge across projects, 
 - Sections are wrapped in `<div class="pdf-section">` for clean page-break behavior.
 - The PDF Image Plan section from the `.md` file is intentionally excluded from the HTML.
 - Images use relative paths from the HTML file location (`../../../../assets/...`).
+
+## Bidi handling
+
+Hebrew paragraphs containing multiple inline English phrases produce bidi rendering artifacts — words, numbers, and punctuation appear in the wrong order or on the wrong side. This happens because the Unicode bidi algorithm struggles with long paragraphs that cross script boundaries multiple times.
+
+**Primary rule: avoid mixed-script paragraphs.** When content is a list of facts that mix English names with Hebrew descriptions, use a table instead of a paragraph. Each table cell carries one language — zero bidi crossing.
+
+```html
+<!-- Instead of a mixed paragraph -->
+<table>
+<tbody>
+<tr><td>Dubai Hills Park</td><td>180,000 מ"ר — פתוח לציבור</td></tr>
+<tr><td>Dubai Hills Mall</td><td>282,000 מ"ר — פועל</td></tr>
+</tbody>
+</table>
+```
+
+**For isolated inline terms** (a single English word or short phrase inside a Hebrew sentence), wrap in `<span dir="ltr">`:
+
+```html
+מאז <span dir="ltr">2018</span> פועל הגולף קורס
+```
+
+The CSS rule `span[dir="ltr"] { unicode-bidi: isolate; direction: ltr; }` in `templates/pdf/style.css` ensures these spans isolate correctly. Use `isolate`, never `embed` — `embed` leaks bidi context and causes misplacement.
