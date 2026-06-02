@@ -313,25 +313,25 @@ python3 scripts/generate/cta.py \
 # 3. Align words to audio
 python3 scripts/pipeline/align.py \
   --blueprint output/club-place-dubai-hills/hebrew/reels/club-place-dubai-hills-he-reels.md \
-  --audio-dir output/club-place-dubai-hills/hebrew/reels/reel_01/ \
-  --output output/club-place-dubai-hills/hebrew/reels/reel_01/transcript.json \
+  --audio-dir output/club-place-dubai-hills/hebrew/reels/reel_01/audio/ \
+  --output output/club-place-dubai-hills/hebrew/reels/reel_01/audio/transcript.json \
   --reel 1
 
 # 4. Render (Kling clips for scenes 1 and 3 resolve from VEP table automatically)
 python3 scripts/pipeline/render.py \
   --blueprint output/club-place-dubai-hills/hebrew/reels/club-place-dubai-hills-he-reels.md \
-  --audio-dir output/club-place-dubai-hills/hebrew/reels/reel_01/ \
+  --audio-dir output/club-place-dubai-hills/hebrew/reels/reel_01/audio/ \
   --assets-dir assets/club-place-dubai-hills/canonical/ \
-  --output output/club-place-dubai-hills/hebrew/reels/club-place-dubai-hills-he-reel-1-draft.mp4 \
+  --output output/club-place-dubai-hills/hebrew/reels/reel_01/club-place-dubai-hills-he-reel-1-draft.mp4 \
   --reel 1 --render \
-  --clip-override 2:output/club-place-dubai-hills/hebrew/reels/reel_01/scene02_timeline.mp4 \
-  --clip-override 4:output/club-place-dubai-hills/hebrew/reels/reel_01/scene04_exclamation.mp4 \
-  --clip-override 5:output/club-place-dubai-hills/hebrew/reels/reel_01/scene05_cta.mp4
+  --clip-override 2:output/club-place-dubai-hills/hebrew/reels/reel_01/scenes/scene02_timeline.mp4 \
+  --clip-override 4:output/club-place-dubai-hills/hebrew/reels/reel_01/scenes/scene04_exclamation.mp4 \
+  --clip-override 5:output/club-place-dubai-hills/hebrew/reels/reel_01/scenes/scene05_cta.mp4
 
 # 5. Subtitle
 python3 scripts/pipeline/subtitle.py \
-  --video output/club-place-dubai-hills/hebrew/reels/club-place-dubai-hills-he-reel-1-draft.mp4 \
-  --transcript output/club-place-dubai-hills/hebrew/reels/reel_01/transcript.json \
+  --video output/club-place-dubai-hills/hebrew/reels/reel_01/club-place-dubai-hills-he-reel-1-draft.mp4 \
+  --transcript output/club-place-dubai-hills/hebrew/reels/reel_01/audio/transcript.json \
   --mode highlighted_phrase --max-words 5
 ```
 
