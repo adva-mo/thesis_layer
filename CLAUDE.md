@@ -28,6 +28,7 @@ At the start of every session, before doing anything else, read these files:
 1. `market.md` — business context, CTAs, hashtag rules, language settings, audience framing
 2. `examples/voice-examples.md` — voice calibration (applies to all content types)
 3. `primary_language.md` — Hebrew writing rules (skip if primary language is English)
+4. `assets/branding/brand-guidelines.md` — brand positioning, visual identity, voice calibration table
 
 If a project is already active (e.g., resuming work), also read:
 
@@ -158,7 +159,8 @@ PDFs are educational lead magnets. They build trust and generate inbound.
 - No specific property recommendations (unless it's a project-specific PDF)
 - Cite data sources if used (e.g., DLD, CBRE, Bayut)
 - See `market.md` — PDF Audience Framing for publication reference and reader profile
-- Format should render cleanly in Markdown → PDF converters (Pandoc, md-to-pdf)
+- Before placing images in a PDF, run the Image Selection step in `templates/pdf/beginner-guide-template.md`
+- For rendering instructions (HTML authoring, PDF generation command, stylesheet), see `docs/pdf-pipeline.md`
 
 ---
 
