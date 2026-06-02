@@ -159,6 +159,7 @@ PDFs are educational lead magnets. They build trust and generate inbound.
 - Cite data sources if used (e.g., DLD, CBRE, Bayut)
 - See `market.md` — PDF Audience Framing for publication reference and reader profile
 - Format should render cleanly in Markdown → PDF converters (Pandoc, md-to-pdf)
+- Before placing images in a PDF, run the Image Selection step in `templates/pdf/beginner-guide-template.md`
 
 ---
 

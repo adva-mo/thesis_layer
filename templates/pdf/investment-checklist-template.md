@@ -6,6 +6,32 @@ One-page checklist. Clean, scannable, printable. Builds trust through honesty.
 
 ---
 
+## Premium PDF Structure — Does Not Apply Here
+
+The Premium PDF Structure (Cover → Executive Summary → Visual Thesis → Core Analysis → ...) is designed for investment memo PDFs, not for this format.
+
+Do not apply it to the checklist.
+
+The checklist is a functional reference tool: scannable, interactive, printable. It has no narrative arc and no verdict to deliver.
+
+**Exception — Thesis Card:**
+
+When generating a project-specific version of this checklist (i.e., pre-filled or framed around a specific project), prepend a Thesis Card at the top before section 0.
+
+Use the Thesis Card component from `templates/pdf/beginner-guide-template.md`.
+
+This gives the reader instant project context before they start working through the questions.
+
+Do not add a Thesis Card to the generic (non-project-specific) version.
+
+**Exception — Fit Matrix:**
+
+When generating a project-specific version, you may also add a compact `| Fits | Does Not Fit |` matrix immediately after the Thesis Card. This sets expectations before the reader invests time in the 25 questions.
+
+Use the Fit Matrix component from `templates/pdf/beginner-guide-template.md`.
+
+---
+
 ```markdown
 ---
 title: "רשימת הבדיקה של המשקיע לפני חתימה על אוף-פלאן בדובאי"

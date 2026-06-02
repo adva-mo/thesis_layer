@@ -241,3 +241,5 @@ If a new reel or carousel needs an asset that already exists in `canonical/`:
 - Mark the row in the Visual Evidence Plan as `reuse — canonical/[filename]`
 
 This is the canonical structure working correctly. One file, many outputs.
+
+**PDFs:** The PDF Image Plan references canonical assets by filename. Update the `used_in` field in the manifest row to include `pdf-[project-slug]`. Do not re-download or rename assets that already exist in `canonical/`.
