@@ -353,72 +353,78 @@ If a paragraph does not help the reader make a better decision, remove it.
 
 ## Image Selection
 
-### When to run
+### Resource rules
 
-Run this step before finalizing any PDF.
+Images are optional enhancements. The PDF must remain high quality with zero images.
 
-If `assets/[project-slug]/manifest.md` exists: read it and select from existing canonical assets.
+**Do NOT open image files. Do NOT inspect pixels. Do NOT run image analysis.**
 
-If no manifest exists (PDF-only project, no reel scripts generated): run a targeted collection of 4–6 images using `templates/asset-collection.md`, then select from what was collected.
+Selection is based entirely on manifest metadata: beat type, thesis link, description, tags, and ranking scores. If `assets/[project-slug]/manifest.md` exists, read it and select from that data alone.
 
-### Purpose taxonomy
+If no manifest exists: skip image selection entirely. Do not trigger an asset collection run. The PDF proceeds without images.
 
-Every image in a PDF must serve exactly one of these six purposes:
+### Framework-first rule
 
-| Purpose | What it shows |
-|---------|---------------|
-| Context | The area or neighborhood — where this project sits |
-| Evidence | Proof that infrastructure or demand is real, not promised |
-| Infrastructure | Specific operational assets: mall, park, golf course, transit |
-| Demographics | Signs of who lives or works there — community feel, not render |
-| Location | Proximity map, aerial view, or key anchor relationship |
-| Conclusion | One closing image that reinforces the thesis visually |
+When choosing between placing an additional image and adding a decision framework (Thesis Chain, Risk Map, Fit Matrix, Area Maturity Score, etc.), prefer the framework.
 
-Each purpose may appear at most once. Do not repeat a purpose.
+Images enhance the report. Frameworks carry it.
 
-### Selection rules
+### Image slots
 
-Do not select based on aesthetics alone.
+Use four named slots. Each slot is optional and may be filled at most once.
 
-Every image must strengthen the investment thesis.
+| Slot | What it shows |
+|------|---------------|
+| **Hero** | Establishes the project or area — one strong opening image |
+| **Infrastructure Evidence** | Proves a specific infrastructure claim made in the thesis |
+| **Area Context** | Aerial view, map, or proximity shot — where the project sits |
+| **Conclusion** | One closing image that reinforces the thesis visually |
 
-Avoid:
+### Asset selection priority
 
-- Repetitive developer renders — more than one is decorative
-- Multiple apartment interiors — the first is useful; the second is noise
-- Decorative lifestyle shots — beach, pool, spa, unless thesis type is tourism
-- Generic luxury imagery — tower against sunset, marble lobby, champagne
+Choose images that strengthen the investment thesis, not images that look attractive.
 
-Prefer:
+Priority order:
 
-- Real infrastructure with visible evidence of use, not just renders
-- Community activity: people, cars, occupied retail, street life
-- Area context: aerial views, maps, proximity to key anchors
-- Accessibility: roads, transit, connectivity evidence
-- Demand indicators: occupied buildings, active retail, foot traffic
+1. Infrastructure evidence
+2. Community evidence
+3. Area context
+4. Accessibility
+5. Project imagery
+
+Avoid unless directly required by the thesis:
+
+- Apartment interiors
+- Luxury lifestyle renders
+- Pools, spas, beach shots
+- Decorative imagery
+- Generic skyline shots
 
 ### Count rule
 
-**Target: 3–6 images. Minimum: 3. Hard maximum: 6.**
+**Target: 2–4 images. Hard maximum: 4. No minimum.**
 
-If fewer than 3 thesis-aligned images exist in canonical: use what is available and note the gap. Do not pad with decorative images to reach 3.
+If no suitable asset exists for a slot, skip it. Do not substitute weak images to fill a slot.
 
-If more than 6 suitable images exist: select the 6 strongest by thesis alignment, not by visual quality.
+PDF generation never fails due to missing images.
+
+If more than 4 suitable images exist: select the 4 strongest by thesis alignment, not by visual quality.
 
 ### PDF Image Plan
 
 Create a PDF Image Plan before placing any image. Format:
 
-| # | Filename | Purpose | PDF Section | Why It Supports the Thesis |
-|---|----------|---------|-------------|---------------------------|
+| # | Filename | Slot | PDF Section | Why It Supports the Thesis |
+|---|----------|------|-------------|---------------------------|
 
 Rules:
 
 - One row per selected image
+- `Slot`: one of Hero / Infrastructure Evidence / Area Context / Conclusion
 - `PDF Section`: the section name where the image will appear
 - `Why It Supports the Thesis`: one sentence — must reference the specific thesis, not just describe the image
 - Cross-check every selected asset against the Anti-Collect Guidance in `thesis.md` — if an image matches the anti-list, reject it even if it looks strong
-- Total rows: 4–6
+- Total rows: 2–4
 
 ### Placement rules
 
