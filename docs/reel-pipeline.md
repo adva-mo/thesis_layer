@@ -168,30 +168,31 @@ Combines audio segments and visual clips into a single MP4. Defaults to dry-run 
 
 ```bash
 python3 scripts/pipeline/render.py \
-  --blueprint output/[slug]/hebrew/reels/[slug]-he-reels.md \
-  --audio-dir output/[slug]/audio/reel1/ \
+  --blueprint output/[slug]/[lang]/reels/[slug]-he-reels.md \
+  --audio-dir output/[slug]/[lang]/reels/reel_01/ \
   --assets-dir assets/[slug]/canonical/ \
-  --output output/[slug]/hebrew/reels/[slug]-he-reel-1-draft.mp4 \
+  --output output/[slug]/[lang]/reels/[slug]-he-reel-1-draft.mp4 \
   --reel 1 --render \
-  --clip-override 1:output/tests/kling_test.mp4 \
-  --clip-override 2:output/[slug]/clips/scene02_timeline.mp4 \
-  --clip-override 3:output/[slug]/clips/kling_scene03.mp4 \
-  --clip-override 4:output/[slug]/clips/scene04_exclamation.mp4 \
-  --clip-override 5:output/[slug]/clips/scene05_cta.mp4
+  --clip-override 2:output/[slug]/[lang]/reels/reel_01/scene02_timeline.mp4 \
+  --clip-override 4:output/[slug]/[lang]/reels/reel_01/scene04_exclamation.mp4 \
+  --clip-override 5:output/[slug]/[lang]/reels/reel_01/scene05_cta.mp4
 ```
 
 **Key flags:**
 - `--render` — required to produce output (omit for dry-run plan)
-- `--clip-override SCENE:PATH` — inject a pre-rendered MP4 for scene N (repeatable, any number of scenes)
+- `--clip-override SCENE:PATH` — override visual for scene N with a specific pre-rendered clip (animated timeline, exclamation, CTA). Falls back to static generated graphic if omitted.
 - `--max-scenes N` — limit to first N scenes (useful for POC testing)
 - `--keep-tmp` — keep the intermediate work directory for debugging
 
 **Visual source priority per scene:**
-1. `--clip-override` if provided
-2. `scene.image_path` if the blueprint has a real asset
-3. Generated graphic (timeline, text_card, cta_card, etc.) from `graphic_generator.py`
+1. `--clip-override` (explicit) — escape hatch; use for animated generated clips
+2. `asset_type == "video"` — Kling clips referenced in VEP table (`canonical/kling_sceneNN.mp4`)
+3. `asset_type == "image"` — still images referenced in VEP table
+4. Generated graphic (timeline, text_card, etc.) from `graphic_generator.py` — static fallback
 
-**Assembler behaviour:** if a clip override is shorter than the VO audio, it's time-stretched (`setpts`). If longer, it's trimmed.
+**Kling clips live in `assets/[slug]/canonical/`** and are referenced directly in the VEP table File column (`canonical/kling_scene01.mp4`). No `--clips-dir` needed — the blueprint is the source of truth.
+
+**Assembler behaviour:** if a clip is shorter than the VO audio, it is time-stretched. If longer, it is trimmed.
 
 ---
 
@@ -202,7 +203,7 @@ Composites Hebrew subtitles onto the rendered video using the `transcript.json` 
 ```bash
 python3 scripts/pipeline/subtitle.py \
   --video output/[slug]/hebrew/reels/[slug]-he-reel-1-draft.mp4 \
-  --transcript output/[slug]/audio/reel1/transcript.json \
+  --transcript output/[slug]/[lang]/reels/reel_01/transcript.json \
   --mode highlighted_phrase \
   --max-words 5
 ```
@@ -312,31 +313,29 @@ python3 scripts/generate/cta.py \
 # 3. Align words to audio
 python3 scripts/pipeline/align.py \
   --blueprint output/club-place-dubai-hills/hebrew/reels/club-place-dubai-hills-he-reels.md \
-  --audio-dir output/club-place-dubai-hills/audio/reel1/ \
-  --output output/club-place-dubai-hills/audio/reel1/transcript.json \
+  --audio-dir output/club-place-dubai-hills/hebrew/reels/reel_01/ \
+  --output output/club-place-dubai-hills/hebrew/reels/reel_01/transcript.json \
   --reel 1
 
-# 4. Render (scene 1 uses existing kling_test.mp4 from output/tests/)
+# 4. Render (Kling clips for scenes 1 and 3 resolve from VEP table automatically)
 python3 scripts/pipeline/render.py \
   --blueprint output/club-place-dubai-hills/hebrew/reels/club-place-dubai-hills-he-reels.md \
-  --audio-dir output/club-place-dubai-hills/audio/reel1/ \
+  --audio-dir output/club-place-dubai-hills/hebrew/reels/reel_01/ \
   --assets-dir assets/club-place-dubai-hills/canonical/ \
   --output output/club-place-dubai-hills/hebrew/reels/club-place-dubai-hills-he-reel-1-draft.mp4 \
   --reel 1 --render \
-  --clip-override 1:output/tests/kling_test.mp4 \
-  --clip-override 2:output/club-place-dubai-hills/clips/scene02_timeline.mp4 \
-  --clip-override 3:output/club-place-dubai-hills/clips/kling_scene03.mp4 \
-  --clip-override 4:output/club-place-dubai-hills/clips/scene04_exclamation.mp4 \
-  --clip-override 5:output/club-place-dubai-hills/clips/scene05_cta.mp4
+  --clip-override 2:output/club-place-dubai-hills/hebrew/reels/reel_01/scene02_timeline.mp4 \
+  --clip-override 4:output/club-place-dubai-hills/hebrew/reels/reel_01/scene04_exclamation.mp4 \
+  --clip-override 5:output/club-place-dubai-hills/hebrew/reels/reel_01/scene05_cta.mp4
 
 # 5. Subtitle
 python3 scripts/pipeline/subtitle.py \
   --video output/club-place-dubai-hills/hebrew/reels/club-place-dubai-hills-he-reel-1-draft.mp4 \
-  --transcript output/club-place-dubai-hills/audio/reel1/transcript.json \
+  --transcript output/club-place-dubai-hills/hebrew/reels/reel_01/transcript.json \
   --mode highlighted_phrase --max-words 5
 ```
 
-**POC test (first 3 scenes only):** add `--max-scenes 3` to the render command and omit `--clip-override 4` and `5`.
+**POC test (first 3 scenes only):** add `--max-scenes 3` to the render command.
 
 ---
 

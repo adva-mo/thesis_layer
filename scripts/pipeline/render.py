@@ -28,6 +28,7 @@ REPO_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from reel_pipeline.assembler import _find_audio, assemble_reel
+from reel_pipeline.graphic_generator import detect_type
 from reel_pipeline.local_clip import get_audio_duration, get_clip_duration
 from reel_pipeline.parser import parse_reel_file
 from reel_pipeline.text_overlay import FONT_PATH
@@ -42,6 +43,7 @@ def _parse_clip_overrides(raw: list[str]) -> dict[int, Path]:
         idx_str, _, path_str = item.partition(":")
         overrides[int(idx_str)] = Path(path_str)
     return overrides
+
 
 
 def print_dry_run(scenes, audio_dir, output_path, clip_overrides):
@@ -65,10 +67,14 @@ def print_dry_run(scenes, audio_dir, output_path, clip_overrides):
             clip_dur = get_clip_duration(p)
             action = "stretch" if clip_dur < dur else "trim"
             vsource = f"clip override: {p.name} ({clip_dur:.1f}s→{dur:.1f}s, {action})"
-        elif scene.image_path:
-            vsource = f"image: {scene.image_path.name}"
+        elif scene.asset_type == "video":
+            clip_dur = get_clip_duration(scene.asset_path)
+            action = "stretch" if clip_dur < dur else "trim"
+            vsource = f"video: {scene.asset_path.name} ({clip_dur:.1f}s→{dur:.1f}s, {action})"
+        elif scene.asset_type == "image":
+            vsource = f"image: {scene.asset_path.name}"
         else:
-            vsource = "color card (black)"
+            vsource = f"generated ({detect_type(scene.visual_intent)})"
 
         screen = f"  [{scene.text_card}]" if scene.text_card else ""
         print(f"{scene.index:<6} {ts:<10} {audio_name:<35} {dur:>4.1f}s  {vsource}{screen}")
@@ -90,7 +96,7 @@ def main():
     parser.add_argument("--keep-tmp",      action="store_true", help="Keep work directory after render")
     parser.add_argument("--font",          default=str(FONT_PATH), help="Path to .ttf font for Hebrew text")
     parser.add_argument("--clip-override", action="append", default=[], metavar="SCENE:PATH",
-                        help="Use a pre-rendered clip for scene N, e.g. 1:output/tests/kling_test.mp4")
+                        help="Override visual for scene N with a pre-rendered clip, e.g. 2:reels/reel_01/scene02_timeline.mp4")
     args = parser.parse_args()
 
     blueprint      = Path(args.blueprint)
