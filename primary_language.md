@@ -183,3 +183,31 @@ Prefer:
 ## Hashtags
 
 `#נדלן_דובאי #השקעות_נדלן #דובאי #אוף_פלאן #ישראלים_בדובאי #השקעה_בחו_ל`
+
+---
+
+## Headings — Hebrew + English Mixing
+
+Never combine a Hebrew definite-article prefix (ה-) with an English brand or section term in a heading.
+
+This applies to all content types: PDFs, carousels, reels, LinkedIn, WhatsApp.
+
+Wrong:
+
+- ה-Thesis
+- ה-Thesis Layer
+- ה-ROI
+
+Correct:
+
+- התזה
+- מדד ה-ROI (when ROI must appear, restructure so Hebrew leads)
+
+When a brand label needs to appear alongside a section heading, display it separately — above or below — not as a prefix.
+
+Example (PDF HTML):
+
+```html
+<p class="brand-label">Thesis Layer</p>
+<h2>התזה</h2>
+```
