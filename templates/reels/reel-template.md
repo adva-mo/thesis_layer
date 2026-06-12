@@ -886,6 +886,41 @@ Better:
 
 ---
 
+## Final Impression Rule
+
+Every reel must end with the audience thinking, not worrying.
+
+Risk and the reality check beat are required — they build credibility. But the content's last emotional note must be clarity, curiosity, or a question worth exploring. Never unresolved doubt.
+
+**The reality check beat must not be the final word on the risk.** Either:
+- (a) the reality check beat itself closes with a reframe or forward question, OR
+- (b) there is a beat between reality check and CTA that anchors the risk to a decision frame
+
+The CTA is not an emotional resolution — it is a conversion step. The risk must be closed before it.
+
+Good:
+```
+"הסיכון? 470 יחידות בו זמנית. השאלה היא אם הביקוש של Dubai Hills סופג את זה."
+```
+Leaves: "Interesting — I want to understand the answer."
+
+Bad:
+```
+"הסיכון? 470 יחידות בו זמנית." [hard cut to CTA]
+```
+Leaves: "This sounds risky."
+
+**Allowed closing mechanisms (use one):**
+1. Return to the thesis
+2. Reframe the risk
+3. Surface the real investor question
+4. Compare tradeoffs
+5. Create curiosity
+
+See CLAUDE.md §13.4.
+
+---
+
 ## Visual Evidence Plan
 
 Every reel output file must include a Visual Evidence Plan section immediately after the Caption section of each reel script.

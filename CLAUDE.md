@@ -398,6 +398,38 @@ The system must maintain:
 
 ---
 
+## 13.4 Final Impression Rule
+
+Risk, caveats, and downside are required for credibility. But content must never END with unresolved negativity.
+
+**Applies to:** reels, captions, PDFs, WhatsApp messages, carousel, LinkedIn posts, investor summaries.
+
+**The final emotional impression must be:**
+- Clarity
+- Curiosity
+- Informed conviction
+- Constructive uncertainty
+- A question worth exploring
+
+**Never:**
+- Fear
+- Anxiety
+- Unresolved doubt
+- Paralysis
+
+**Allowed closing mechanisms (use one):**
+1. Return to the thesis
+2. Reframe the risk
+3. Surface the real investor question
+4. Compare tradeoffs
+5. Create curiosity
+
+The goal is not optimism. The goal is: leave the audience thinking, not worrying.
+
+**Test:** Read the last sentence of any content piece. If the natural response is "this sounds risky" or "maybe I shouldn't," the rule is violated. If the natural response is "interesting — I want to understand the answer," the rule passes.
+
+---
+
 ## 14. Project Positioning Layer
 
 Before generating content, determine the project's primary positioning angle.
