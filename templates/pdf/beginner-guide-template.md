@@ -30,6 +30,8 @@ Read:
 
 Voice calibration applies to all PDFs.
 
+**Signals:** PDFs are long-form — include all Investment Signal roles from `thesis.md` including `context`. Apply compression rule from `templates/positioning-framework.md`.
+
 PDFs should sound:
 
 - analytical

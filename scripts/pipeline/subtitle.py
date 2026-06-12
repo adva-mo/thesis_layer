@@ -32,6 +32,7 @@ REPO_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from reel_pipeline.subtitles import (
+    DEFAULT_MAX_CHARS,
     DEFAULT_MAX_WORDS,
     DEFAULT_MODE,
     FONT_SIZE_SUBTITLE,
@@ -69,6 +70,8 @@ def main():
                         help=f"Subtitle style (default: {DEFAULT_MODE})")
     parser.add_argument("--max-words",  type=int, default=DEFAULT_MAX_WORDS,
                         help=f"Soft word limit per phrase (default: {DEFAULT_MAX_WORDS})")
+    parser.add_argument("--max-chars",  type=int, default=DEFAULT_MAX_CHARS,
+                        help=f"Max chars per phrase incl. spaces — prevents wide overflow (default: {DEFAULT_MAX_CHARS})")
     parser.add_argument("--font-size",  type=int, default=FONT_SIZE_SUBTITLE,
                         help=f"Subtitle font size (default: {FONT_SIZE_SUBTITLE})")
     parser.add_argument("--font",       default=str(FONT_PATH),
@@ -104,6 +107,7 @@ def main():
         font_path=font_path,
         font_size=args.font_size,
         max_words=args.max_words,
+        max_chars=args.max_chars,
         preview_segment=preview_segment,
     )
 

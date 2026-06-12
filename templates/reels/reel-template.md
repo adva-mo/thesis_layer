@@ -89,6 +89,38 @@ Prefer:
 - calm explanations
 - honest uncertainty
 
+---
+
+### Numbers Must Earn Their Place
+
+Reels are not research summaries. Their job is making one investment idea memorable.
+
+**The test:** "If I remove this number, does the investment logic weaken?"
+
+If not: remove it.
+
+Add a number only when it materially changes:
+- the bet
+- the timing
+- the risk
+- the demand profile
+- the leverage
+- the investor decision
+
+Target: 1–3 high-leverage numbers per reel.
+
+Avoid decorative research facts that add cognitive load without strengthening the thesis.
+
+The audience should remember the investment idea. Not the statistics.
+
+Bad — number as decoration:
+"2,700 דונם. גולף, פארק, קניון, בתי ספר, בית חולים, כולם פועלים."
+The 2,700 doesn't change any decision. Remove it. The list is the point.
+
+Good — number that changes the bet:
+"473 יחידות מגיעות לשוק בדיוק ב-2028."
+Remove it and the supply risk disappears from the viewer's mind. It earns its place.
+
 Examples:
 
 Instead of:
@@ -124,7 +156,25 @@ Prefer:
 - `[VISUAL_INTENT:]` = what the scene should visually show — written at script time, abstract intent only. No asset paths here. Asset paths are assigned later via Visual Evidence Plan (Step 2.5).
 - `[MOTION_STYLE:]` = camera movement and style direction for Kling generation. e.g. "slow cinematic push-in, stable camera, warm light". Omit for generated graphic scenes.
 - `[TEXT_CARD:]` = explicit text on screen. Use sparingly — CTA, number breakdowns, risk disclaimers only. Subtitles handle everything else. No default text overlays.
-- `[VO:]` = spoken voiceover (ElevenLabs). Write as natural spoken Hebrew.
+- `[VO:]` = spoken voiceover (ElevenLabs). Write as natural spoken Hebrew. Use the Investment Signals table and Decision Anchor as internal reasoning — they inform what thought to express, not what to list. Write the conclusion of the reasoning, not the structure of it. One clean insight per segment. High reasoning density, low explanation density.
+
+**Architecture is internal reasoning, not narration**
+
+The Investment Signals table, Decision Anchor, and thesis type exist to sharpen the reasoning underneath the sentence — not to appear in the sentence.
+
+- Use: read the architecture, arrive at the clearest version of the investor's thought, write that thought.
+- Do not: enumerate signals, list implications, or structure the VO as signal → implication → conclusion.
+
+**Voice test:** If it sounds like something a sharp investor would say in conversation → good. If it sounds like a polished thesis statement → rewrite.
+
+The voice should feel: conversational, instinctive, slightly contrarian, mentally sharp.
+NOT: slogan-like, compressed memo language, translated investment prose.
+
+Bad (correct reasoning, narrated as structure):
+> "קהילה מוכחת, כניסה עם כ-150 אלף דירהם. לא השקעה לתזרים מקסימלי. לא הימור על שינוי. הימור על כך שהביקוש ימשיך."
+
+Good (same reasoning, investor arriving at a thought):
+> "לא מהמרים פה שמשהו ישתנה. הקהילה כבר עובדת. אם מאמינים שזה ימשיך, כ-150 אלף דירהם הם הכניסה."
 - `[PAUSE]` = short dramatic beat between lines.
 
 ### Visual intent format
@@ -188,9 +238,15 @@ Old files using `[VISUAL:]` and `[SCREEN:]` still parse correctly. No migration 
 
 ---
 
-### TTS VO Rules
+### TTS Rules
 
-These apply to every `[VO:]` block before saving the reel .md. They exist because ElevenLabs reads the raw text — what you write is exactly what the model hears.
+Two parts: what the agent writes in the `[VO:]` block, and when to add an optional `[TTS:]` override for the ElevenLabs string.
+
+---
+
+#### Part 1 — VO Text (`[VO:]`)
+
+These rules govern what gets written into `[VO: "..."]` blocks and stored in the `.md` file.
 
 **Rule 0 — Word budget (check this first)**
 
@@ -211,32 +267,65 @@ Self-check:
 3. Count the words
 4. If over budget: **rewrite the thought in fewer words** — never cut mid-sentence or trim arbitrarily. The idea must still land complete. If it cannot fit the budget, reduce the number of ideas, not the quality of the one that stays.
 
-**Rule A — כתיב מלא (full spelling)**
-Always prefer the full-spelled form when a vowel letter (י, ו) can be added — but only when adding the letter does not change the word's meaning or grammatical form.
-- `הגיון` → `היגיון`
-- Do NOT apply mechanically: `כשמשהו` = "when something" — adding י produces `כשמישהו` = "when someone", a different word. Meaning-changing substitutions are forbidden.
-- Test: would a Hebrew spellchecker add a י or ו here with no change in meaning? Only then apply.
-
-**Rule B — No abbreviations**
-TTS cannot expand abbreviations. Spell everything out inside `[VO:]` blocks.
-- `מ"ר` → `מטר רבוע`
-- `ד"ר` → `דוקטור`
-- Any `X"Y` pattern → write the full word(s)
-
 **Rule C — Spoken sentence structure**
 Write VO as flowing speech, not as line-broken page text. Use commas to guide natural pauses. Use a newline only for a genuine dramatic beat — maximum one per segment.
 - Bad: `"ויש בזה הגיון.\n\nכי רוב ההזדמנויות הן כשמשהו עוד לא קרה.\n\nאבל זה גם הסיכון:"`
 - Good: `"ויש בזה היגיון, כי ההזדמנויות הכי טובות הן כשמשהו עוד לא קרה. אבל, זה גם הסיכון:"`
 
-**Rule D — No em dashes in VO**
-Do not use `—` in `[VO:]` blocks. ElevenLabs handles em dashes inconsistently and they become subtitle artifacts (a standalone `—` token with its own time slot). Use comma `,` for a natural pause within a sentence.
+**Rule D — No em dashes**
+Do not use `—` in `[VO:]` blocks. ElevenLabs handles em dashes inconsistently and they become subtitle artifacts. Use comma `,` for a natural pause within a sentence.
 - Bad: `"הסיכון — שהתשתית לא תגיע בזמן"`
 - Good: `"הסיכון, שהתשתית לא תגיע בזמן"`
 
-**Rule E — No ALL-CAPS English words in VO**
-ElevenLabs spells out all-caps words letter by letter ("C-L-U-B" instead of "Club"). Use Title Case for any English word meant to be pronounced as a word.
-- Bad: `"כתבו לי CLUB"`
-- Good: `"כתבו לי Club"`
+**Rule F — Round numbers**
+Round to the nearest clean number a speaker would naturally say. Precision belongs in graphics, not in spoken VO. Never add `כ-` (approximately) prefix — write the rounded number directly.
+- Bad: `"473 יחידות"` → TTS stumbles on the specific number
+- Bad: `"כ-470 יחידות"` → `כ-` sounds hedging and unnatural in VO
+- Good: `"470 יחידות"` — clean, confident, no approximation marker
+- Good: `"150 אלף דירהם"` — not `"כ-150 אלף דירהם"`
+
+**Decision Anchor — which number to surface**
+Before writing any number in a VO block, check `## Decision Anchor` in `thesis.md`. Use the anchor value, not the asset price. Asset price is only appropriate when `type: asset_price`.
+- entry_capital → surface the down payment / initial capital required
+- yield_return → surface the yield % or monthly income figure
+- asset_price → surface the full property price
+
+---
+
+#### Part 2 — TTS Override (`[TTS:]`)
+
+Add a `[TTS:]` block immediately after `[VO:]` when the string sent to ElevenLabs must differ from the VO text. `vo.py` uses `[TTS:]` if present; falls back to `[VO:]` if absent.
+
+```
+[VO:] "the human-readable text"
+[TTS:] "the exact string to send to ElevenLabs"
+```
+
+If the VO text already works well with ElevenLabs, omit `[TTS:]`.
+
+**Rule A — כתיב מלא (full spelling)**
+When the VO text uses simplified spelling, add a `[TTS:]` block with the full-voweled form.
+- `הגיון` → `היגיון` in `[TTS:]`
+- `כתבו` → `כיתבו` in `[TTS:]` (imperative vowel clarified; same meaning)
+- Do NOT apply mechanically: `כשמשהו` = "when something" — adding י produces `כשמישהו` = "when someone", a different word. Meaning-changing substitutions are forbidden.
+- Test: would a Hebrew spellchecker add a י or ו here with no change in meaning? Only then apply.
+
+**Rule B — No abbreviations**
+TTS cannot expand abbreviations. When the VO text contains abbreviations (kept for readability), write the expanded form in `[TTS:]`.
+- `[VO:] "שטח של 62 מ"ר"`  →  `[TTS:] "שטח של 62 מטר רבוע"`
+- Any `X"Y` pattern → expand in `[TTS:]`
+
+**Rule E — CTA keywords**
+Keep keywords ALL-CAPS in `[VO:]` for readability. Write lowercase in `[TTS:]` so ElevenLabs pronounces them as words.
+- `[VO:] "כתבו לי CLUB לקבל את הניתוח"`
+  `[TTS:] "כתבו לי club לקבל את הניתוח"`
+
+**Rule G — Decimal numbers**
+Write the rounded numeral in `[VO:]`, Hebrew words in `[TTS:]`.
+- `[VO:] "כניסה מ-1.5 מיליון דירהם"`
+  `[TTS:] "כניסה מאחד וחצי מיליון דירהם"`
+- `[VO:] "תשואה של 6.5 אחוז"`
+  `[TTS:] "תשואה של שישה וחצי אחוז"`
 
 Visual pacing:
 

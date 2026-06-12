@@ -47,6 +47,7 @@ def assemble_reel(
     font_path: Path = FONT_PATH,
     font_size: int = FONT_SIZE,
     clip_overrides: Optional[dict[int, Path]] = None,
+    trailing_pad_ms: int = 0,
 ) -> Path:
     work_dir.mkdir(parents=True, exist_ok=True)
     clip_overrides = clip_overrides or {}
@@ -133,6 +134,29 @@ def assemble_reel(
         str(audio_only),
         label="concat audio",
     )
+
+    # ── Trailing pad (freeze last frame + silence) ────────────────
+    if trailing_pad_ms > 0:
+        pad_s = trailing_pad_ms / 1000.0
+        print(f"  Padding end by {trailing_pad_ms}ms...")
+        padded_video = work_dir / "video_only_padded.mp4"
+        padded_audio = work_dir / "audio_only_padded.mp3"
+        _ffmpeg(
+            "-i", str(video_only),
+            "-vf", f"tpad=stop_mode=clone:stop_duration={pad_s}",
+            "-c:v", "libx264", "-preset", "fast", "-crf", "18",
+            str(padded_video),
+            label="pad video",
+        )
+        _ffmpeg(
+            "-i", str(audio_only),
+            "-af", f"apad=pad_dur={pad_s}",
+            "-c:a", "libmp3lame", "-q:a", "2",
+            str(padded_audio),
+            label="pad audio",
+        )
+        video_only = padded_video
+        audio_only = padded_audio
 
     # ── Mux video + audio ─────────────────────────────────────────
     print("  Muxing video + audio...")

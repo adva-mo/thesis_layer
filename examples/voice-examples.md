@@ -70,6 +70,15 @@ Avoid repeating:
 
 ---
 
+## Global Writing Prohibition
+
+**No em-dashes (—) in any content.** Captions, VO, carousels, LinkedIn, hooks, WhatsApp, PDFs. All languages. Em-dash is an AI fingerprint — audiences recognize it.
+
+Replace with a period, comma, or colon. Restructure if needed.
+
+
+---
+
 ## Style Rules
 
 ThesisLayer should sound:
@@ -121,18 +130,56 @@ These are the failure modes that appear most in Hebrew investment content. In ev
 
 ---
 
-**Thesis — brand language vs. analyst jargon**
+**Thesis — brand language**
 
-Bad (standalone, no logic follows):
+"Thesis" is a ThesisLayer language asset. Always keep it. Capitalize as "Thesis."
+
+The fix is never: remove Thesis to make Hebrew sound more natural.
+The fix is always: rewrite the sentence construction around Thesis.
+
+Bad — jargon constructs (rewrite the sentence, keep the word):
+"ה-thesis מבוסס על catalyst" / "השקעה מבוססת thesis" / "ה-thesis שלך"
+
+Bad — standalone with no logic following:
 "אלא בגלל ה-thesis."
 
-Good (branded — Thesis as framing, logic stated):
-"אלא בגלל ה-Thesis: Wynn פותח ב-2027 ממש לידה, ובנדל״ן המחיר בדרך כלל זז לפני שהדברים נפתחים."
+Good — Thesis as framing, logic stated:
+"אלא בגלל ה-Thesis: Wynn פותח ב-2027 ממש לידה."
 
-Bad (consultant constructs — rewrite entirely):
-"ה-thesis מבוסס על catalyst" / "ה-thesis שלך" / "השקעה מבוססת thesis"
+---
 
-Rule: Thesis stays when it works as a branded thinking frame. It gets rewritten when it's used as a black box or academic construct.
+**Investor conviction — avoid translated finance phrasing**
+
+Bad:
+"לקנות את ה-Thesis"
+"מי שקונה את ה-Thesis"
+
+Direct carryover from English finance language. Sounds translated and slightly Twitter/VC-native rather than naturally Israeli.
+
+Better:
+"אם מאמינים ב-Thesis"
+"אם ה-Thesis נשמע הגיוני"
+"אם ה-Thesis עובד"
+"אם ההיגיון הזה נכון"
+
+Good:
+"Club Place מעניין רק אם מאמינים ב-Thesis."
+"זה עובד רק אם ה-Thesis נכון גם ב-2028."
+"אם ה-Thesis נשמע לך הגיוני, זה כבר סיפור אחר."
+
+---
+
+**When to use "הזה" with Thesis**
+
+Default: "ה-Thesis" — lighter rhythm, more natural in VO.
+
+Use "ה-Thesis הזה" only when explicitly referring back to a specific thesis already named earlier in the reel or sentence.
+
+Good:
+"אם ה-Thesis הזה נכון, המחיר עדיין לא זז."
+"אם ה-Thesis הזה נשבר, כל הסיפור נראה אחרת."
+
+Rule: default to "ה-Thesis". Add "הזה" only when callback or contrast is necessary.
 
 ---
 
@@ -238,31 +285,48 @@ Right:
 
 **Thesis — a family of patterns, not one formula**
 
-Thesis is a framing tool. It works in several structures. Use variety — defaulting to one pattern makes content sound templated.
+Thesis is a framing tool and a brand language asset. It works in several structures. Use variety — defaulting to one pattern makes content sound templated.
+
+The goal is for the audience to hear Thesis and associate it with a specific way of thinking — naturally, repeatedly, across content. The word should feel like the speaker's natural vocabulary, not a technical term being deployed.
+
+**Good patterns — naturally spoken:**
 
 Question frame:
 "מה ה-Thesis פה?"
+"מה ה-Thesis פה בעצם?"
+
+Short pivot:
+"אז ה-Thesis פה קצת אחר."
+"ה-Thesis פה הוא לא תשואה. זה סיפור אחר."
 
 Short assertion with colon:
-"ה-Thesis פה די פשוט: Wynn."
+"ה-Thesis פה פשוט: Wynn."
+"ה-Thesis פה פשוט: מה שכבר עובד — ימשיך לעבוד."
 
 Conditional:
 "ה-Thesis עובד אם Wynn באמת נפתח בזמן."
+"אם ה-Thesis הזה נכון, הביקוש לא צריך להגיע. הוא כבר שם."
 
 Contrast:
 "ה-Thesis מעניין, אבל גם המחיר צריך לעבוד."
 
+Broken into thought units:
+"מה ה-Thesis פה בעצם? לא שינוי. המשך."
+
 Investor framing:
 "אם ה-Thesis שלך הוא Wynn — זה כבר סיפור אחר."
 
-Bad — formal predication (Thesis as subject of a definition):
-"ה-Thesis פה הוא Wynn ספציפית" → use any of the patterns above instead.
+**Bad — explained/concluded construction:**
 
-Bad — partitive:
-"רוב ה-Thesis תלוי בפתיחת Wynn" → "ה-Thesis עובד אם Wynn נפתח בזמן ומביא ביקוש."
+"ה-Thesis פה הוא לא שמשהו ישתנה, אלא שמה שכבר קיים ימשיך."
 
-Bad — passive construction:
-"ה-Thesis מבוסס על / מסתמך על" → restructure as conditional or simple assertion.
+The logic is correct. But the construction — Thesis as subject of a full logical clause — sounds like a framework being narrated, not a thought being had. Break it into shorter units.
+
+**Bad — structural problems:**
+
+Formal predication: "ה-Thesis פה הוא Wynn ספציפית" → use a short pattern above.
+Partitive: "רוב ה-Thesis תלוי בפתיחת Wynn" → "ה-Thesis עובד אם Wynn נפתח בזמן ומביא ביקוש."
+Passive: "ה-Thesis מבוסס על / מסתמך על" → restructure as conditional or short assertion.
 
 ---
 

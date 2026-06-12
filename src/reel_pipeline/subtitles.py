@@ -25,6 +25,7 @@ DEFAULT_MODE        = "highlighted_phrase"
 DEFAULT_MAX_WORDS   = 5
 DEFAULT_MAX_DUR     = 2.5
 DEFAULT_PAUSE_THR   = 0.35   # seconds between words to trigger phrase split
+DEFAULT_MAX_CHARS   = 20     # total chars (incl. spaces) per phrase — prevents wide overflow
 
 FONT_SIZE_SUBTITLE  = 77
 
@@ -92,6 +93,10 @@ def _split_lines(words: list[str]) -> tuple[list[str], list[str]] | None:
     if not any(s == other_script for s in scripts):
         return None
     split_at = next(i for i, s in enumerate(scripts) if s == other_script)
+    # If the phrase alternates back to the first script after the split point
+    # (e.g. Hebrew → CLUB → Hebrew), don't split — let full-phrase BiDi handle it.
+    if first_script in scripts[split_at + 1:]:
+        return None
     return words[:split_at], words[split_at:]
 
 
@@ -179,6 +184,7 @@ def group_into_phrases(
     max_words: int = DEFAULT_MAX_WORDS,
     max_duration: float = DEFAULT_MAX_DUR,
     pause_threshold: float = DEFAULT_PAUSE_THR,
+    max_chars: int = DEFAULT_MAX_CHARS,
 ) -> list[Phrase]:
     """
     Pause-aware, punctuation-aware phrase grouping.
@@ -199,6 +205,8 @@ def group_into_phrases(
         gap = word.start - current[-1].end
         phrase_dur = word.end - current[0].start
         prev_text = current[-1].text.rstrip()
+        current_chars = sum(len(w.text) for w in current) + max(0, len(current) - 1)
+        new_chars = current_chars + 1 + len(word.text)
 
         # Split triggers (priority order)
         split = False
@@ -209,6 +217,8 @@ def group_into_phrases(
         elif phrase_dur > max_duration:                        # 3. duration cap
             split = True
         elif len(current) >= max_words:                        # 4. soft word limit
+            split = True
+        elif new_chars > max_chars:                            # 5. character width guard
             split = True
 
         if split:
@@ -497,6 +507,7 @@ def apply_subtitles(
     font_size: int = FONT_SIZE_SUBTITLE,
     max_words: int = DEFAULT_MAX_WORDS,
     max_duration: float = DEFAULT_MAX_DUR,
+    max_chars: int = DEFAULT_MAX_CHARS,
     width: int = 1080,
     height: int = 1920,
     preview_segment: Optional[tuple[float, float]] = None,
@@ -504,7 +515,7 @@ def apply_subtitles(
     from .fal_wizper import load_transcript
 
     chunks = load_transcript(transcript_json)
-    phrases = group_into_phrases(chunks, max_words=max_words, max_duration=max_duration)
+    phrases = group_into_phrases(chunks, max_words=max_words, max_duration=max_duration, max_chars=max_chars)
     font = ImageFont.truetype(str(font_path), font_size)
 
     if preview_segment:

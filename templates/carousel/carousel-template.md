@@ -243,6 +243,8 @@ Choose only:
 
 ## Slide 4 — Investment Thesis
 
+> Pull signals from Investment Signals in `thesis.md` — apply compression rule from `templates/positioning-framework.md`. `thesis_core` always present; `supporting` where space allows; `risk` required.
+
 ### Goal
 
 This is the most important slide.

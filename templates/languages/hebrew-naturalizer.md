@@ -34,6 +34,34 @@ If a phrase seems wrong in content terms — not just language terms — flag it
 
 ---
 
+## Global Prohibition — Em-Dash
+
+Em-dash (—) is banned from all generated content. Every output the audience sees — VO, captions, carousel slides, LinkedIn posts, hooks, WhatsApp messages, PDF body copy. No exceptions.
+
+Em-dash is one of the most recognizable AI writing signals. It does not appear in natural Israeli Hebrew writing and reads as machine-generated to any fluent speaker.
+
+**Replace with:**
+- Period — when the em-dash creates a sentence break
+- Comma — when it creates a pause or continuation
+- Colon — when it introduces a list or explanation
+- Restructure — when the sentence needs it
+
+Bad:
+"הביקוש כבר שם — לא ממתין לאירוע חיצוני."
+
+Good:
+"הביקוש כבר שם. לא ממתין לאירוע חיצוני."
+
+Bad:
+"RAK הוא שוק צעיר — אין רשת ביטחון אחרת."
+
+Good:
+"RAK הוא שוק צעיר. אין רשת ביטחון אחרת."
+
+This rule applies at generation time — not only as a post-pass fix. Do not write em-dashes into any output.
+
+---
+
 ## Fix These Patterns
 
 ### Translated English → natural Hebrew
@@ -60,27 +88,30 @@ These are correct ideas written in the wrong public-facing register. The meaning
 
 ---
 
-**Thesis — brand language vs. analyst jargon**
+**Thesis — brand language**
 
-"Thesis" is ThesisLayer brand vocabulary. When used as a branded thinking frame — keep it. When used as analyst or consultant jargon — rewrite it. Capitalize as "Thesis" in brand usage.
+"Thesis" is a ThesisLayer language asset. Always keep it. Capitalize as "Thesis."
 
-Good — branded and intentional, do not change:
-"ה-Thesis פה פשוט: Wynn נפתח ב-2027, והשאלה היא אם המחיר כבר מתמחר את זה"
-"ה-Thesis מעניין, אבל בסוף גם המחיר צריך לעבוד"
-"מה ה-Thesis פה?"
-"ה-Thesis מאחורי ההשקעה" [when followed by the actual logic]
+The fix is never: remove Thesis to make Hebrew sound more natural.
+The fix is always: rewrite the sentence construction around Thesis.
 
-Bad — analyst/consultant register, rewrite:
+**Bad — jargon constructs (rewrite the sentence, keep the word):**
 "ה-thesis מבוסס על catalyst"
 "השקעה מבוססת thesis"
 "ה-thesis שלך"
-"ה-thesis מתבסס על..."
-"אלא בגלל ה-thesis." [standalone, no explanation follows]
+"אלא בגלל ה-thesis." [standalone, no logic follows]
 
-For standalone usage without explanation: add the actual logic, or fold the concept into the sentence.
+Bad → fix: "אלא בגלל ה-thesis." → "אלא בגלל ה-Thesis: Wynn פותח ב-2027 ממש לידה."
 
-Bad → fix:
-"אלא בגלל ה-thesis." → "אלא בגלל ה-Thesis: Wynn פותח ב-2027 ממש לידה."
+**Bad — explained/concluded construction:**
+"ה-Thesis פה הוא לא שמשהו ישתנה, אלא שמה שכבר קיים ימשיך."
+(Thesis as subject of a full logical clause — sounds like a framework narrated, not a thought.)
+
+Bad → fix: break into short thought units:
+"אז ה-Thesis פה קצת אחר."
+"מה ה-Thesis פה בעצם? לא שינוי. המשך."
+"ה-Thesis פה פשוט: מה שכבר עובד — ימשיך לעבוד."
+"אם ה-Thesis הזה נכון, הביקוש לא צריך להגיע. הוא כבר שם."
 
 ---
 
@@ -140,6 +171,18 @@ Good:
 
 ---
 
+**כניסה מ- (missing החל)**
+
+Bad:
+כניסה מ-1.3 מיליון דירהם
+
+Good:
+כניסה החל מ-1.3 מיליון דירהם
+
+Rule: "מ-" alone implies an exact price. "החל מ-" signals a starting point, which is accurate for off-plan entry pricing. Always use "החל מ-" with entry price figures.
+
+---
+
 **מציעה/מציע + [נכס] (listing register)**
 
 Bad:
@@ -171,6 +214,77 @@ Run this check on every `[VO:]` block in reel scripts. These rules exist because
 **Abbreviations:** Expand all `X"Y` patterns inside VO blocks. `מ"ר` → `מטר רבוע`. `ד"ר` → `דוקטור`. No abbreviations may remain inside a `[VO:]` string.
 
 **Spoken flow:** VO text should read as flowing speech. Commas guide pauses. Newlines only for genuine dramatic beats (max one per segment). Not page-formatted poetry.
+
+**No em-dashes:** See Global Prohibition above. VO blocks are especially sensitive — ElevenLabs reads em-dashes inconsistently. Use periods and commas only.
+
+---
+
+### Spoken Hebrew Patterns for VO
+
+Four patterns that distinguish natural Israeli spoken Hebrew from written or translated VO. Apply during generation — not only as a post-pass fix.
+
+**1. List rhythm — periods, not commas**
+
+When listing 3+ items in VO, prefer short period-separated items over long comma-separated constructions. Each item lands as its own beat. ElevenLabs pauses at periods — use that.
+
+No em-dashes in VO. Em-dashes are not valid in [VO:] blocks. TTS engines read them inconsistently. Use periods or commas only.
+
+Bad:
+"הגולף, הפארק, הקניון, כולם כבר פועלים."
+
+Bad (em-dash — not valid in VO):
+"הגולף, הפארק, הקניון — הכול כבר שם, עובד."
+
+Good:
+"הגולף. הפארק. הקניון. הכול כבר שם, עובד."
+
+Rule: the list items stay short. The summary word ("הכול") closes the list. The verb comes last, once.
+
+---
+
+**2. Risk as a question, not a label**
+
+In spoken Hebrew, flagging a risk sounds like raising a question — not reading a category heading.
+
+Bad:
+"הסיכון: 473 יחידות..."
+
+Good:
+"הסיכון? 473 יחידות..."
+
+Rule: replace "הסיכון:" with "הסיכון?" in all VO blocks. The question mark signals natural spoken inflection for ElevenLabs and feels less like a list item being read aloud.
+
+---
+
+**3. Conditional framing — add the qualifier**
+
+When VO invites the viewer to consider whether a thesis is right for them, add an explicit spoken qualifier. The original construction often leaves this implicit; spoken Israeli Hebrew makes it audible.
+
+Bad:
+"ולכן Club Place מעניין אם מאמינים ב-Thesis הזה."
+
+Good:
+"ולכן Club Place נהיה מעניין רק אם באמת קונים את ה-Thesis הזה."
+
+Pattern: `מעניין אם` → `נהיה מעניין רק אם באמת`. The "רק אם באמת" carries natural Israeli skepticism — it sounds like the speaker is qualifying their own recommendation rather than selling.
+
+---
+
+**4. Avoid formal abstract nouns in VO — prefer the verb**
+
+Formal nouns derived from verbs are analyst register. In VO they sound academic. Replace with the verb construction.
+
+Bad (formal noun):
+"הימור על ההמשכיות של הביקוש"
+
+Good (verb):
+"הימור על כך שהביקוש ימשיך"
+
+Bad:
+"הרציפות של הדרישה"
+"הקיימות של הביקוש"
+
+Rule: if you wrote a noun ending in ־וּת or ־יּוּת in a VO block, check whether a verb construction says the same thing more naturally.
 
 ---
 

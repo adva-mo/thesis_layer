@@ -66,6 +66,7 @@ For full brand positioning, visual identity, and voice calibration table, see `a
 - A luxury influencer ("the lifestyle you deserve")
 - A generic AI ("The market is experiencing unprecedented growth")
 - Fake urgency ("only 3 units left — call NOW!")
+- An investment memo being narrated ("the thesis is supported by the following signals") — architecture informs the reasoning, never appears in the sentence
 
 ### Calibration test:
 

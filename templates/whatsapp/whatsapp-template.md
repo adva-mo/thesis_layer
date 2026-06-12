@@ -13,6 +13,8 @@ Three message variants per project. Hebrew-first. Conversational, direct, never 
 
 **Before writing:** Read the Pitch Block from `output/[project-slug]/hebrew/linkedin/[project-slug]-he-linkedin.md` — the `## Pitch Block` section at the bottom of the file. Use it as the core project description in all 3 variants. Only adapt the opening, relationship context, and closing question per variant. Do not re-write the project pitch from scratch.
 
+**Signals:** Apply compression rule from Investment Signals in `thesis.md` — see `templates/positioning-framework.md`. WhatsApp is short-form: `thesis_core` only; drop `supporting`, `context`, and `risk`.
+
 ---
 
 ## Variant 1 — Cold Outreach
