@@ -77,7 +77,7 @@ Every hook opening falls into one of 6 named cadences. Track the cadence alongsi
 | QUESTION | Open with the investor question | "מה שמשקיע מנוסה שואל ראשון..." |
 | INVERSION | State the norm, then flip it in the next sentence | "רוב הפרויקטים מוכרים לך הבטחה. Club Place עובד הפוך." |
 | CONDITION | Frame the thesis as a condition | "אם אתה מאמין ש-X, [project] הגיוני." |
-| SURPRISE | Juxtapose two unexpected facts with no transition | "18 חורים גולף, 282 אלף מ"ר מסחרי — כניסה ב-150 אלף דירהם." |
+| SURPRISE | Juxtapose two unexpected facts with no transition | "18 חורים גולף, 282 אלף מ"ר מסחרי. כניסה ב-150 אלף דירהם." |
 
 Do not repeat the same cadence within the last 5 channel-level reels. If the best hook family opens naturally with a repeated cadence, rewrite the opening line to use a different cadence while preserving the hook's psychological lever.
 
@@ -91,7 +91,7 @@ Run this before scripting any reel. Priority order: **thesis fit → format fit 
 Look up Tier 1 and Tier 2 for this project's thesis type (from thesis.md → Matrix above). These are your candidates. Avoid list families are disqualified entirely.
 
 **Step 2 — Project-level fatigue guard**
-Read `output/[project-slug]/hook-log.md`. If a hook family appears in the last 3 reels for this project, apply a soft penalty: prefer an alternative candidate. Override (repeat anyway) only if the repeated family is uniquely Tier 1 AND no other Tier 1/2 candidate has strong format fit.
+Read `output/[project-slug]/hook-log.md`. Filter to PUBLISHED rows only — SCRIPTED and SKIPPED rows do not count toward the fatigue lookback. If a hook family appears in the last 3 PUBLISHED reels for this project, apply a soft penalty: prefer an alternative candidate. Override (repeat anyway) only if the repeated family is uniquely Tier 1 AND no other Tier 1/2 candidate has strong format fit.
 
 **Step 3 — Channel-level diversity**
 Read `content/history/hook-log.md`. Filter to PUBLISHED rows only — SCRIPTED and SKIPPED rows are ignored. Apply three soft penalties:
@@ -101,6 +101,8 @@ Read `content/history/hook-log.md`. Filter to PUBLISHED rows only — SCRIPTED a
 
 **Step 4 — Pick and log**
 Rank remaining candidates by (thesis tier → format fit). Pick the top. After scripting, append a row to both `hook-log.md` files and recompute the "Next reel recommendation" block in the project-level log.
+
+**Partial sessions:** If a session ends before all reels are scripted, log every reel that was completed with Status `SCRIPTED`. Do not wait for the full batch. When a reel is published, update its row to `PUBLISHED`. When a reel is abandoned, update to `SKIPPED`.
 
 ---
 
@@ -122,6 +124,10 @@ Create this file once. Append one row per reel, across all projects.
 
 **Diversity lookback uses PUBLISHED rows only.** SCRIPTED and SKIPPED rows are ignored when applying soft penalties in Step E. This ensures the diversity logic reflects what the audience actually heard, not what was drafted.
 
+`SCRIPTED` exists for production continuity and partial sessions only. It does not influence diversity lookback unless later promoted to `PUBLISHED`.
+
+**Environment note:** `content/history/hook-log.md` is runtime/channel memory and may be gitignored. On a fresh environment, the file may start empty. This is acceptable — the system will build history forward from that point. If migrating environments, seed the log manually from published content history before generating new reels.
+
 ### Project-level — `output/[project-slug]/hook-log.md`
 
 Create when starting reel production for a project. Append one row per reel. Recompute the recommendation block each time.
@@ -130,9 +136,9 @@ Create when starting reel production for a project. Append one row per reel. Rec
 # Hook Log — [Project Name]
 Thesis type: [Quality Hold / Capital Efficiency / ...]
 
-| Reel | Format | Hook Family | Rhetorical Pattern | Brand/Perf | Date |
-|------|--------|-------------|-------------------|------------|------|
-| reel_01 | Format 2 | H8 — Hidden Opportunity | INVERSION | Brand | YYYY-MM-DD |
+| Reel | Format | Hook Family | Rhetorical Pattern | Brand/Perf | Date | Status |
+|------|--------|-------------|-------------------|------------|------|--------|
+| reel_01 | Format 2 | H8 — Hidden Opportunity | INVERSION | Brand | YYYY-MM-DD | SCRIPTED |
 
 ## Next reel recommendation
 - Thesis Tier 1: [H7, H8] | Tier 2: [H1, H4, H9]
@@ -143,3 +149,9 @@ Thesis type: [Quality Hold / Capital Efficiency / ...]
 - Candidates: [ranked list with rationale]
 - Recommendation: [H# — Family Name, CADENCE]
 ```
+
+**Status values:** `SCRIPTED` (default at log time) → `PUBLISHED` (flip when the reel goes live) → `SKIPPED` (scripted but not published).
+
+**Diversity lookback uses PUBLISHED rows only.** SCRIPTED and SKIPPED rows do not consume diversity slots.
+
+`SCRIPTED` exists for production continuity and partial sessions only. It does not influence diversity lookback unless later promoted to `PUBLISHED`.
