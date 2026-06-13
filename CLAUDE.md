@@ -38,6 +38,8 @@ If a project is already active (e.g., resuming work), also read:
 If the session involves reel generation (rendering, scripting, or pipeline work), also read:
 
 6. `docs/reel-pipeline.md` — full technical reference for the reel generation pipeline (scripts, workflow, commands)
+7. `content/history/hook-log.md` — channel-level hook history (create if missing)
+8. `output/[project-slug]/hook-log.md` — project-level hook history (create if missing)
 
 These files are referenced throughout the system from multiple templates. Reading them once here eliminates per-template re-reads and prevents "see market.md" pointers from triggering repeated loads of the same file during CTA, hashtag, and language sections.
 
@@ -102,6 +104,8 @@ Every hook must serve one psychological function. Choose from the 10 categories 
 - Never start with "Are you looking for..." or "Do you want..."
 - One specific number per hook (price, %, timeframe, or ratio) when possible
 - Test: if the hook could work for any project, rewrite it to be specific
+
+For hook selection logic (which hook opens which reel, diversity rules, brand/performance balance, rhetorical freshness), see `templates/hooks/hook-selection.md`.
 
 ---
 
