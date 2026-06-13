@@ -12,6 +12,9 @@ input/*/
 # Generated output — not tracked in version control
 output/
 
+# Channel history (hook logs, publish tracking)
+content/
+
 # Project assets (all except branding)
 assets/*
 !assets/branding/

@@ -70,6 +70,25 @@ Save to `output/[project-slug]/[language]/hooks/` — see CLAUDE.md §12 for nam
 
 ---
 
+### Step 1.5 — Select Opening Hook for Each Reel
+
+Reference: `templates/hooks/hook-selection.md`
+
+Before scripting any reel:
+
+1. Read `content/history/hook-log.md` (channel-level history — create the file if it doesn't exist yet, using the template in hook-selection.md §F)
+2. Read `output/[project-slug]/hook-log.md` (project-level history — create if missing, same template)
+3. Apply the 4-step selection rule from hook-selection.md §E for each reel format being produced
+4. From the 10 generated hooks (Step 1), select the hook matching the chosen family for that reel's opening beat
+5. After each reel is scripted, append a row to both hook-log.md files and recompute the "Next reel recommendation" block in the project-level log
+
+**Rules:**
+- One reel = one hook family. Do not blend families in the opening beat.
+- Thesis fit takes priority over diversity. Only diversify when a strong-fit alternative exists.
+- Log every reel before moving to the next one.
+
+---
+
 ### Step 2 — Generate 5 Reel Scripts
 
 Reference: `templates/reels/reel-template.md`
