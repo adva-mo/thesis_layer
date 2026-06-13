@@ -88,7 +88,7 @@ Do not repeat the same cadence within the last 5 channel-level reels. If the bes
 Run this before scripting any reel. Priority order: **thesis fit → format fit → project diversity → channel diversity**.
 
 **Step 1 — Thesis candidates**
-Look up Tier 1 and Tier 2 for this project's thesis type (from thesis.md → Matrix above). These are your candidates. Avoid list families are disqualified entirely.
+Look up Tier 1 and Tier 2 for this project's thesis type (from thesis.md → Matrix above). These are your candidates. Families in the Avoid column are disqualified entirely.
 
 **Step 2 — Project-level fatigue guard**
 Read `output/[project-slug]/hook-log.md`. Filter to PUBLISHED rows only — SCRIPTED and SKIPPED rows do not count toward the fatigue lookback. If a hook family appears in the last 3 PUBLISHED reels for this project, apply a soft penalty: prefer an alternative candidate. Override (repeat anyway) only if the repeated family is uniquely Tier 1 AND no other Tier 1/2 candidate has strong format fit.
@@ -150,8 +150,4 @@ Thesis type: [Quality Hold / Capital Efficiency / ...]
 - Recommendation: [H# — Family Name, CADENCE]
 ```
 
-**Status values:** `SCRIPTED` (default at log time) → `PUBLISHED` (flip when the reel goes live) → `SKIPPED` (scripted but not published).
-
-**Diversity lookback uses PUBLISHED rows only.** SCRIPTED and SKIPPED rows do not consume diversity slots.
-
-`SCRIPTED` exists for production continuity and partial sessions only. It does not influence diversity lookback unless later promoted to `PUBLISHED`.
+Same status semantics apply — see channel-level notes above.
