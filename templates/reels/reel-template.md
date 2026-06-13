@@ -453,9 +453,11 @@ Best for:
 [0–4s]   Hook
 [4–15s]  Bigger idea
 [15–28s] Why this project matters
-[28–38s] Reality check
+[28–38s] Reality check → reframe
 [38–45s] CTA
 ```
+
+> The [28–38s] beat is 10 seconds — enough for both the risk and its closure. It must contain the risk statement AND a reframe question or return to thesis within the same segment. CTA follows immediately; there is no separate reframe beat. Do not let the last VO line of [28–38s] be the raw risk.
 
 ### Script Scaffold
 
@@ -476,11 +478,11 @@ Best for:
 "[Project Name]
 gets interesting if you believe [thesis]."
 
-[VISUAL: Reality check]
+[VISUAL: Reality check → reframe]
 
 [VO]
-"The honest risk:
-[real risk]."
+"The honest risk: [real risk].
+[Reframe question or return to thesis — this is the last VO line before CTA.]"
 
 [VISUAL: CTA]
 
@@ -508,8 +510,8 @@ gets interesting if you believe [thesis]."
 
 [VO]
 "לא בלי סיכון.
-
-RAK עדיין שוק צעיר יותר מדובאי."
+RAK עדיין שוק צעיר יותר מדובאי.
+השאלה היא אם הקצב של Wynn מצדיק את הפרמיום."
 
 [VO]
 "כתבו לי RAK
@@ -635,10 +637,12 @@ Focus on:
 ```text
 [0–4s]   Hook
 [4–18s]  What most people miss
-[18–32s] Why now
-[32–40s] Project connection
+[18–32s] Why now — include Reality Check here if relevant
+[32–40s] Thesis return / Investor question
 [40–45s] CTA
 ```
+
+> If this reel introduces a risk or supply concern, place it in the [18–32s] segment, not [32–40s]. The [32–40s] beat is always a thesis return, investor question, or forward frame. Never a risk statement.
 
 ### Script Scaffold
 
@@ -655,16 +659,17 @@ Here's what most investors miss."
 [VO]
 "[Demand driver / pricing story / infrastructure]."
 
-[VISUAL: Timing signal]
+[VISUAL: Timing signal — include risk here if relevant]
 
 [VO]
-"[Why this matters now]."
+"[Why this matters now.]
+[If risk applies: state the risk here, not below.]"
 
-[VISUAL: Project connection]
+[VISUAL: Thesis return]
 
 [VO]
-"[Project Name]
-only matters if you believe this thesis."
+"[Project Name] only matters if you believe [thesis].
+[Surface the investor question that connects thesis to decision.]"
 
 [VISUAL: CTA]
 
@@ -897,6 +902,8 @@ Risk and the reality check beat are required — they build credibility. But the
 - (b) there is a beat between reality check and CTA that anchors the risk to a decision frame
 
 The CTA is not an emotional resolution — it is a conversion step. The risk must be closed before it.
+
+**Beat ordering constraint:** If a Reality Check / Risk beat is introduced in any format, it may not occupy the last content beat position before CTA. If the format's natural structure places risk last (e.g., Format 4's [32–40s] slot), that beat must be redesignated as a thesis return and the risk moves earlier. The last content beat before CTA is always a reframe, thesis return, or investor question — never a risk statement.
 
 Good:
 ```
