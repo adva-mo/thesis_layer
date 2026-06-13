@@ -243,6 +243,8 @@ Choose only:
 
 ## Slide 4 — Investment Thesis
 
+> Pull signals from Investment Signals in `thesis.md` — apply compression rule from `templates/positioning-framework.md`. `thesis_core` always present; `supporting` where space allows; `risk` required.
+
 ### Goal
 
 This is the most important slide.
@@ -378,6 +380,15 @@ This slide makes the carousel credible.
 [how to think about it]
 ```
 
+The `[how to think about it]` line is mandatory. It converts the risk from a dead end into a decision frame.
+
+**Final Impression Rule:** Slide 6's last line must leave the reader thinking about the question, not paralyzed by the risk.
+
+Good: “לא בעיה בפני עצמה — זה אומר שצריך לבדוק ביקוש בזמן המסירה.”
+Bad: “יכול להיות בעיה.” [no forward anchor]
+
+See CLAUDE.md §13.4.
+
 ### Example
 
 ```text
@@ -388,7 +399,7 @@ IMAN הוא יזם צעיר יחסית.
 70% upfront
 דורש להבין באיזה שלב הפרויקט.
 
-ומועד המסירה עדיין לא פורסם.
+ומועד המסירה עדיין לא פורסם — שאלה שכדאי לבדוק לפני כניסה.
 ```
 
 ---

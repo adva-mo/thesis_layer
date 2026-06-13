@@ -275,6 +275,7 @@ Before marking any file `status: ready`, check:
 - [ ] No scarcity claims unless unit count is confirmed and sourced
 - [ ] No "Dubai is booming" or equivalent clichés
 - [ ] Tone is calm and analytical — not broker-urgent
+- [ ] Final Impression Rule: no content piece ends on unresolved negativity — last emotional note is clarity, curiosity, or informed conviction (CLAUDE.md §13.4)
 
 **Naturalizer**
 - [ ] Every Hebrew file has a naturalizer sign-off at the bottom

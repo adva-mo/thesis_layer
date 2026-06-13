@@ -30,6 +30,8 @@ Read:
 
 Voice calibration applies to all PDFs.
 
+**Signals:** PDFs are long-form — include all Investment Signal roles from `thesis.md` including `context`. Apply compression rule from `templates/positioning-framework.md`.
+
 PDFs should sound:
 
 - analytical
@@ -260,6 +262,8 @@ The verdict should sound like:
 NOT:
 
 “This is a great opportunity.”
+
+**Final Impression Rule:** The verdict is the last substantive section — it must leave the reader in informed decision-readiness or defined uncertainty, not unresolved worry. State the conditions clearly: “This works if X. The question is whether Y.” A verdict that ends on a bare risk statement without anchoring it to a decision frame violates this rule. See CLAUDE.md §13.4.
 
 ---
 

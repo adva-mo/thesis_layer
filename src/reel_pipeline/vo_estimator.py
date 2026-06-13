@@ -68,7 +68,7 @@ def estimate_duration(
     return round(speech_s + pause_s, 1)
 
 
-def budget_warning(estimated: float, target: float, tolerance: float = 0.4) -> str:
+def budget_warning(estimated: float, target: float, tolerance: float = 0.15) -> str:
     """
     Return a warning symbol if estimated duration exceeds target by more than tolerance.
     tolerance=0.4 means warn if estimated > target * 1.4

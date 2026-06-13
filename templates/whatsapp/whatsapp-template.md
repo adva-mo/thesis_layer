@@ -8,10 +8,13 @@ Three message variants per project. Hebrew-first. Conversational, direct, never 
 - No formal sign-offs ("בברכה", "Regards") — just natural closing
 - Never open with "היי, אני מציע לך..."
 - Sound like a message from a knowledgeable friend, not a sales rep
+- Final Impression Rule: if risk or uncertainty is mentioned, close with a forward-leaning question or tradeoff before the CTA line — never end on bare doubt (see CLAUDE.md §13.4)
 
 **Language note (Hebrew):** WhatsApp is Tier 3 — direct and personal. Hebrew must sound like a real person, not a sales template. `primary_language.md` is loaded at session init — no re-read needed here.
 
 **Before writing:** Read the Pitch Block from `output/[project-slug]/hebrew/linkedin/[project-slug]-he-linkedin.md` — the `## Pitch Block` section at the bottom of the file. Use it as the core project description in all 3 variants. Only adapt the opening, relationship context, and closing question per variant. Do not re-write the project pitch from scratch.
+
+**Signals:** Apply compression rule from Investment Signals in `thesis.md` — see `templates/positioning-framework.md`. WhatsApp is short-form: `thesis_core` only; drop `supporting`, `context`, and `risk`.
 
 ---
 

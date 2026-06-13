@@ -193,6 +193,13 @@ Risk builds trust.
 
 Never hide it.
 
+**Final Impression Rule:** The risk paragraph must resolve before the Soft CTA. Close risk with a decision framework, a forward question, or a tradeoff comparison — never leave the risk as the last substantive idea before the CTA.
+
+Incomplete: "RAK עדיין שוק צעיר יותר מדובאי."
+Complete: "RAK עדיין שוק צעיר יותר מדובאי — זה אומר שהתשואה צריכה לפצות על הסיכון הנוסף. השאלה היא אם היא עושה את זה."
+
+See CLAUDE.md §13.4.
+
 ---
 
 ### 6. Soft CTA

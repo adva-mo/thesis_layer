@@ -73,7 +73,7 @@ def generate_segment(text, out_path):
         "xi-api-key":   API_KEY,
     }
     body = {
-        "text":           _normalize_caps(text),
+        "text":           text,
         "model_id":       MODEL,
         "voice_settings": VOICE_SETTINGS,
     }
@@ -103,12 +103,6 @@ def generate_segment(text, out_path):
 
 # ── Parser ────────────────────────────────────────────────────────
 
-def _normalize_caps(text: str) -> str:
-    """Convert ALL-CAPS words (2+ letters) to Title case for natural TTS pronunciation.
-    ElevenLabs spells out CLUB as C-L-U-B; 'Club' pronounces it as a word."""
-    return re.sub(r'\b[A-Z]{2,}\b', lambda m: m.group(0).title(), text)
-
-
 def clean_vo_text(raw):
     """Strip PAUSE markers, extra whitespace, keep spoken words only."""
     text = re.sub(r'\[PAUSE\]', '', raw)
@@ -120,24 +114,25 @@ def sanitize_filename(s):
     """Make a timestamp like '0–4s' safe for filenames."""
     return re.sub(r'[–—]', '-', s).replace(' ', '')
 
+def _extract_tagged(block, tag):
+    """Extract quoted text after [TAG:] in block, or None if absent."""
+    pos = block.find(tag)
+    if pos == -1:
+        return None
+    after = block[pos + len(tag):].strip()
+    oq = after.find('"')
+    if oq == -1:
+        return None
+    lq = after.find('"', oq + 1)
+    if lq == -1:
+        return None
+    return clean_vo_text(after[oq + 1:lq])
+
 def _extract_vo_text(block):
-    """
-    Extract VO text from a script block, handling internal Hebrew quotes.
-    Hebrew words like מ"ר and נדל"ן contain " which breaks regex approaches.
-    Strategy: find opening quote after [VO:], then use rfind for the closing quote.
-    """
-    vo_pos = block.find('[VO:]')
-    if vo_pos == -1:
-        return None
-    after_vo = block[vo_pos + len('[VO:]'):].strip()
-    open_q = after_vo.find('"')
-    if open_q == -1:
-        return None
-    last_q = after_vo.rfind('"')
-    if last_q == open_q:
-        return None
-    raw = after_vo[open_q + 1:last_q]
-    return clean_vo_text(raw)
+    return _extract_tagged(block, '[VO:]')
+
+def _extract_tts_text(block):
+    return _extract_tagged(block, '[TTS:]')
 
 
 def parse_reel_file(md_path):
@@ -197,6 +192,7 @@ def parse_reel_file(md_path):
             segments.append({
                 'timestamp': timestamp,
                 'text':      vo_text,
+                'tts':       _extract_tts_text(block),
             })
 
         if segments:
@@ -256,6 +252,7 @@ def main():
     # Import estimator (lives in src/ alongside the rest of the pipeline)
     sys.path.insert(0, str(REPO_ROOT / 'src'))
     from reel_pipeline.vo_estimator import estimate_duration, budget_warning
+    from reel_pipeline.local_clip import get_audio_duration
 
     reels = parse_reel_file(md_path)
     if not reels:
@@ -345,10 +342,18 @@ def main():
                 generated += 1
                 continue
 
-            ok = generate_segment(seg['text'], out_path)
+            ok = generate_segment(seg['tts'] or seg['text'], out_path)
             if ok:
                 size_kb = out_path.stat().st_size // 1024
-                print(f"      ✓ saved ({size_kb} KB)\n")
+                print(f"      ✓ saved ({size_kb} KB)")
+                actual_s = get_audio_duration(out_path)
+                target_s = _parse_target_seconds(seg['timestamp'])
+                over = actual_s - target_s
+                timing_note = f"actual {actual_s:.1f}s / target {target_s:.0f}s"
+                if over > 0:
+                    print(f"      ⚠  OVER by {over:.1f}s — {timing_note} — rewrite before rendering\n")
+                else:
+                    print(f"      ✓  {timing_note}\n")
                 generated += 1
             else:
                 errors += 1

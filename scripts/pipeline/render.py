@@ -97,6 +97,8 @@ def main():
     parser.add_argument("--font",          default=str(FONT_PATH), help="Path to .ttf font for Hebrew text")
     parser.add_argument("--clip-override", action="append", default=[], metavar="SCENE:PATH",
                         help="Override visual for scene N with a pre-rendered clip, e.g. 2:reels/reel_01/scene02_timeline.mp4")
+    parser.add_argument("--trailing-pad-ms", type=int, default=0, metavar="MS",
+                        help="Freeze last frame + pad audio by N ms at end of video (fixes VO cutoff)")
     args = parser.parse_args()
 
     blueprint      = Path(args.blueprint)
@@ -146,6 +148,7 @@ def main():
             work_dir=work_dir,
             font_path=font_path,
             clip_overrides=clip_overrides,
+            trailing_pad_ms=args.trailing_pad_ms,
         )
     finally:
         if not args.keep_tmp:
