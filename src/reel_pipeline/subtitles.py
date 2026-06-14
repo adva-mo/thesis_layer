@@ -95,10 +95,13 @@ def _split_lines(words: list[str]) -> tuple[list[str], list[str]] | None:
     if not any(s == other_script for s in scripts):
         return None
     split_at = next(i for i, s in enumerate(scripts) if s == other_script)
-    # If the phrase alternates back to the first script after the split point
-    # (e.g. Hebrew → CLUB → Hebrew), don't split — let full-phrase BiDi handle it.
+    # If the phrase alternates back to the first script after the split point,
+    # only keep single-line BiDi for short continuations (e.g. Hebrew → CLUB → one Hebrew word).
+    # Substantial Hebrew continuations (>1 word) split cleanly into two lines.
     if first_script in scripts[split_at + 1:]:
-        return None
+        trailing = sum(1 for s in scripts[split_at + 1:] if s == first_script)
+        if trailing <= 1:
+            return None
     return words[:split_at], words[split_at:]
 
 
@@ -126,8 +129,15 @@ def _render_two_lines(
     space_w = space_bbox[2] - space_bbox[0]
 
     def _visual(words: list[str], script: str) -> list[str]:
+        joined = " ".join(words)
         if script == 'hebrew':
-            return _visual_hebrew(" ".join(words)).split()
+            return _visual_hebrew(joined).split()
+        # Single mixed-script tokens like "ה-Thesis:" are classified 'latin' because
+        # Latin chars outnumber Hebrew chars, but the trailing punctuation (":") is a
+        # BiDi-neutral char that resolves to RTL (left side) when the word is run through
+        # the BiDi algorithm with base_dir='R'.
+        if len(words) == 1 and any('֐' <= c <= '׿' for c in joined):
+            return _visual_hebrew(joined).split()
         return list(words)
 
     def _vis_active_idx(n: int, logical: int, script: str) -> int:
@@ -239,7 +249,7 @@ def group_into_phrases(
 def _visual_hebrew(text: str) -> str:
     try:
         from bidi.algorithm import get_display
-        return get_display(text)
+        return get_display(text, base_dir='R')
     except ImportError:
         return text
 
@@ -278,7 +288,7 @@ def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, heigh
     if split:
         line1_words, line2_words = split
         line1_script = next((_word_script(w) for w in line1_words if _word_script(w) != 'neutral'), 'latin')
-        line2_script = next((_word_script(w) for w in line2_words if _word_script(w) != 'neutral'), 'hebrew')
+        line2_script = 'hebrew' if any(_word_script(w) == 'hebrew' for w in line2_words) else 'latin'
         n1 = len(line1_words)
         if active_idx < n1:
             active_line, active_word_idx = 0, active_idx
@@ -358,7 +368,7 @@ def build_spans(
             if split:
                 l1, l2 = split
                 s1 = next((_word_script(w) for w in l1 if _word_script(w) != 'neutral'), 'latin')
-                s2 = next((_word_script(w) for w in l2 if _word_script(w) != 'neutral'), 'hebrew')
+                s2 = 'hebrew' if any(_word_script(w) == 'hebrew' for w in l2) else 'latin'
                 img = _render_two_lines(l1, l2, s1, s2, -1, -1, font, width, height, highlight_all=True)
             else:
                 img = _render_uniform(phrase.text, HIGHLIGHT_COLOR, font, width, height)
