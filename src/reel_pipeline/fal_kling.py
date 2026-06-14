@@ -9,12 +9,45 @@ import hashlib
 import os
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 from typing import Optional
 
 import requests
 
 from . import config
+
+
+# ── Image pre-processing ──────────────────────────────────────────
+
+
+def _crop_to_portrait(image_path: Path) -> Path:
+    """
+    Center-crop a landscape image to 9:16 portrait before Kling upload.
+    Kling I2V matches the input image's aspect ratio — sending a portrait
+    image is the only way to get portrait video output.
+    Returns a tmp path if cropped; returns image_path unchanged if already portrait.
+    """
+    try:
+        from PIL import Image
+    except ImportError:
+        return image_path  # PIL unavailable — skip, assembler will crop downstream
+
+    img = Image.open(image_path)
+    w, h = img.size
+    target_ar = 9 / 16  # portrait
+
+    if (w / h) <= target_ar * 1.05:
+        return image_path  # already portrait or square — no crop needed
+
+    # Crop width to portrait AR, keep full height
+    new_w = int(h * target_ar)
+    left = (w - new_w) // 2
+    cropped = img.crop((left, 0, left + new_w, h))
+
+    tmp = tempfile.NamedTemporaryFile(suffix=image_path.suffix, delete=False)
+    cropped.save(tmp.name, quality=95)
+    return Path(tmp.name)
 
 
 # ── Cache helpers ─────────────────────────────────────────────────
@@ -31,6 +64,7 @@ def compute_cache_key(
     h.update(prompt.encode())
     h.update(str(duration).encode())
     h.update(model.encode())
+    h.update(config.ASPECT_RATIO.encode())  # portrait pre-crop changes the effective input
     return h.hexdigest()[:16]
 
 
@@ -54,9 +88,17 @@ def run_dry(
     rel_image = _rel(image_path)
     rel_output = _rel(output_path)
 
+    from PIL import Image as _Img
+    try:
+        _img = _Img.open(image_path)
+        _w, _h = _img.size
+        will_crop = (_w / _h) > (9 / 16) * 1.05
+    except Exception:
+        will_crop = False
+
     print("\nDRY RUN — no API call will be made")
     print("─" * 41)
-    print(f"  Image:         {rel_image}")
+    print(f"  Image:         {rel_image}" + (" [will crop to portrait]" if will_crop else ""))
     print(f"  Prompt:        {prompt}")
     print(f"  Duration:      {duration}s")
     print(f"  Aspect ratio:  {config.ASPECT_RATIO}")
@@ -100,9 +142,14 @@ def generate_clip(
         print(f"  Copied from cache → {_rel(output_path)}")
         return output_path
 
-    print(f"  Uploading image: {_rel(image_path)}")
-    image_url = fal_client.upload_file(str(image_path))
+    prepared = _crop_to_portrait(image_path)
+    if prepared != image_path:
+        print(f"  Cropped to portrait: {_rel(image_path)} → {prepared.name}")
+    print(f"  Uploading image: {_rel(prepared)}")
+    image_url = fal_client.upload_file(str(prepared))
     print(f"  Uploaded → {image_url}")
+    if prepared != image_path:
+        prepared.unlink(missing_ok=True)
 
     print(f"  Submitting job to {model} ...")
 
