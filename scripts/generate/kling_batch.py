@@ -1,0 +1,191 @@
+#!/usr/bin/env python3
+"""
+Batch Kling I2V generator — reads a reel blueprint and generates one clip per
+image-type scene, with output filenames derived from scene index.
+
+Eliminates manual --output path naming (the source of kling_scene03-vs-04 bugs).
+
+Usage:
+    # Dry run (default — free, prints plan):
+    python3 scripts/generate/kling_batch.py \\
+        --blueprint output/club-place-dubai-hills/hebrew/reels/club-place-dubai-hills-he-reels.md \\
+        --reel 1 \\
+        --assets-dir assets/club-place-dubai-hills/canonical
+
+    # Paid run:
+    python3 scripts/generate/kling_batch.py \\
+        --blueprint output/club-place-dubai-hills/hebrew/reels/club-place-dubai-hills-he-reels.md \\
+        --reel 1 \\
+        --assets-dir assets/club-place-dubai-hills/canonical \\
+        --model fal-ai/kling-video/v3/pro/image-to-video \\
+        --confirm-paid-api-call
+
+    # Regenerate specific scenes only (e.g. after QA fail):
+    python3 scripts/generate/kling_batch.py ... --scenes 2,4 --confirm-paid-api-call
+"""
+
+import argparse
+import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(REPO_ROOT / "src"))
+
+from reel_pipeline import config, fal_kling
+from reel_pipeline.parser import parse_reel_file
+
+
+def _clip_duration(segment_s: float) -> int:
+    """Segments > 7s get a 10s clip; shorter get 5s. Matches Kling's two supported durations."""
+    return 10 if segment_s > 7 else 5
+
+
+def _output_path(assets_dir: Path, scene_index: int) -> Path:
+    return assets_dir / f"kling_scene{scene_index:02d}.mp4"
+
+
+def _estimate_cost(scenes_to_generate: list, model: str) -> str:
+    costs = {
+        "v1/standard": 0.22,
+        "v2.5/turbo":  0.35,
+        "v3/pro":      0.56,
+        "seedance":    1.21,
+        "hailuo":      0.49,
+        "veo3":        0.25,
+    }
+    per_5s = next((v for k, v in costs.items() if k in model), 0.56)
+    total = sum(per_5s * (_clip_duration(s.end_s - s.start_s) / 5) for s in scenes_to_generate)
+    return f"~${total:.2f} ({', '.join(f'scene{s.index}=${per_5s * _clip_duration(s.end_s - s.start_s) / 5:.2f}' for s in scenes_to_generate)})"
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Batch Kling I2V — auto-names clips from scene index."
+    )
+    parser.add_argument("--blueprint",  required=True, help="Path to reel .md blueprint")
+    parser.add_argument("--reel",       type=int, default=1, help="Reel number (default: 1)")
+    parser.add_argument("--assets-dir", required=True, help="Path to canonical assets dir (clips saved here)")
+    parser.add_argument("--model",      default=config.DEFAULT_MODEL,
+                        help=f"fal.ai model ID (default: {config.DEFAULT_MODEL})")
+    parser.add_argument("--scenes",     default="",
+                        help="Comma-separated scene indices to generate (default: all image scenes)")
+    parser.add_argument("--confirm-paid-api-call", action="store_true",
+                        help="Required to make real fal.ai calls (costs money)")
+    args = parser.parse_args()
+
+    blueprint  = Path(args.blueprint)
+    assets_dir = Path(args.assets_dir)
+    model      = args.model
+
+    if not blueprint.exists():
+        print(f"Error: blueprint not found — {blueprint}")
+        sys.exit(1)
+    if not assets_dir.exists():
+        print(f"Error: assets-dir not found — {assets_dir}")
+        sys.exit(1)
+
+    scenes = parse_reel_file(blueprint, reel_number=args.reel, assets_dir=assets_dir)
+
+    # Filter to requested scene indices if --scenes provided
+    scene_filter: set[int] = set()
+    if args.scenes:
+        try:
+            scene_filter = {int(x.strip()) for x in args.scenes.split(",") if x.strip()}
+        except ValueError:
+            print("Error: --scenes must be comma-separated integers (e.g. '2,4')")
+            sys.exit(1)
+
+    to_generate = []
+    for scene in scenes:
+        if scene_filter and scene.index not in scene_filter:
+            continue
+        if scene.asset_type != "image":
+            continue
+        if scene.asset_path is None or not scene.asset_path.exists():
+            print(f"  Scene {scene.index}: asset_path missing or not found — skip")
+            continue
+        to_generate.append(scene)
+
+    print(f"\nKling batch — Reel {args.reel}")
+    print(f"  Blueprint: {blueprint}")
+    print(f"  Model:     {model}")
+    print()
+
+    for scene in scenes:
+        in_filter = not scene_filter or scene.index in scene_filter
+        if scene.asset_type != "image" or not in_filter:
+            label = "generated — skip" if scene.asset_type != "image" else "filtered — skip"
+            print(f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]  {label}")
+            continue
+
+        dur       = _clip_duration(scene.end_s - scene.start_s)
+        out_path  = _output_path(assets_dir, scene.index)
+        prompt    = " ".join(filter(None, [scene.visual_intent, scene.motion_style]))
+
+        # Portrait crop detection
+        try:
+            from PIL import Image as _Img
+            img = _Img.open(scene.asset_path)
+            w, h = img.size
+            will_crop = (w / h) > (9 / 16) * 1.05
+        except Exception:
+            will_crop = False
+
+        cache_key  = fal_kling.compute_cache_key(scene.asset_path, prompt, dur, model)
+        cache_hit  = fal_kling.get_cached_path(cache_key) is not None
+        crop_note  = " [will crop to portrait]" if will_crop else ""
+        cache_note = " [cache hit — free]" if cache_hit else ""
+
+        print(
+            f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]  "
+            f"image  {scene.asset_path.name}  →  {out_path.name}  ({dur}s)"
+            f"{crop_note}{cache_note}"
+        )
+
+    if not to_generate:
+        print("\n  Nothing to generate.")
+        return
+
+    if not args.confirm_paid_api_call:
+        non_cached = [s for s in to_generate
+                      if not fal_kling.get_cached_path(
+                          fal_kling.compute_cache_key(
+                              s.asset_path,
+                              " ".join(filter(None, [s.visual_intent, s.motion_style])),
+                              _clip_duration(s.end_s - s.start_s),
+                              model,
+                          )
+                      )]
+        if non_cached:
+            print(f"\n  Estimated cost: {_estimate_cost(non_cached, model)}")
+        else:
+            print("\n  All clips cached — no API cost.")
+        print("  Pass --confirm-paid-api-call to generate.\n")
+        return
+
+    # ── Paid run ──────────────────────────────────────────────────────
+    print()
+    errors = []
+    for scene in to_generate:
+        dur      = _clip_duration(scene.end_s - scene.start_s)
+        out_path = _output_path(assets_dir, scene.index)
+        prompt   = " ".join(filter(None, [scene.visual_intent, scene.motion_style]))
+
+        print(f"  Generating scene {scene.index} → {out_path.name}  ({dur}s) …")
+        try:
+            fal_kling.generate_clip(scene.asset_path, prompt, dur, model, out_path)
+            print(f"    ✓ {out_path.name}")
+        except Exception as e:
+            print(f"    ✗ scene {scene.index} failed: {e}")
+            errors.append(scene.index)
+
+    print()
+    if errors:
+        print(f"  ✗ Failed scenes: {errors}")
+        sys.exit(1)
+    else:
+        print(f"  ✓ Done — {len(to_generate)} clip(s) saved to {assets_dir}/")
+
+
+if __name__ == "__main__":
+    main()

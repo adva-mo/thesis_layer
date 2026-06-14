@@ -179,20 +179,55 @@ Good (same reasoning, investor arriving at a thought):
 
 ### Visual intent format
 
-For real image scenes:
+#### Real image scenes (Kling clip will be generated from this)
+
 ```
-[VISUAL_INTENT: what the scene should show — specific, thesis-linked visual context]
-[MOTION_STYLE: camera movement and style for Kling]
+[VISUAL_INTENT: <location/subject> — <state and atmosphere> — <thesis relevance> — no <anti-collect items>]
+[MOTION_STYLE: <movement type>, <speed>, <camera height/angle>, <light quality>, <stability>]
 ```
 
-For generated graphic scenes (no image asset needed):
+**`[VISUAL_INTENT:]` must include:**
+- Subject: what is in frame and its operational state (functioning, lived-in, active, empty)
+- Atmosphere: time of day, light quality, feel
+- Thesis link: one phrase explaining why this specific image, not just "nice shot"
+- At least one negative cue: what NOT to show — drawn from the thesis anti-collect rules
+
+**`[MOTION_STYLE:]` must include:**
+- Movement type: push-in / pan (left-to-right or right-to-left) / pull-back / static / handheld drift
+- Speed: slow / ultra-slow / deliberate / subtle
+- Camera height: aerial / slightly elevated / eye-level / low
+- Light quality: golden hour / overcast soft / warm afternoon / clear midday
+- Stability: smooth / no shake / steady
+
+These two tags together must be specific enough to pass directly as a Kling `--prompt` string without human editing at generation time.
+
+**Before:**
 ```
-[VISUAL_INTENT: generated — brief description of the graphic (payment plan, etc.)]
+[VISUAL_INTENT: Dubai Hills Estate community street or park — family residential feel]
+[MOTION_STYLE: slow pan, warm daylight]
 ```
 
-The word "generated" at the start signals: no Kling clip, create the graphic in Canva or programmatically.
+**After:**
+```
+[VISUAL_INTENT: Dubai Hills Estate residential street — warm afternoon, lived-in, families visible softly in background, neighborhood already operating — no construction, no cranes, not a render]
+[MOTION_STYLE: gentle forward push, deliberate pace, eye-level camera, warm afternoon light, steady no shake]
+```
 
-For timeline / argument sequence scenes, use the structured format:
+**Optional — add `[KLING_AVOID:]` for scenes where Kling reliably hallucinates:**
+```
+[KLING_AVOID: people in close foreground, motion blur, shaky camera, construction equipment]
+```
+
+#### Generated graphic scenes (no Kling clip)
+
+```
+[VISUAL_INTENT: generated — brief description of the graphic (payment plan, comparison table, etc.)]
+```
+
+The word "generated" at the start signals: no Kling clip, create the graphic programmatically.
+
+#### Timeline / argument sequence scenes
+
 ```
 [VISUAL_INTENT: timeline — <label 1> → <label 2> → <label 3>]
 ```
@@ -231,6 +266,7 @@ For CTA / text card scenes only:
 - Do not write asset file paths in `[VISUAL_INTENT:]` — those come from the Visual Evidence Plan.
 - Do not add text overlays as a default — subtitles render the VO text.
 - Do not write `[VISUAL_INTENT: Timeline graphic — ...]` — deprecated. Use `timeline — label → label → label` instead.
+- Do not write thin VISUAL_INTENT like "community street, residential feel" — must include atmosphere, thesis link, and a negative cue.
 
 ### Legacy format (backwards compatible)
 
@@ -955,7 +991,10 @@ Anti-collect: [3–5 specific things NOT to collect — be explicit about what l
 | [timestamp] | [establish / prove / reinforce / texture] | [yes / no] | canonical/a[NNN]_[description].jpg | [what to search for] | [source per matrix in asset-collection.md] | [A / B / C] |
 ```
 
-For reused assets (already in canonical/ from another reel): write `reuse — canonical/[filename]` in the File column. No new download.
+**VEP File column convention:**
+- For image-type scenes (Kling input): reference the **source image** — `canonical/aNN_*.jpg`. Kling clips are generated from this source via `kling_batch.py` and applied at render time using `--clip-override`. Do not reference Kling output clips here.
+- For generated/animated scenes (exclamation, CTA, timeline): reference the pre-rendered clip — `scenes/sceneNN_*.mp4`.
+- For reused assets (already in canonical/ from another reel): write `reuse — canonical/[filename]`. No new download.
 
 ### After the table
 

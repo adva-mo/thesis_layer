@@ -26,7 +26,8 @@ assets/[slug]/          ← collected image assets (canonical/)
 2a. Generate TTS review        → scripts/generate/vo_combined.py --prepare-tts-review
     ↳ edit tts_review.md, set APPROVED: true
 2b. Generate VO audio          → scripts/generate/vo_combined.py --require-tts-review --confirm-paid-api-call
-3. Generate visual clips       → scripts/generate/kling.py
+3. Generate visual clips       → scripts/generate/kling_batch.py  (Kling I2V — recommended)
+                                  scripts/generate/kling.py          (single clip — manual use)
                                   scripts/generate/timeline.py
                                   scripts/generate/exclamation.py
                                   scripts/generate/cta.py
@@ -82,7 +83,7 @@ python3 scripts/generate/kling.py \
   --prompt "slow cinematic push-in, warm daylight, smooth camera" \
   --duration 5 \
   --model fal-ai/kling-video/v2.5/turbo/image-to-video \
-  --output output/[slug]/clips/kling_scene01.mp4 \
+  --output assets/[slug]/canonical/kling_scene01.mp4 \
   --confirm-paid-api-call
 ```
 
@@ -152,24 +153,61 @@ python3 scripts/generate/vo.py output/[slug]/hebrew/reels/[slug]-he-reels.md \
 
 ---
 
-### kling.py — Kling I2V clip
+### kling_batch.py — Batch Kling I2V *(recommended)*
 
-Generates a motion video clip from a still image using fal.ai Kling.
+Reads a reel blueprint, finds all image-type scenes, and generates one Kling clip per scene. Output filenames are derived from `scene.index` — no manual counting, no naming mistakes.
+
+```bash
+# Dry run — see plan and cost estimate (no API call):
+python3 scripts/generate/kling_batch.py \
+  --blueprint output/[slug]/[lang]/reels/[slug]-he-reels.md \
+  --reel 1 \
+  --assets-dir assets/[slug]/canonical \
+  --model fal-ai/kling-video/v3/pro/image-to-video
+
+# Paid run:
+python3 scripts/generate/kling_batch.py \
+  --blueprint output/[slug]/[lang]/reels/[slug]-he-reels.md \
+  --reel 1 \
+  --assets-dir assets/[slug]/canonical \
+  --model fal-ai/kling-video/v3/pro/image-to-video \
+  --confirm-paid-api-call
+
+# Regenerate specific scenes only (e.g. after QA fail):
+python3 scripts/generate/kling_batch.py ... --scenes 2,4 --confirm-paid-api-call
+```
+
+**Naming:** output is `canonical/kling_scene{index:02d}.mp4` where `index` is the scene's position in the reel (1-based). Generated or video scenes are skipped automatically — names are always correct regardless of which scenes use Kling.
+
+**Prompt construction:** concatenates `VISUAL_INTENT` + `MOTION_STYLE` from the blueprint. Both fields must be Kling-ready (see `templates/reels/reel-template.md`).
+
+**Duration logic:** segments > 7s → 10s clip; ≤7s → 5s clip. Maps to Kling's two supported durations.
+
+**Portrait handling:** landscape source images are center-cropped to 9:16 before upload. Dry-run shows `[will crop to portrait]` for affected scenes.
+
+**Cache:** inherited from `fal_kling.py` — same inputs on a re-run are free.
+
+---
+
+### kling.py — Single Kling I2V clip *(manual use only)*
+
+Use only to generate or regenerate a single clip with full control over the prompt. Prefer `kling_batch.py` for standard reel production.
 
 ```bash
 python3 scripts/generate/kling.py \
   --image assets/[slug]/canonical/a001_description.jpg \
   --prompt "slow cinematic push-in, warm daylight, smooth camera" \
   --duration 5 \
-  --output output/[slug]/clips/kling_scene03.mp4 \
+  --output assets/[slug]/canonical/kling_scene04.mp4 \
   --confirm-paid-api-call
 ```
 
 - Default model: `fal-ai/kling-video/v1/standard/image-to-video`
 - Duration options: 5s or 10s
 - Cost: ~$0.22 for 5s (standard tier)
-- **Cache:** clips are cached in `.cache/kling/` by SHA256(image+prompt+duration+model). Re-running with same inputs is free.
-- Output is always 9:16 vertical. The assembler will stretch or trim to match the VO segment duration.
+- **Portrait crop:** landscape images are automatically center-cropped to 9:16 before upload. Dry-run shows `[will crop to portrait]`. Cache key includes aspect ratio — switching crop behavior invalidates old cache entries.
+- **Cache:** clips are cached in `.cache/kling/` by SHA256(image+prompt+duration+model+aspect_ratio). Re-running with same inputs is free.
+- Output is always 9:16 portrait. The assembler will stretch or trim to match the VO segment duration.
 
 ---
 
@@ -180,7 +218,7 @@ Generates an animated MP4 showing the timeline boxes (הבטחה → שנים �
 ```bash
 python3 scripts/generate/timeline.py \
   --duration 9.7 \
-  --output output/[slug]/clips/scene02_timeline.mp4
+  --output output/[slug]/[lang]/reels/reel_01/scenes/scene02_timeline.mp4
 ```
 
 Items are hardcoded for Club Place. For other projects, edit the `ITEMS` list in the script.
@@ -195,7 +233,7 @@ Generates an animated red circle with a "!" for the reality-check scene.
 ```bash
 python3 scripts/generate/exclamation.py \
   --duration 9.0 \
-  --output output/[slug]/clips/scene04_exclamation.mp4
+  --output output/[slug]/[lang]/reels/reel_01/scenes/scene04_exclamation.mp4
 ```
 
 Animation: circle scales in (0.45s) → "!" drops in with bounce (0.4s) → holds static.
@@ -211,7 +249,7 @@ python3 scripts/generate/cta.py \
   --assets-dir assets/[slug]/canonical \
   --bg-asset a003_dh-family-residential-community.jpg \
   --duration 3.0 \
-  --output output/[slug]/clips/scene05_cta.mp4
+  --output output/[slug]/[lang]/reels/reel_01/scenes/scene05_cta.mp4
 ```
 
 Text layout (centered, 48% height): `"כתבו לי"` / `"CLUB"` (large) / `"לניתוח המלא"` (dimmed).
@@ -244,8 +282,8 @@ Use only when audio was generated with `vo.py` (no `alignment.json` available). 
 ```bash
 python3 scripts/pipeline/align.py \
   --blueprint output/[slug]/hebrew/reels/[slug]-he-reels.md \
-  --audio-dir output/[slug]/audio/reel1/ \
-  --output output/[slug]/audio/reel1/transcript.json \
+  --audio-dir output/[slug]/[lang]/reels/reel_01/audio \
+  --output output/[slug]/[lang]/reels/reel_01/audio/transcript.json \
   --reel 1
 ```
 
@@ -262,9 +300,9 @@ python3 scripts/pipeline/render.py \
   --assets-dir assets/[slug]/canonical/ \
   --output output/[slug]/[lang]/reels/[slug]-he-reel-1-draft.mp4 \
   --reel 1 --render \
-  --clip-override 2:output/[slug]/[lang]/reels/reel_01/scene02_timeline.mp4 \
-  --clip-override 4:output/[slug]/[lang]/reels/reel_01/scene04_exclamation.mp4 \
-  --clip-override 5:output/[slug]/[lang]/reels/reel_01/scene05_cta.mp4
+  --clip-override 2:output/[slug]/[lang]/reels/reel_01/scenes/scene02_timeline.mp4 \
+  --clip-override 4:output/[slug]/[lang]/reels/reel_01/scenes/scene04_exclamation.mp4 \
+  --clip-override 5:output/[slug]/[lang]/reels/reel_01/scenes/scene05_cta.mp4
 ```
 
 **Key flags:**
@@ -274,12 +312,12 @@ python3 scripts/pipeline/render.py \
 - `--keep-tmp` — keep the intermediate work directory for debugging
 
 **Visual source priority per scene:**
-1. `--clip-override` (explicit) — escape hatch; use for animated generated clips
-2. `asset_type == "video"` — Kling clips referenced in VEP table (`canonical/kling_sceneNN.mp4`)
-3. `asset_type == "image"` — still images referenced in VEP table
+1. `--clip-override` (explicit) — use for Kling clips and animated generated clips (exclamation, CTA)
+2. `asset_type == "video"` — video files referenced in VEP table (e.g. pre-rendered animations)
+3. `asset_type == "image"` — still images referenced in VEP table (used as static frame if no override)
 4. Generated graphic (timeline, text_card, etc.) from `graphic_generator.py` — static fallback
 
-**Kling clips live in `assets/[slug]/canonical/`** and are referenced directly in the VEP table File column (`canonical/kling_scene01.mp4`). No `--clips-dir` needed — the blueprint is the source of truth.
+**VEP convention:** the VEP File column references the **source image** (`canonical/aNN_*.jpg`) for Kling scenes, not the Kling output clip. Kling clips are generated separately via `kling_batch.py` and applied at render time using `--clip-override`. Without `--clip-override`, the assembler falls back to a static image from the VEP.
 
 **Assembler behaviour:** if a clip is shorter than the VO audio, it is time-stretched. If longer, it is trimmed.
 
@@ -347,29 +385,30 @@ No automatic text transforms are applied — `[TTS:]` is the exact string sent t
 ## Output Folder Structure
 
 ```
-output/[slug]/
-├── audio/
-│   └── reel1/
-│       ├── seg01_0-4s.mp3
-│       ├── seg02_4-15s.mp3
-│       ├── ...
-│       └── transcript.json
-├── clips/                        ← pre-rendered visual clips
-│   ├── kling_scene03.mp4
-│   ├── scene02_timeline.mp4
-│   ├── scene04_exclamation.mp4
-│   └── scene05_cta.mp4
-└── hebrew/reels/
-    ├── [slug]-he-reels.md        ← blueprint
-    ├── [slug]-he-reel-1-draft.mp4
-    └── [slug]-he-reel-1-draft_subtitled.mp4
+output/[slug]/[lang]/reels/
+├── [slug]-he-reels.md            ← blueprint
+└── reel_01/
+    ├── audio/
+    │   ├── seg01_0-4s.mp3
+    │   ├── seg02_4-15s.mp3
+    │   ├── ...
+    │   ├── alignment.json
+    │   ├── transcript.json
+    │   └── tts_review.md
+    ├── scenes/                   ← pre-rendered animated clips (exclamation, CTA, etc.)
+    │   ├── scene04_exclamation.mp4
+    │   └── scene05_cta.mp4
+    ├── reel01_draft.mp4
+    └── reel01_draft_subtitled.mp4
 
 assets/[slug]/
-├── canonical/                    ← validated images
+├── canonical/                    ← validated source images + Kling output clips
 │   ├── a001_description.jpg
-│   └── ...
-├── raw/
-└── manifest.md
+│   ├── kling_scene01.mp4         ← Kling output (generated by kling_batch.py)
+│   ├── kling_scene02.mp4
+│   └── kling_scene04.mp4
+├── manifest.md
+└── raw/
 ```
 
 ---
@@ -398,10 +437,16 @@ python3 scripts/generate/vo_combined.py \
   --output-dir $AUDIO_DIR \
   --require-tts-review --confirm-paid-api-call
 
-# 2. Generate visual clips (paid for kling, free for others)
-python3 scripts/generate/timeline.py \
-  --duration 9.7 --output $SCENES_DIR/scene02_timeline.mp4
+# 2. Generate Kling clips (paid — use kling_batch.py for automatic naming)
+python3 scripts/generate/kling_batch.py \
+  --blueprint $REEL_DIR/$SLUG-he-reels.md \
+  --reel 1 \
+  --assets-dir $ASSETS_DIR \
+  --model fal-ai/kling-video/v3/pro/image-to-video \
+  --confirm-paid-api-call
+# → produces: kling_scene01.mp4 (scene 1, 5s), kling_scene02.mp4 (scene 2, 5s), kling_scene04.mp4 (scene 4, 10s)
 
+# 3. Generate animated clips (free — no API call)
 python3 scripts/generate/exclamation.py \
   --duration 9.0 --output $SCENES_DIR/scene04_exclamation.mp4
 
@@ -409,10 +454,12 @@ python3 scripts/generate/cta.py \
   --bg-asset a003_dh-family-residential-community.jpg \
   --duration 3.0 --output $SCENES_DIR/scene05_cta.mp4
 
-# 3. Build transcript from alignment (free — no API call)
+# 4. Build transcript from alignment (free — no API call)
 python3 scripts/pipeline/align_timing.py --audio-dir $AUDIO_DIR
 
-# 4. Render (Kling clips for scenes 1 and 3 resolve from VEP table automatically)
+# 5. Render — Kling clips applied via --clip-override (VEP File = source images)
+#    Scene 3 (exclamation) and scene 5 (CTA) are overridden explicitly for clarity;
+#    they would also resolve from the VEP table as video-type assets.
 python3 scripts/pipeline/render.py \
   --blueprint $REEL_DIR/$SLUG-he-reels.md \
   --audio-dir $AUDIO_DIR \
@@ -420,11 +467,12 @@ python3 scripts/pipeline/render.py \
   --output $REEL_DIR/reel_01/reel01_draft.mp4 \
   --reel 1 --render \
   --clip-override 1:$ASSETS_DIR/kling_scene01.mp4 \
-  --clip-override 2:$SCENES_DIR/scene02_timeline.mp4 \
-  --clip-override 4:$SCENES_DIR/scene04_exclamation.mp4 \
+  --clip-override 2:$ASSETS_DIR/kling_scene02.mp4 \
+  --clip-override 3:$SCENES_DIR/scene04_exclamation.mp4 \
+  --clip-override 4:$ASSETS_DIR/kling_scene04.mp4 \
   --clip-override 5:$SCENES_DIR/scene05_cta.mp4
 
-# 5. Subtitle
+# 6. Subtitle
 python3 scripts/pipeline/subtitle.py \
   --video $REEL_DIR/reel_01/reel01_draft.mp4 \
   --transcript $AUDIO_DIR/transcript.json \
