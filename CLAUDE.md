@@ -166,6 +166,7 @@ PDFs are educational lead magnets. They build trust and generate inbound.
 - See `market.md` — PDF Audience Framing for publication reference and reader profile
 - Before placing images in a PDF, run the Image Selection step in `templates/pdf/beginner-guide-template.md`
 - For rendering instructions (HTML authoring, PDF generation command, stylesheet), see `docs/pdf-pipeline.md`
+- **Logo:** When generating PDF HTML, include `<img src="../../../../assets/branding/logo-wide.png" class="pdf-logo" alt="" />` as the first element inside `<body>`, before any section content.
 
 ---
 

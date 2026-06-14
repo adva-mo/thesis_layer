@@ -323,9 +323,9 @@ python3 scripts/pipeline/render.py \
 
 ---
 
-### subtitle.py — Add subtitles
+### subtitle.py — Add subtitles + logo watermark
 
-Composites Hebrew subtitles onto the rendered video using the `transcript.json` alignment.
+Composites Hebrew subtitles onto the rendered video using the `transcript.json` alignment. Also automatically applies the brand logo watermark (top-right corner, 200px wide, 36px padding) from `assets/branding/logo-wide.png` on every frame. No author action required — the logo is applied if the file exists, skipped silently if not.
 
 ```bash
 python3 scripts/pipeline/subtitle.py \

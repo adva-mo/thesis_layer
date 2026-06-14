@@ -17,6 +17,7 @@ from typing import Literal, Optional
 
 from PIL import Image, ImageDraw, ImageFont
 
+from .config import LOGO_PATH, LOGO_WIDTH, LOGO_PADDING
 from .text_overlay import FONT_PATH, TEXT_Y_RATIO, BAR_PADDING_X, BAR_PADDING_Y, BAR_RADIUS
 
 # ── Defaults ──────────────────────────────────────────────────────
@@ -422,6 +423,15 @@ def _apply_timed_overlays(
     fps_parts = parts[2].split("/")
     fps = float(fps_parts[0]) / float(fps_parts[1])
 
+    logo_img = None
+    logo_x = logo_y = 0
+    if LOGO_PATH.exists():
+        _logo = Image.open(LOGO_PATH).convert("RGBA")
+        _logo_h = int(_logo.height * LOGO_WIDTH / _logo.width)
+        logo_img = _logo.resize((LOGO_WIDTH, _logo_h), Image.LANCZOS)
+        logo_x = w - LOGO_WIDTH - LOGO_PADDING
+        logo_y = LOGO_PADDING
+
     frame_size = w * h * 4  # RGBA bytes per frame
 
     # Sort spans by start time for fast lookup
@@ -465,10 +475,13 @@ def _apply_timed_overlays(
                 break
             t = frame_num / fps + time_offset
             sub_img = active_image(t)
-            if sub_img:
+            if sub_img or logo_img:
                 base = Image.frombytes("RGBA", (w, h), raw)
-                composited = Image.alpha_composite(base, sub_img)
-                writer.stdin.write(composited.tobytes())
+                if logo_img:
+                    base.paste(logo_img, (logo_x, logo_y), logo_img)
+                if sub_img:
+                    base = Image.alpha_composite(base, sub_img)
+                writer.stdin.write(base.tobytes())
             else:
                 writer.stdin.write(raw)
             frame_num += 1

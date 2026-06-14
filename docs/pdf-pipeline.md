@@ -53,6 +53,20 @@ Currently embedded inline in each HTML file. If styles diverge across projects, 
 - The PDF Image Plan section from the `.md` file is intentionally excluded from the HTML.
 - Images use relative paths from the HTML file location (`../../../../assets/...`).
 
+## Logo
+
+Include the brand logo as the first element inside `<body>`, before any `<div class="pdf-section">`:
+
+```html
+<img src="../../../../assets/branding/logo-wide.png" class="pdf-logo" alt="" />
+```
+
+The `.pdf-logo` class in `templates/pdf/style.css` overrides the global `img` rule to render the logo at 40px height with no border-radius and no `object-fit: cover`.
+
+The relative path `../../../../assets/branding/logo-wide.png` resolves correctly from `output/[slug]/hebrew/pdfs/`.
+
+---
+
 ## Bidi handling
 
 Hebrew paragraphs containing multiple inline English phrases produce bidi rendering artifacts — words, numbers, and punctuation appear in the wrong order or on the wrong side. This happens because the Unicode bidi algorithm struggles with long paragraphs that cross script boundaries multiple times.
