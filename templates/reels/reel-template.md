@@ -338,7 +338,7 @@ ElevenLabs at current settings (1.35× speed + 1.1× ffmpeg) speaks at roughly 3
 | 10–15s | Insight / body | 22–32 | 3–4 |
 | 13–18s | Prove / area | 28–40 | 3–5 |
 | 8–12s | Reality check | 18–26 | 2–3 |
-| 4–6s | CTA | 6–10 | 1 |
+| 5–7s | CTA | 10–14 | 1–2 |
 
 Self-check:
 1. Note the timestamp span — that is your duration target
@@ -396,8 +396,8 @@ TTS cannot expand abbreviations. When the VO text contains abbreviations (kept f
 
 **Rule E — CTA keywords**
 Keep keywords ALL-CAPS in `[VO:]` for readability. Write lowercase in `[TTS:]` so ElevenLabs pronounces them as words.
-- `[VO:] "כתבו לי CLUB לקבל את הניתוח"`
-  `[TTS:] "כתבו לי club לקבל את הניתוח"`
+- `[VO:] "רוצים את ה-Thesis המלא?\nתגיבו CLUB\nואשלח את הניתוח."`
+  `[TTS:] "רוצים את ה-thesis המלא?\nתגיבו club\nואשלח את הניתוח."`
 
 **Rule G — Decimal numbers**
 Write the rounded numeral in `[VO:]`, Hebrew words in `[TTS:]`.

@@ -19,6 +19,7 @@ Usage:
 """
 
 import argparse
+import json
 import shutil
 import sys
 import tempfile
@@ -152,6 +153,12 @@ def main():
             clip_overrides=clip_overrides,
             leading_pad_ms=args.leading_pad_ms,
             trailing_pad_ms=args.trailing_pad_ms,
+        )
+        # Write sidecar so subtitle.py picks up the correct pad automatically
+        sidecar = output.with_suffix(".render.json")
+        sidecar.write_text(
+            json.dumps({"leading_pad_ms": args.leading_pad_ms, "trailing_pad_ms": args.trailing_pad_ms}),
+            encoding="utf-8",
         )
     finally:
         if not args.keep_tmp:

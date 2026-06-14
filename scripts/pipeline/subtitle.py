@@ -25,6 +25,7 @@ Outputs:
 """
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -76,6 +77,8 @@ def main():
                         help=f"Subtitle font size (default: {FONT_SIZE_SUBTITLE})")
     parser.add_argument("--font",       default=str(FONT_PATH),
                         help="Path to .ttf font file")
+    parser.add_argument("--leading-pad-ms", type=int, default=300, metavar="MS",
+                        help="Leading pad added by render.py — subtitles are shifted by this amount (default: 300)")
     args = parser.parse_args()
 
     video_path      = Path(args.video)
@@ -87,6 +90,21 @@ def main():
             print(f"Error: {name} not found — {p}")
             sys.exit(1)
 
+    # Auto-read leading pad from render sidecar if present; CLI flag overrides
+    leading_pad_ms = args.leading_pad_ms
+    sidecar = video_path.with_suffix(".render.json")
+    sidecar_source = "default"
+    if sidecar.exists():
+        try:
+            data = json.loads(sidecar.read_text(encoding="utf-8"))
+            if "leading_pad_ms" in data and args.leading_pad_ms == 300:
+                leading_pad_ms = data["leading_pad_ms"]
+                sidecar_source = f"sidecar ({sidecar.name})"
+        except Exception:
+            pass
+    else:
+        sidecar_source = "default (no sidecar found)"
+
     preview_segment = _parse_segment(args.preview_segment) if args.preview_segment else None
     output_path = _output_path(video_path, preview_segment)
 
@@ -97,6 +115,7 @@ def main():
     print(f"  Max words:  {args.max_words}")
     if preview_segment:
         print(f"  Segment:    {preview_segment[0]:.0f}s – {preview_segment[1]:.0f}s  (preview)")
+    print(f"  Leading pad: {leading_pad_ms}ms  [{sidecar_source}]")
     print(f"  Output:     {output_path.name}\n")
 
     apply_subtitles(
@@ -109,6 +128,7 @@ def main():
         max_words=args.max_words,
         max_chars=args.max_chars,
         preview_segment=preview_segment,
+        leading_pad_s=leading_pad_ms / 1000.0,
     )
 
     size_mb = output_path.stat().st_size / (1024 * 1024)

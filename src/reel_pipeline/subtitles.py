@@ -17,7 +17,7 @@ from typing import Literal, Optional
 
 from PIL import Image, ImageDraw, ImageFont
 
-from .config import LOGO_PATH, LOGO_WIDTH, LOGO_PADDING
+
 from .text_overlay import FONT_PATH, TEXT_Y_RATIO, BAR_PADDING_X, BAR_PADDING_Y, BAR_RADIUS, _draw_halo
 
 # ── Defaults ──────────────────────────────────────────────────────
@@ -31,9 +31,11 @@ DEFAULT_MAX_CHARS   = 22     # total chars (incl. spaces) per phrase — prevent
 FONT_SIZE_SUBTITLE  = 86
 
 HIGHLIGHT_COLOR     = (255, 255, 255, 255)   # active word
-DIM_COLOR           = (255, 255, 255, 178)   # other words in phrase (~70% opacity)
-SHADOW_COLOR        = (0, 0, 0, 130)         # cinematic drop shadow (~51% opacity)
-SHADOW_OFFSET       = 2                      # px diagonal offset
+DIM_COLOR           = (255, 255, 255, 255)   # other words — fully white, glow distinguishes active
+SHADOW_COLOR        = (0, 0, 0, 170)         # cinematic shadow (~67% opacity)
+SHADOW_OFFSET       = 4                      # px — multi-radius fill via _draw_halo
+ACTIVE_GLOW_COLOR   = (255, 255, 255, 55)    # soft white glow ring around active word
+ACTIVE_GLOW_OFFSET  = 2                      # px offset for the glow pass
 
 PUNCTUATION_SPLIT   = set(".?!,—;:")
 
@@ -176,9 +178,12 @@ def _render_two_lines(
     def draw_line(metrics, total_w, base_y, vis_active):
         x = bar_x + (bar_w - total_w) // 2
         for i, (word, adv, bbox) in enumerate(metrics):
-            color = HIGHLIGHT_COLOR if (highlight_all or i == vis_active) else DIM_COLOR
+            is_active = highlight_all or i == vis_active
+            color = HIGHLIGHT_COLOR if is_active else DIM_COLOR
             draw_x = x - bbox[0]
             _draw_halo(draw, (draw_x, base_y), word, font, SHADOW_COLOR, SHADOW_OFFSET)
+            if is_active and not highlight_all:
+                _draw_halo(draw, (draw_x, base_y), word, font, ACTIVE_GLOW_COLOR, ACTIVE_GLOW_OFFSET)
             draw.text((draw_x, base_y), word, font=font, fill=color)
             x += adv + space_w
 
@@ -336,6 +341,8 @@ def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, heigh
         color = HIGHLIGHT_COLOR if i == visual_active_idx else DIM_COLOR
         draw_x = x - word_bbox[0]
         _draw_halo(draw, (draw_x, base_draw_y), word, font, SHADOW_COLOR, SHADOW_OFFSET)
+        if i == visual_active_idx:
+            _draw_halo(draw, (draw_x, base_draw_y), word, font, ACTIVE_GLOW_COLOR, ACTIVE_GLOW_OFFSET)
         draw.text((draw_x, base_draw_y), word, font=font, fill=color)
         x += advance_w + space_w
 
@@ -429,15 +436,6 @@ def _apply_timed_overlays(
     fps_parts = parts[2].split("/")
     fps = float(fps_parts[0]) / float(fps_parts[1])
 
-    logo_img = None
-    logo_x = logo_y = 0
-    if LOGO_PATH.exists():
-        _logo = Image.open(LOGO_PATH).convert("RGBA")
-        _logo_h = int(_logo.height * LOGO_WIDTH / _logo.width)
-        logo_img = _logo.resize((LOGO_WIDTH, _logo_h), Image.LANCZOS)
-        logo_x = w - LOGO_WIDTH - LOGO_PADDING
-        logo_y = LOGO_PADDING
-
     frame_size = w * h * 4  # RGBA bytes per frame
 
     # Sort spans by start time for fast lookup
@@ -481,10 +479,8 @@ def _apply_timed_overlays(
                 break
             t = frame_num / fps + time_offset
             sub_img = active_image(t)
-            if sub_img or logo_img:
+            if sub_img:
                 base = Image.frombytes("RGBA", (w, h), raw)
-                if logo_img:
-                    base.paste(logo_img, (logo_x, logo_y), logo_img)
                 if sub_img:
                     base = Image.alpha_composite(base, sub_img)
                 writer.stdin.write(base.tobytes())
@@ -530,6 +526,7 @@ def apply_subtitles(
     width: int = 1080,
     height: int = 1920,
     preview_segment: Optional[tuple[float, float]] = None,
+    leading_pad_s: float = 0.0,
 ) -> Path:
     from .fal_wizper import load_transcript
 
@@ -548,8 +545,6 @@ def apply_subtitles(
 
     spans = build_spans(phrases, mode, font, width, height)
 
-    time_offset = preview_segment[0] if preview_segment else 0.0
-
     if preview_segment:
         seg_start, seg_end = preview_segment
         # Trim video to segment window first
@@ -565,4 +560,7 @@ def apply_subtitles(
         trimmed.unlink(missing_ok=True)
         return result_path
 
-    return _apply_timed_overlays(video_path, spans, output_path, time_offset=0.0)
+    # Subtract the leading pad so subtitle timestamps stay locked to the VO audio.
+    # With a pad of P seconds, video frame at time T contains VO audio at time T-P.
+    # time_offset = -P makes the frame→transcript lookup: t = frame_time - P.
+    return _apply_timed_overlays(video_path, spans, output_path, time_offset=-leading_pad_s)

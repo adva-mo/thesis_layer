@@ -33,10 +33,11 @@ _HALO_OFFSETS = [
 
 
 def _draw_halo(draw, xy, text, font, shadow_color, offset):
-    """Render text at 8 compass offsets to create a clean all-around shadow halo."""
+    """Multi-radius halo: fills every radius 1..offset for a thick cinematic shadow."""
     x, y = xy
-    for dx, dy in _HALO_OFFSETS:
-        draw.text((x + dx * offset, y + dy * offset), text, font=font, fill=shadow_color)
+    for r in range(1, offset + 1):
+        for dx, dy in _HALO_OFFSETS:
+            draw.text((x + dx * r, y + dy * r), text, font=font, fill=shadow_color)
 
 
 def _visual_hebrew(text: str) -> str:

@@ -73,8 +73,7 @@ Apply to the tier structure defined in `CLAUDE.md §7`. For primary language CTA
 - "If you want to dig into the numbers, let's talk."
 
 ### Tier 2 — Medium CTA
-- "DM me 'DUBAI' for the full investment breakdown."
-- "Save this — you'll want to reference these numbers."
+- "Want the full Thesis? Comment [KEYWORD] and I'll send you the breakdown."
 
 ### Tier 3 — Direct CTA
 - "Want me to send you the full project file?"
