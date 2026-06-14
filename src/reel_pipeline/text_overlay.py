@@ -11,18 +11,32 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 
-FONT_PATH = Path("/System/Library/Fonts/Supplemental/Arial Unicode.ttf")
+FONT_PATH = Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf")
 
-# Vertical position: center of lower third (avoid bottom 15% for UI overlap)
-TEXT_Y_RATIO = 0.78
+# Bottom edge of subtitle block — block grows upward from this Y position
+TEXT_Y_RATIO = 0.75
 
 # Text style
-FONT_SIZE      = 68
+FONT_SIZE      = 72
 TEXT_COLOR     = (255, 255, 255, 255)
-BAR_COLOR      = (0, 0, 0, 180)
-BAR_PADDING_X  = 48
-BAR_PADDING_Y  = 22
-BAR_RADIUS     = 16
+BAR_PADDING_X  = 40
+BAR_PADDING_Y  = 20
+BAR_RADIUS     = 0   # exported for subtitles.py; box removed from this renderer
+SHADOW_COLOR   = (0, 0, 0, 100)
+SHADOW_OFFSET  = 2
+
+# 8-direction halo offsets
+_HALO_OFFSETS = [
+    (-1, 0), (1, 0), (0, -1), (0, 1),
+    (-1, -1), (1, -1), (-1, 1), (1, 1),
+]
+
+
+def _draw_halo(draw, xy, text, font, shadow_color, offset):
+    """Render text at 8 compass offsets to create a clean all-around shadow halo."""
+    x, y = xy
+    for dx, dy in _HALO_OFFSETS:
+        draw.text((x + dx * offset, y + dy * offset), text, font=font, fill=shadow_color)
 
 
 def _visual_hebrew(text: str) -> str:
@@ -35,7 +49,7 @@ def _visual_hebrew(text: str) -> str:
 
 
 def _render_text_overlay(text: str, width: int, height: int, font_path: Path, font_size: int) -> Image.Image:
-    """Return a transparent RGBA image with the text pill rendered."""
+    """Return a transparent RGBA image with the text rendered."""
     visual = _visual_hebrew(text)
     font = ImageFont.truetype(str(font_path), font_size)
 
@@ -44,27 +58,21 @@ def _render_text_overlay(text: str, width: int, height: int, font_path: Path, fo
     draw = ImageDraw.Draw(tmp)
     bbox = draw.textbbox((0, 0), visual, font=font)
     text_w = bbox[2] - bbox[0]
-    text_h = bbox[3] - bbox[1]
+    ascent, descent = font.getmetrics()
+    line_h = ascent + descent
 
     bar_w = text_w + BAR_PADDING_X * 2
-    bar_h = text_h + BAR_PADDING_Y * 2
+    bar_h = line_h + BAR_PADDING_Y * 2
 
     overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
 
     bar_x = (width - bar_w) // 2
-    bar_y = int(height * TEXT_Y_RATIO) - bar_h // 2
+    bar_y = int(height * TEXT_Y_RATIO) - bar_h
 
-    # Dark pill background
-    draw.rounded_rectangle(
-        [bar_x, bar_y, bar_x + bar_w, bar_y + bar_h],
-        radius=BAR_RADIUS,
-        fill=BAR_COLOR,
-    )
-
-    # Text centered on pill
     text_x = bar_x + BAR_PADDING_X
     text_y = bar_y + BAR_PADDING_Y
+    _draw_halo(draw, (text_x, text_y), visual, font, SHADOW_COLOR, SHADOW_OFFSET)
     draw.text((text_x, text_y), visual, font=font, fill=TEXT_COLOR)
 
     return overlay

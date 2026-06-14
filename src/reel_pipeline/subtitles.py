@@ -18,25 +18,26 @@ from typing import Literal, Optional
 from PIL import Image, ImageDraw, ImageFont
 
 from .config import LOGO_PATH, LOGO_WIDTH, LOGO_PADDING
-from .text_overlay import FONT_PATH, TEXT_Y_RATIO, BAR_PADDING_X, BAR_PADDING_Y, BAR_RADIUS
+from .text_overlay import FONT_PATH, TEXT_Y_RATIO, BAR_PADDING_X, BAR_PADDING_Y, BAR_RADIUS, _draw_halo
 
 # ── Defaults ──────────────────────────────────────────────────────
 
 DEFAULT_MODE        = "highlighted_phrase"
-DEFAULT_MAX_WORDS   = 5
-DEFAULT_MAX_DUR     = 2.5
-DEFAULT_PAUSE_THR   = 0.35   # seconds between words to trigger phrase split
-DEFAULT_MAX_CHARS   = 20     # total chars (incl. spaces) per phrase — prevents wide overflow
+DEFAULT_MAX_WORDS   = 6
+DEFAULT_MAX_DUR     = 3.2
+DEFAULT_PAUSE_THR   = 0.40   # seconds between words to trigger phrase split
+DEFAULT_MAX_CHARS   = 22     # total chars (incl. spaces) per phrase — prevents wide overflow
 
-FONT_SIZE_SUBTITLE  = 77
+FONT_SIZE_SUBTITLE  = 86
 
 HIGHLIGHT_COLOR     = (255, 255, 255, 255)   # active word
-DIM_COLOR           = (255, 255, 255, 155)   # other words in phrase (~60% opacity)
-BAR_COLOR           = (0, 0, 0, 175)
+DIM_COLOR           = (255, 255, 255, 178)   # other words in phrase (~70% opacity)
+SHADOW_COLOR        = (0, 0, 0, 130)         # cinematic drop shadow (~51% opacity)
+SHADOW_OFFSET       = 2                      # px diagonal offset
 
 PUNCTUATION_SPLIT   = set(".?!,—;:")
 
-LINE_GAP = 14   # px between lines in a two-line subtitle pill
+LINE_GAP = 26   # px between lines in a two-line subtitle
 
 SubtitleMode = Literal["phrase", "highlighted_phrase", "single_word"]
 
@@ -152,28 +153,27 @@ def _render_two_lines(
     total_w1 = sum(m[1] for m in met1) + space_w * max(0, n1 - 1) if met1 else 0
     total_w2 = sum(m[1] for m in met2) + space_w * max(0, n2 - 1) if met2 else 0
 
-    h1 = max(m[2][3] - m[2][1] for m in met1) if met1 else 0
-    h2 = max(m[2][3] - m[2][1] for m in met2) if met2 else 0
     top1 = min(m[2][1] for m in met1) if met1 else 0
     top2 = min(m[2][1] for m in met2) if met2 else 0
+    ascent, descent = font.getmetrics()
+    line_h = ascent + descent
 
     bar_w = max(total_w1, total_w2) + BAR_PADDING_X * 2
-    bar_h = h1 + LINE_GAP + h2 + BAR_PADDING_Y * 2
+    bar_h = line_h * 2 + LINE_GAP + BAR_PADDING_Y * 2
     bar_x = (width - bar_w) // 2
-    bar_y = int(height * TEXT_Y_RATIO) - bar_h // 2
-
-    draw.rounded_rectangle([bar_x, bar_y, bar_x + bar_w, bar_y + bar_h],
-                            radius=BAR_RADIUS, fill=BAR_COLOR)
+    bar_y = int(height * TEXT_Y_RATIO) - bar_h
 
     def draw_line(metrics, total_w, base_y, vis_active):
         x = bar_x + (bar_w - total_w) // 2
         for i, (word, adv, bbox) in enumerate(metrics):
             color = HIGHLIGHT_COLOR if (highlight_all or i == vis_active) else DIM_COLOR
-            draw.text((x - bbox[0], base_y), word, font=font, fill=color)
+            draw_x = x - bbox[0]
+            _draw_halo(draw, (draw_x, base_y), word, font, SHADOW_COLOR, SHADOW_OFFSET)
+            draw.text((draw_x, base_y), word, font=font, fill=color)
             x += adv + space_w
 
     draw_line(met1, total_w1, bar_y + BAR_PADDING_Y - top1, va1)
-    draw_line(met2, total_w2, bar_y + BAR_PADDING_Y + h1 + LINE_GAP - top2, va2)
+    draw_line(met2, total_w2, bar_y + BAR_PADDING_Y + line_h + LINE_GAP - top2, va2)
 
     return img
 
@@ -252,20 +252,17 @@ def _render_uniform(text: str, color, font, width: int, height: int) -> Image.Im
 
     bbox = draw.textbbox((0, 0), visual, font=font)
     text_w = bbox[2] - bbox[0]
-    text_h = bbox[3] - bbox[1]
+    ascent, descent = font.getmetrics()
+    line_h = ascent + descent
 
     bar_w = text_w + BAR_PADDING_X * 2
-    bar_h = text_h + BAR_PADDING_Y * 2
+    bar_h = line_h + BAR_PADDING_Y * 2
     bar_x = (width - bar_w) // 2
-    bar_y = int(height * TEXT_Y_RATIO) - bar_h // 2
+    bar_y = int(height * TEXT_Y_RATIO) - bar_h
 
-    draw.rounded_rectangle([bar_x, bar_y, bar_x + bar_w, bar_y + bar_h],
-                            radius=BAR_RADIUS, fill=BAR_COLOR)
-
-    # Offset by bbox[0]/bbox[1] so the bounding box top-left lands at
-    # (bar_x + PAD, bar_y + PAD) — not the raw anchor point.
     draw_x = bar_x + BAR_PADDING_X - bbox[0]
     draw_y = bar_y + BAR_PADDING_Y - bbox[1]
+    _draw_halo(draw, (draw_x, draw_y), visual, font, SHADOW_COLOR, SHADOW_OFFSET)
     draw.text((draw_x, draw_y), visual, font=font, fill=color)
     return img
 
@@ -313,16 +310,14 @@ def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, heigh
         word_metrics.append((word, advance_w, bbox))
 
     total_w = sum(m[1] for m in word_metrics) + space_w * max(0, n_visual - 1)
-    max_h = max(m[2][3] - m[2][1] for m in word_metrics) if word_metrics else 0
     min_top = min(m[2][1] for m in word_metrics) if word_metrics else 0
+    ascent, descent = font.getmetrics()
+    line_h = ascent + descent
 
     bar_w = total_w + BAR_PADDING_X * 2
-    bar_h = max_h + BAR_PADDING_Y * 2
+    bar_h = line_h + BAR_PADDING_Y * 2
     bar_x = (width - bar_w) // 2
-    bar_y = int(height * TEXT_Y_RATIO) - bar_h // 2
-
-    draw.rounded_rectangle([bar_x, bar_y, bar_x + bar_w, bar_y + bar_h],
-                            radius=BAR_RADIUS, fill=BAR_COLOR)
+    bar_y = int(height * TEXT_Y_RATIO) - bar_h
 
     x = bar_x + BAR_PADDING_X
     base_draw_y = bar_y + BAR_PADDING_Y - min_top
@@ -330,6 +325,7 @@ def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, heigh
     for i, (word, advance_w, word_bbox) in enumerate(word_metrics):
         color = HIGHLIGHT_COLOR if i == visual_active_idx else DIM_COLOR
         draw_x = x - word_bbox[0]
+        _draw_halo(draw, (draw_x, base_draw_y), word, font, SHADOW_COLOR, SHADOW_OFFSET)
         draw.text((draw_x, base_draw_y), word, font=font, fill=color)
         x += advance_w + space_w
 
