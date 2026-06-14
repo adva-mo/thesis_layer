@@ -88,8 +88,8 @@ def run_dry(
     rel_image = _rel(image_path)
     rel_output = _rel(output_path)
 
-    from PIL import Image as _Img
     try:
+        from PIL import Image as _Img
         _img = _Img.open(image_path)
         _w, _h = _img.size
         will_crop = (_w / _h) > (9 / 16) * 1.05

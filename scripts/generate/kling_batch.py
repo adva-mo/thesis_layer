@@ -53,7 +53,10 @@ def _estimate_cost(scenes_to_generate: list, model: str) -> str:
         "hailuo":      0.49,
         "veo3":        0.25,
     }
-    per_5s = next((v for k, v in costs.items() if k in model), 0.56)
+    matched = next(((k, v) for k, v in costs.items() if k in model), None)
+    if matched is None:
+        print(f"  Warning: unknown model '{model}' — cost estimate uses v3/pro price ($0.56/5s)")
+    per_5s = matched[1] if matched else 0.56
     total = sum(per_5s * (_clip_duration(s.end_s - s.start_s) / 5) for s in scenes_to_generate)
     return f"~${total:.2f} ({', '.join(f'scene{s.index}=${per_5s * _clip_duration(s.end_s - s.start_s) / 5:.2f}' for s in scenes_to_generate)})"
 
@@ -116,6 +119,10 @@ def main() -> None:
         if scene.asset_type != "image" or not in_filter:
             label = "generated — skip" if scene.asset_type != "image" else "filtered — skip"
             print(f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]  {label}")
+            continue
+
+        if scene.asset_path is None or not scene.asset_path.exists():
+            print(f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]  image  [asset missing — skip]")
             continue
 
         dur       = _clip_duration(scene.end_s - scene.start_s)
