@@ -118,7 +118,7 @@ def main():
     if not font_path.exists():
         print(f"Warning: font not found at {font_path} — text overlays may fail")
 
-    scenes = parse_reel_file(blueprint, reel_number=args.reel, assets_dir=assets_dir)
+    scenes = parse_reel_file(blueprint, reel_number=args.reel, assets_dir=assets_dir, repo_root=REPO_ROOT)
 
     if not scenes:
         print(f"No scenes found for Reel {args.reel}.")

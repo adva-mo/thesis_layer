@@ -48,12 +48,19 @@ def _resolve_asset_from_text(visual: str, assets_dir: Optional[Path]) -> tuple[s
     return "generated", None
 
 
-def _parse_vep_table(body: str, assets_dir: Optional[Path]) -> tuple[dict[str, Path], dict[str, Path]]:
+def _parse_vep_table(
+    body: str,
+    assets_dir: Optional[Path],
+    repo_root: Optional[Path] = None,
+) -> tuple[dict[str, Path], dict[str, Path]]:
     """
-    Parse the Visual Evidence Plan table to extract timestamp → canonical asset path mappings.
+    Parse the Visual Evidence Plan table to extract timestamp → asset path mappings.
 
-    Returns (image_mapping, clip_mapping) where keys are normalized timestamp strings
-    like "15–28s" and values are resolved Paths.
+    Resolves two path forms so the VEP table is the single source of truth:
+      • canonical/filename  → assets_dir / filename
+      • any/other/path.mp4  → repo_root / path  (scenes clips, output clips, etc.)
+
+    Returns (image_mapping, clip_mapping) keyed by normalised timestamp string.
     """
     image_mapping: dict[str, Path] = {}
     clip_mapping:  dict[str, Path] = {}
@@ -72,19 +79,30 @@ def _parse_vep_table(body: str, assets_dir: Optional[Path]) -> tuple[dict[str, P
         if not file_cell or file_cell in ("—", "-", "File", "file"):
             continue
 
-        # Handle "reuse — canonical/filename" format
         file_cell = re.sub(r"^reuse\s*[–—-]\s*", "", file_cell).strip()
 
-        m = re.search(r"canonical/([\w\-]+\.(?:jpg|jpeg|png|webp|mp4|mov))", file_cell, re.IGNORECASE)
-        if not m:
-            continue
+        ext_pat = r"\.(?:jpg|jpeg|png|webp|mp4|mov)"
 
-        filename = m.group(1)
-        if assets_dir:
-            p = assets_dir / filename
+        # Strategy 1: canonical/filename — resolve via assets_dir
+        m = re.search(r"canonical/([\w\-]+(?:/" + r"[\w\-]+" + r")*" + ext_pat + r")", file_cell, re.IGNORECASE)
+        if m and assets_dir:
+            p = assets_dir / m.group(1)
             if p.exists():
                 ts_key = re.sub(r"[–—]", "–", ts_cell)
-                if filename.lower().endswith((".mp4", ".mov")):
+                fname = m.group(1)
+                if fname.lower().endswith((".mp4", ".mov")):
+                    clip_mapping[ts_key] = p
+                else:
+                    image_mapping[ts_key] = p
+            continue
+
+        # Strategy 2: any repo-relative path — resolve via repo_root
+        m2 = re.search(r"([\w\-]+(?:/[\w\-]+)+" + ext_pat + r")", file_cell, re.IGNORECASE)
+        if m2 and repo_root:
+            p = repo_root / m2.group(1)
+            if p.exists():
+                ts_key = re.sub(r"[–—]", "–", ts_cell)
+                if m2.group(1).lower().endswith((".mp4", ".mov")):
                     clip_mapping[ts_key] = p
                 else:
                     image_mapping[ts_key] = p
@@ -97,7 +115,12 @@ def _ts_key(start_s: float, end_s: float) -> str:
     return f"{int(start_s)}–{int(end_s)}s"
 
 
-def parse_reel_file(md_path: Path, reel_number: int = 1, assets_dir: Optional[Path] = None) -> list[Scene]:
+def parse_reel_file(
+    md_path: Path,
+    reel_number: int = 1,
+    assets_dir: Optional[Path] = None,
+    repo_root: Optional[Path] = None,
+) -> list[Scene]:
     content = md_path.read_text(encoding="utf-8")
 
     reel_splits = re.split(r"^## (Reel \d+ — .+?)$", content, flags=re.MULTILINE)
@@ -115,7 +138,7 @@ def parse_reel_file(md_path: Path, reel_number: int = 1, assets_dir: Optional[Pa
     full_reel_body = reel_splits[target_heading_idx + 1]
     script_body = re.split(r"^### Caption", full_reel_body, maxsplit=1, flags=re.MULTILINE)[0]
 
-    image_mapping, clip_mapping = _parse_vep_table(full_reel_body, assets_dir)
+    image_mapping, clip_mapping = _parse_vep_table(full_reel_body, assets_dir, repo_root)
 
     blocks = re.split(r"\n---+\n", script_body)
 
