@@ -47,6 +47,7 @@ def assemble_reel(
     font_path: Path = FONT_PATH,
     font_size: int = FONT_SIZE,
     clip_overrides: Optional[dict[int, Path]] = None,
+    leading_pad_ms: int = 0,
     trailing_pad_ms: int = 0,
 ) -> Path:
     work_dir.mkdir(parents=True, exist_ok=True)
@@ -134,6 +135,29 @@ def assemble_reel(
         str(audio_only),
         label="concat audio",
     )
+
+    # ── Leading pad (freeze first frame + silence) ───────────────
+    if leading_pad_ms > 0:
+        pad_s = leading_pad_ms / 1000.0
+        print(f"  Padding start by {leading_pad_ms}ms...")
+        padded_video = work_dir / "video_only_lead_padded.mp4"
+        padded_audio = work_dir / "audio_only_lead_padded.mp3"
+        _ffmpeg(
+            "-i", str(video_only),
+            "-vf", f"tpad=start_mode=clone:start_duration={pad_s}",
+            "-c:v", "libx264", "-preset", "fast", "-crf", "18",
+            str(padded_video),
+            label="pad video start",
+        )
+        _ffmpeg(
+            "-i", str(audio_only),
+            "-af", f"adelay={leading_pad_ms}:all=1",
+            "-c:a", "libmp3lame", "-q:a", "2",
+            str(padded_audio),
+            label="pad audio start",
+        )
+        video_only = padded_video
+        audio_only = padded_audio
 
     # ── Trailing pad (freeze last frame + silence) ────────────────
     if trailing_pad_ms > 0:

@@ -308,7 +308,8 @@ python3 scripts/pipeline/render.py \
 **Key flags:**
 - `--render` — required to produce output (omit for dry-run plan)
 - `--clip-override SCENE:PATH` — override visual for scene N with a specific pre-rendered clip (animated timeline, exclamation, CTA). Falls back to static generated graphic if omitted.
-- `--trailing-pad-ms N` — freeze last frame + pad audio by N ms (default: 300ms, prevents VO cutoff)
+- `--leading-pad-ms N` — freeze first frame + pad audio by N ms at start (default: 300ms)
+- `--trailing-pad-ms N` — freeze last frame + pad audio by N ms at end (default: 300ms, prevents VO cutoff)
 - `--max-scenes N` — limit to first N scenes (useful for POC testing)
 - `--keep-tmp` — keep the intermediate work directory for debugging
 
