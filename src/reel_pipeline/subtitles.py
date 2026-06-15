@@ -482,8 +482,7 @@ def _apply_timed_overlays(
             sub_img = active_image(t)
             if sub_img:
                 base = Image.frombytes("RGBA", (w, h), raw)
-                if sub_img:
-                    base = Image.alpha_composite(base, sub_img)
+                base = Image.alpha_composite(base, sub_img)
                 writer.stdin.write(base.tobytes())
             else:
                 writer.stdin.write(raw)

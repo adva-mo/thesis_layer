@@ -92,7 +92,6 @@ def main():
             sys.exit(1)
 
     leading_pad_ms = args.leading_pad_ms
-    sidecar_source = "default"
 
     preview_segment = _parse_segment(args.preview_segment) if args.preview_segment else None
     output_path = _output_path(video_path, preview_segment)
@@ -104,7 +103,7 @@ def main():
     print(f"  Max words:  {args.max_words}")
     if preview_segment:
         print(f"  Segment:    {preview_segment[0]:.0f}s – {preview_segment[1]:.0f}s  (preview)")
-    print(f"  Leading pad: {leading_pad_ms}ms  [{sidecar_source}]")
+    print(f"  Leading pad: {leading_pad_ms}ms")
     print(f"  Output:     {output_path.name}\n")
 
     apply_subtitles(
@@ -127,7 +126,9 @@ def main():
         print()
         return
 
-    vc = json.loads((REPO_ROOT / "config" / "voice-settings.json").read_text())
+    cfg_path = REPO_ROOT / "config" / "voice-settings.json"
+    vc = json.loads(cfg_path.read_text()) if cfg_path.exists() else {}
+
     speed = vc.get("video_speed", 1.0)
     if speed != 1.0:
         stem = output_path.stem
