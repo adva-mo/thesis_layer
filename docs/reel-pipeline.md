@@ -118,7 +118,7 @@ python3 scripts/generate/vo_combined.py \
 
 **`[TTS:]` blocks:** if a segment has a `[TTS:]` block, that string is sent to ElevenLabs instead of `[VO:]`. `settings.json` records both `vo_text` and `tts_sent` per segment.
 
-**ElevenLabs settings:** single source of truth is `config/voice-settings.json` — both `vo_combined.py` and `vo.py` read from it at runtime. Current values: model `eleven_v3`, stability 0.45, similarity_boost 0.87, style 0.15, speed 1.2 + 1.1× ffmpeg atempo post-process.
+**ElevenLabs settings:** single source of truth is `config/voice-settings.json` — both `vo_combined.py` and `vo.py` read from it at runtime. Current values: model `eleven_v3`, stability 0.45, similarity_boost 0.87, style 0.15, speed 1.2 + 1.1× ffmpeg atempo post-process + 1.08× video speed (compact step in `subtitle.py`).
 
 **Pronunciation dictionary:** active entries are in `docs/pronunciation-log.md`. The dictionary is applied automatically when `EL_PRONUNCIATION_DICT_ID` and `EL_PRONUNCIATION_DICT_VERSION_ID` are set in `.env`. Every new version created in EL Studio requires updating `EL_PRONUNCIATION_DICT_VERSION_ID` in `.env` before regenerating — the script always uses the version pinned there.
 
@@ -430,15 +430,13 @@ Composites Hebrew subtitles onto the rendered video using the `transcript.json` 
 ```bash
 python3 scripts/pipeline/subtitle.py \
   --video output/[slug]/hebrew/reels/[slug]-he-reel-1-draft.mp4 \
-  --transcript output/[slug]/[lang]/reels/reel_01/transcript.json \
-  --mode highlighted_phrase \
-  --max-words 5
+  --transcript output/[slug]/[lang]/reels/reel_01/transcript.json
 ```
 
-**Output:** `[video_name]_subtitled.mp4` (same directory as input video).
+**Output:** `_subtitled.mp4`, then auto-compacts to `_final.mp4` at `video_speed` from `config/voice-settings.json`. Preview runs (`--preview-segment`) skip the compact step.
 
 **Modes:**
-- `highlighted_phrase` (default) — active word full white, others dimmed at ~60% opacity
+- `highlighted_phrase` (default) — active word full white (255,255,255), inactive slightly dimmed (210,210,210). Directional drop shadow (black 200α, 3px bottom-right) on all words. No glow. Top-anchored stable baseline — single-line and two-line phrases share the same vertical position; two-line expands downward.
 - `phrase` — all words in phrase equally bright
 - `single_word` — one word at a time
 
@@ -447,12 +445,13 @@ python3 scripts/pipeline/subtitle.py \
 **Key constants** (in `src/reel_pipeline/`):
 | Constant | Value | File |
 |----------|-------|------|
-| `FONT_SIZE_SUBTITLE` | 77pt | `subtitles.py` |
-| `BAR_PADDING_X` | 48px | `text_overlay.py` |
-| `BAR_PADDING_Y` | 22px | `text_overlay.py` |
-| `TEXT_Y_RATIO` | 0.78 | `text_overlay.py` |
-| `DEFAULT_MAX_WORDS` | 5 | `subtitles.py` |
-| `DEFAULT_PAUSE_THR` | 0.35s | `subtitles.py` |
+| `FONT_SIZE_SUBTITLE` | 86pt | `subtitles.py` |
+| `DEFAULT_MAX_WORDS` | 9 | `subtitles.py` |
+| `DEFAULT_MAX_CHARS` | 22 | `subtitles.py` |
+| `DEFAULT_PAUSE_THR` | 0.40s | `subtitles.py` |
+| `BAR_PADDING_X` | 40px | `text_overlay.py` |
+| `BAR_PADDING_Y` | 20px | `text_overlay.py` |
+| `TEXT_Y_RATIO` | 0.75 | `text_overlay.py` |
 
 ---
 
