@@ -493,7 +493,10 @@ output/[slug]/[lang]/reels/
     │   ├── seg02_4-15s.mp3
     │   ├── ...
     │   ├── alignment.json
-    │   └── transcript.json
+    │   ├── transcript.json
+    │   └── _tests/               ← all test/experiment outputs go here (safe to delete)
+    │       ├── seg01_test_style017.mp3
+    │       └── seg04_test_no_dirham_entry.mp3
     ├── scenes/                   ← pre-rendered animated clips (exclamation, CTA, etc.)
     │   ├── scene03_exclamation.mp4
     │   └── scene05_cta.mp4

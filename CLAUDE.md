@@ -250,6 +250,12 @@ output/
 
 Each project gets its own folder. The slug is lowercase, hyphens, derived from the project name (e.g., `arlington-park-2`, `sky-gardens`).
 
+### Test outputs:
+
+All test and experiment outputs (voice tuning samples, render tests, pronunciation tests) must be saved to a `_tests/` subfolder within the relevant directory — never alongside production files. `_tests/` is safe to delete at any time without affecting the pipeline.
+
+Example: `output/[slug]/[lang]/reels/reel_01/audio/_tests/seg04_test_style017.mp3`
+
 ### Content block headers:
 
 Label each generated item clearly:

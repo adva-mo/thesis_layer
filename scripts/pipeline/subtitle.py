@@ -90,20 +90,8 @@ def main():
             print(f"Error: {name} not found — {p}")
             sys.exit(1)
 
-    # Auto-read leading pad from render sidecar if present; CLI flag overrides
     leading_pad_ms = args.leading_pad_ms
-    sidecar = video_path.with_suffix(".render.json")
     sidecar_source = "default"
-    if sidecar.exists():
-        try:
-            data = json.loads(sidecar.read_text(encoding="utf-8"))
-            if "leading_pad_ms" in data and args.leading_pad_ms == 300:
-                leading_pad_ms = data["leading_pad_ms"]
-                sidecar_source = f"sidecar ({sidecar.name})"
-        except Exception:
-            pass
-    else:
-        sidecar_source = "default (no sidecar found)"
 
     preview_segment = _parse_segment(args.preview_segment) if args.preview_segment else None
     output_path = _output_path(video_path, preview_segment)

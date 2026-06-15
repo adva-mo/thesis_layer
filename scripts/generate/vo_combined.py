@@ -158,20 +158,8 @@ def main():
     if not segments:
         print(f"No VO segments found for reel {args.reel}"); sys.exit(1)
 
-    # Load settings.json from output dir if present
     vs = dict(VOICE_SETTINGS)
     atempo = ATEMPO
-    settings_path = output_dir / 'settings.json'
-    if settings_path.exists():
-        try:
-            saved = json.loads(settings_path.read_text(encoding='utf-8'))
-            for k, v in saved.get('voice_settings', {}).items():
-                vs[k] = v
-            if 'ffmpeg_atempo' in saved:
-                atempo = saved['ffmpeg_atempo']
-            print(f"  Settings loaded from settings.json")
-        except Exception:
-            pass
 
     # Build combined text + track offsets
     texts = [s['tts'] if s.get('tts') else s['text'] for s in segments]
@@ -285,20 +273,6 @@ def main():
     finally:
         os.unlink(combined_tmp)
 
-    # Save settings.json
-    payload = {
-        "model_id":         MODEL,
-        "voice_settings":   vs,
-        "ffmpeg_atempo":    atempo,
-        "source_reel_file": md_path.name,
-        "reel":             args.reel,
-        "combined_call":    True,
-        "segments": {info['filename']: {k: v for k, v in info.items() if k != 'filename'}
-                     for info in segments_info},
-    }
-    (output_dir / 'settings.json').write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2), encoding='utf-8'
-    )
 
     print(f"\n  Done.  {len(segments)} segments  |  1 API call")
     print(f"  Folder: {output_dir}\n")
