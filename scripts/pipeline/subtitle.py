@@ -26,6 +26,7 @@ Outputs:
 
 import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -120,7 +121,38 @@ def main():
     )
 
     size_mb = output_path.stat().st_size / (1024 * 1024)
-    print(f"  ✓ {output_path.name}  ({size_mb:.1f} MB)\n")
+    print(f"  ✓ {output_path.name}  ({size_mb:.1f} MB)")
+
+    if preview_segment:
+        print()
+        return
+
+    vc = json.loads((REPO_ROOT / "config" / "voice-settings.json").read_text())
+    speed = vc.get("video_speed", 1.0)
+    if speed != 1.0:
+        stem = output_path.stem
+        out_stem = stem[: -len("_subtitled")] + "_final" if stem.endswith("_subtitled") else stem + "_final"
+        final_path = output_path.parent / f"{out_stem}.mp4"
+        print(f"  Compacting {speed}×  →  {final_path.name}")
+        r = subprocess.run([
+            "ffmpeg", "-y", "-i", str(output_path),
+            "-filter_complex", f"[0:v]setpts=PTS/{speed}[v];[0:a]atempo={speed}[a]",
+            "-map", "[v]", "-map", "[a]",
+            "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac",
+            str(final_path),
+        ], capture_output=True)
+        if r.returncode != 0:
+            print(f"  ✗ compact failed:\n{r.stderr.decode()[-400:]}")
+        else:
+            dur = subprocess.run(
+                ["ffprobe", "-v", "quiet", "-show_entries", "format=duration",
+                 "-of", "csv=p=0", str(final_path)],
+                capture_output=True, text=True,
+            ).stdout.strip()
+            final_mb = final_path.stat().st_size / (1024 * 1024)
+            print(f"  ✓ {final_path.name}  ({final_mb:.1f} MB  {float(dur):.1f}s)\n")
+    else:
+        print()
 
 
 if __name__ == "__main__":
