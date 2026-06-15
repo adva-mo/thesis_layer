@@ -49,18 +49,25 @@ def load_env(path):
 ENV      = load_env(ENV_PATH)
 API_KEY  = ENV.get('ELEVENLABS_API_KEY', '')
 VOICE_ID = ENV.get('ELEVENLABS_VOICE_ID', '')
-MODEL    = 'eleven_v3'   # supports Hebrew with auto language detection
 LANGUAGE = 'he'
 
-SPEED = 1.1   # ffmpeg atempo multiplier applied after ElevenLabs generation
+def _load_voice_config():
+    import json
+    path = REPO_ROOT / 'config' / 'voice-settings.json'
+    if path.exists():
+        return json.loads(path.read_text(encoding='utf-8'))
+    return {}
 
-VOICE_SETTINGS = {
-    "stability":        0.38,
-    "similarity_boost": 0.72,
-    "style":            0.08,
+_vc            = _load_voice_config()
+MODEL          = _vc.get('model_id', 'eleven_v3')
+SPEED          = _vc.get('ffmpeg_atempo', 1.1)
+VOICE_SETTINGS = _vc.get('voice_settings', {
+    "stability":        0.45,
+    "similarity_boost": 0.87,
+    "style":            0.15,
     "use_speaker_boost": True,
-    "speed":            1.2,   # ElevenLabs cap is 1.2 as of 2026
-}
+    "speed":            1.2,
+})
 
 # ── ElevenLabs API ────────────────────────────────────────────────
 

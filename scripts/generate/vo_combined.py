@@ -8,8 +8,8 @@ Usage:
     python3 scripts/generate/vo_combined.py <reel-file.md> --reel 1 --output-dir <path> --confirm-paid-api-call
 """
 
-import sys
 import os
+import sys
 import re
 import json
 import base64
@@ -19,8 +19,8 @@ import tempfile
 import requests
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).parent.parent.parent
-SEPARATOR = "\n\n"
+REPO_ROOT  = Path(__file__).parent.parent.parent
+SEPARATOR  = "\n\n"
 
 # ── Config ────────────────────────────────────────────────────────
 
@@ -35,19 +35,26 @@ def load_env():
             env[k.strip()] = v.strip()
     return env
 
+def load_voice_config():
+    path = REPO_ROOT / 'config' / 'voice-settings.json'
+    if path.exists():
+        return json.loads(path.read_text(encoding='utf-8'))
+    return {}
+
 ENV      = load_env()
 API_KEY  = ENV.get('ELEVENLABS_API_KEY', '')
 VOICE_ID = ENV.get('ELEVENLABS_VOICE_ID', '')
-MODEL    = 'eleven_v3'
-ATEMPO   = 1.1
 
-VOICE_SETTINGS = {
-    "stability":        0.38,
-    "similarity_boost": 0.72,
-    "style":            0.08,
+_vc            = load_voice_config()
+MODEL          = _vc.get('model_id', 'eleven_v3')
+ATEMPO         = _vc.get('ffmpeg_atempo', 1.1)
+VOICE_SETTINGS = _vc.get('voice_settings', {
+    "stability":        0.45,
+    "similarity_boost": 0.87,
+    "style":            0.15,
     "use_speaker_boost": True,
     "speed":            1.2,
-}
+})
 
 # ── Reel parsing (mirrors vo.py) ──────────────────────────────────
 
@@ -167,7 +174,8 @@ def main():
             pass
 
     # Build combined text + track offsets
-    texts   = [s['tts'] if s.get('tts') else s['text'] for s in segments]
+    texts = [s['tts'] if s.get('tts') else s['text'] for s in segments]
+
     combined = SEPARATOR.join(texts)
     offsets  = []
     pos = 0
@@ -215,6 +223,12 @@ def main():
             "text":           combined,
             "model_id":       MODEL,
             "voice_settings": vs,
+            **({
+                "pronunciation_dictionary_locators": [{
+                    "pronunciation_dictionary_id": ENV["EL_PRONUNCIATION_DICT_ID"],
+                    "version_id": ENV["EL_PRONUNCIATION_DICT_VERSION_ID"],
+                }]
+            } if ENV.get("EL_PRONUNCIATION_DICT_ID") and ENV.get("EL_PRONUNCIATION_DICT_VERSION_ID") else {}),
         },
         timeout=120,
     )

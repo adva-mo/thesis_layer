@@ -118,27 +118,32 @@ python3 scripts/generate/vo_combined.py \
 
 **`[TTS:]` blocks:** if a segment has a `[TTS:]` block, that string is sent to ElevenLabs instead of `[VO:]`. `settings.json` records both `vo_text` and `tts_sent` per segment.
 
-**ElevenLabs settings:** model `eleven_v3`, stability 0.38, similarity_boost 0.72, style 0.08, speed 1.2 + 1.1× ffmpeg atempo post-process.
+**ElevenLabs settings:** single source of truth is `config/voice-settings.json` — both `vo_combined.py` and `vo.py` read from it at runtime. Current values: model `eleven_v3`, stability 0.45, similarity_boost 0.87, style 0.15, speed 1.2 + 1.1× ffmpeg atempo post-process.
 
-**Pronunciation review (required):** the paid API call will not fire without an approved `tts_review.md`. Run `--prepare-tts-review` first, edit the file, then re-run with `--require-tts-review`.
+**Pronunciation dictionary:** active entries are in `docs/pronunciation-log.md`. The dictionary is applied automatically when `EL_PRONUNCIATION_DICT_ID` and `EL_PRONUNCIATION_DICT_VERSION_ID` are set in `.env`. Every new version created in EL Studio requires updating `EL_PRONUNCIATION_DICT_VERSION_ID` in `.env` before regenerating — the script always uses the version pinned there.
 
 ```bash
-# Step 1 — generate nikud review (no API call):
+# Generate VO audio (1 API call, produces alignment.json):
 python3 scripts/generate/vo_combined.py \
   output/[slug]/hebrew/reels/[slug]-he-reels.md \
   --reel 1 \
   --output-dir output/[slug]/hebrew/reels/reel_01/audio \
-  --prepare-tts-review
-# → writes output/[slug]/hebrew/reels/reel_01/audio/tts_review.md
-# Edit: keep nikud only on mispronounced words; set APPROVED: true
-
-# Step 2 — generate VO using approved pronunciation:
-python3 scripts/generate/vo_combined.py \
-  output/[slug]/hebrew/reels/[slug]-he-reels.md \
-  --reel 1 \
-  --output-dir output/[slug]/hebrew/reels/reel_01/audio \
-  --require-tts-review --confirm-paid-api-call
+  --confirm-paid-api-call
 ```
+
+**Post-generation pronunciation review (agent-driven):**
+
+After every VO generation, the agent asks:
+> "Do any words sound wrong and need to go into the EL dictionary?"
+
+If yes — iterate one word at a time:
+1. Agent asks: "Which word?"
+2. Agent provides the IPA transcription for that word
+3. User adds the alias rule manually in EL Studio
+4. Repeat until no more words
+
+When done: update `EL_PRONUNCIATION_DICT_VERSION_ID` in `.env` → regenerate VO with user permission.
+
 
 ---
 
@@ -488,8 +493,7 @@ output/[slug]/[lang]/reels/
     │   ├── seg02_4-15s.mp3
     │   ├── ...
     │   ├── alignment.json
-    │   ├── transcript.json
-    │   └── tts_review.md
+    │   └── transcript.json
     ├── scenes/                   ← pre-rendered animated clips (exclamation, CTA, etc.)
     │   ├── scene03_exclamation.mp4
     │   └── scene05_cta.mp4
@@ -517,20 +521,13 @@ AUDIO_DIR=$REEL_DIR/reel_01/audio
 SCENES_DIR=$REEL_DIR/reel_01/scenes
 ASSETS_DIR=assets/$SLUG/canonical
 
-# 1a. Generate TTS review (no API call)
+# 1. Generate VO — timing endpoint (1 API call, produces alignment.json)
 python3 scripts/generate/vo_combined.py \
   $REEL_DIR/$SLUG-he-reels.md \
   --reel 1 \
   --output-dir $AUDIO_DIR \
-  --prepare-tts-review
-# → edit $AUDIO_DIR/tts_review.md, set APPROVED: true
-
-# 1b. Generate VO — timing endpoint (1 API call, produces alignment.json)
-python3 scripts/generate/vo_combined.py \
-  $REEL_DIR/$SLUG-he-reels.md \
-  --reel 1 \
-  --output-dir $AUDIO_DIR \
-  --require-tts-review --confirm-paid-api-call
+  --confirm-paid-api-call
+# → listen; if mispronunciation: add word to EL dictionary, update .env, regenerate
 
 # 2. Generate Kling clips (paid — VEP File column must point to source images at this stage)
 python3 scripts/generate/kling_batch.py \

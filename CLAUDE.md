@@ -26,7 +26,7 @@ Claude is the engine. The templates are scaffolds. This file is the law.
 At the start of every session, before doing anything else, read these files:
 
 1. `market.md` — business context, CTAs, hashtag rules, language settings, audience framing
-2. `examples/voice-examples.md` — voice calibration (applies to all content types)
+2. `docs/voice-examples.md` — voice calibration (applies to all content types)
 3. `primary_language.md` — Hebrew writing rules (skip if primary language is English)
 4. `assets/branding/brand-guidelines.md` — brand positioning, visual identity, voice calibration table
 
@@ -38,7 +38,7 @@ If a project is already active (e.g., resuming work), also read:
 If the session involves reel generation (rendering, scripting, or pipeline work), also read:
 
 6. `docs/reel-pipeline.md` — full technical reference for the reel generation pipeline (scripts, workflow, commands)
-7. `content/history/hook-log.md` — channel-level hook history (create if missing)
+7. `output/history/hook-log.md` — channel-level hook history (create if missing)
 8. `output/[project-slug]/hook-log.md` — project-level hook history (create if missing)
 
 These files are referenced throughout the system from multiple templates. Reading them once here eliminates per-template re-reads and prevents "see market.md" pointers from triggering repeated loads of the same file during CTA, hashtag, and language sections.
@@ -76,7 +76,7 @@ See `market.md` — Calibration Test section.
 
 ### Voice examples:
 
-Before generating any content, read `examples/voice-examples.md`. Use one example per output as a voice calibration reference — for tone, pacing, and reasoning style only. Do not imitate examples directly or repeat their sentence formulas.
+Before generating any content, read `docs/voice-examples.md`. Use one example per output as a voice calibration reference — for tone, pacing, and reasoning style only. Do not imitate examples directly or repeat their sentence formulas.
 
 ---
 

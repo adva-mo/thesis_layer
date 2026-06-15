@@ -94,7 +94,7 @@ Look up Tier 1 and Tier 2 for this project's thesis type (from thesis.md → Mat
 Read `output/[project-slug]/hook-log.md`. Filter to PUBLISHED rows only — SCRIPTED and SKIPPED rows do not count toward the fatigue lookback. If a hook family appears in the last 3 PUBLISHED reels for this project, apply a soft penalty: prefer an alternative candidate. Override (repeat anyway) only if the repeated family is uniquely Tier 1 AND no other Tier 1/2 candidate has strong format fit.
 
 **Step 3 — Channel-level diversity**
-Read `content/history/hook-log.md`. Filter to PUBLISHED rows only — SCRIPTED and SKIPPED rows are ignored. Apply three soft penalties:
+Read `output/history/hook-log.md`. Filter to PUBLISHED rows only — SCRIPTED and SKIPPED rows are ignored. Apply three soft penalties:
 - **Hook family:** If a Tier 1 candidate appears in the last 2 PUBLISHED channel-level reels, prefer an alternative. Same override rule.
 - **Brand/perf balance:** If the last 2 PUBLISHED channel-level reels both used brand hooks, prefer a performance candidate from the list; vice versa. Override if no performance candidate is Tier 1/2 for this thesis type.
 - **Rhetorical freshness:** Identify the likely opening cadence for each candidate (Pattern D). If a cadence appears in the last 5 PUBLISHED channel-level reels, prefer a candidate that opens with a different cadence. Override if no alternative cadence is available at Tier 1/2.
@@ -108,7 +108,7 @@ Rank remaining candidates by (thesis tier → format fit). Pick the top. After s
 
 ## F. Hook Log Templates
 
-### Channel-level — `content/history/hook-log.md`
+### Channel-level — `output/history/hook-log.md`
 
 Create this file once. Append one row per reel, across all projects.
 
@@ -126,7 +126,7 @@ Create this file once. Append one row per reel, across all projects.
 
 `SCRIPTED` exists for production continuity and partial sessions only. It does not influence diversity lookback unless later promoted to `PUBLISHED`.
 
-**Environment note:** `content/history/hook-log.md` is runtime/channel memory and may be gitignored. On a fresh environment, the file may start empty. This is acceptable — the system will build history forward from that point. If migrating environments, seed the log manually from published content history before generating new reels.
+**Environment note:** `output/history/hook-log.md` is runtime/channel memory and may be gitignored. On a fresh environment, the file may start empty. This is acceptable — the system will build history forward from that point. If migrating environments, seed the log manually from published content history before generating new reels.
 
 ### Project-level — `output/[project-slug]/hook-log.md`
 

@@ -26,7 +26,7 @@ OR
 
 Read:
 
-`examples/voice-examples.md`
+`docs/voice-examples.md`
 
 Voice calibration applies to all PDFs.
 
@@ -99,7 +99,7 @@ Do NOT imitate examples directly.
 
 Read:
 
-`examples/voice-examples.md`
+`docs/voice-examples.md`
 
 for:
 

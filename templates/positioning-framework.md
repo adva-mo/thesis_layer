@@ -327,7 +327,7 @@ Do NOT collect: [3–5 specific image types that look relevant but contradict th
 [The word used in Tier 2 reels/carousel CTA, e.g., CLUB, COSTA, SIERRA]
 
 ## Voice Style
-[Style N from examples/voice-examples.md — one choice, applies to all reels for this project]
+[Style N from docs/voice-examples.md — one choice, applies to all reels for this project]
 ```
 
 **Rules:**
