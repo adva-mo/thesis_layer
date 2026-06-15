@@ -91,7 +91,7 @@ Run this before scripting any reel. Priority order: **thesis fit → format fit 
 Look up Tier 1 and Tier 2 for this project's thesis type (from thesis.md → Matrix above). These are your candidates. Families in the Avoid column are disqualified entirely.
 
 **Step 2 — Project-level fatigue guard**
-Read `output/[project-slug]/hook-log.md`. Filter to PUBLISHED rows only — SCRIPTED and SKIPPED rows do not count toward the fatigue lookback. If a hook family appears in the last 3 PUBLISHED reels for this project, apply a soft penalty: prefer an alternative candidate. Override (repeat anyway) only if the repeated family is uniquely Tier 1 AND no other Tier 1/2 candidate has strong format fit.
+Read `output/history/hook-log.md`, filter rows by project slug. Filter to PUBLISHED rows only — SCRIPTED and SKIPPED rows do not count toward the fatigue lookback. If a hook family appears in the last 3 PUBLISHED reels for this project, apply a soft penalty: prefer an alternative candidate. Override (repeat anyway) only if the repeated family is uniquely Tier 1 AND no other Tier 1/2 candidate has strong format fit.
 
 **Step 3 — Channel-level diversity**
 Read `output/history/hook-log.md`. Filter to PUBLISHED rows only — SCRIPTED and SKIPPED rows are ignored. Apply three soft penalties:
@@ -100,7 +100,7 @@ Read `output/history/hook-log.md`. Filter to PUBLISHED rows only — SCRIPTED an
 - **Rhetorical freshness:** Identify the likely opening cadence for each candidate (Pattern D). If a cadence appears in the last 5 PUBLISHED channel-level reels, prefer a candidate that opens with a different cadence. Override if no alternative cadence is available at Tier 1/2.
 
 **Step 4 — Pick and log**
-Rank remaining candidates by (thesis tier → format fit). Pick the top. After scripting, append a row to both `hook-log.md` files and recompute the "Next reel recommendation" block in the project-level log.
+Rank remaining candidates by (thesis tier → format fit). Pick the top. After scripting, append a row to `output/history/hook-log.md` and recompute the "Next reel recommendation" block for this project in that file.
 
 **Partial sessions:** If a session ends before all reels are scripted, log every reel that was completed with Status `SCRIPTED`. Do not wait for the full batch. When a reel is published, update its row to `PUBLISHED`. When a reel is abandoned, update to `SKIPPED`.
 
@@ -108,40 +108,22 @@ Rank remaining candidates by (thesis tier → format fit). Pick the top. After s
 
 ## F. Hook Log Templates
 
-### Channel-level — `output/history/hook-log.md`
+### `output/history/hook-log.md`
 
-Create this file once. Append one row per reel, across all projects.
+Single file. Append one row per reel, across all projects. Project-level history is derived by filtering on the Project column.
 
 ```markdown
 # Channel Hook Log
 
-| Date | Project | Reel | Hook Family | Rhetorical Pattern | Brand/Perf | Status |
-|------|---------|------|-------------|-------------------|------------|--------|
-| YYYY-MM-DD | [project-slug] | reel_01 | H8 — Hidden Opportunity | INVERSION | Brand | SCRIPTED |
-```
+| Scripted | Published | Project | Reel | Hook Family | Rhetorical Pattern | Brand/Perf | Platforms | Status |
+|----------|-----------|---------|------|-------------|-------------------|------------|-----------|--------|
+| YYYY-MM-DD | YYYY-MM-DD | [project-slug] | reel_01 | H8 — Hidden Opportunity | INVERSION | Brand | Instagram, TikTok | PUBLISHED |
 
-**Status values:** `SCRIPTED` (default at log time) → `PUBLISHED` (flip when the reel goes live) → `SKIPPED` (scripted but not published).
+---
 
-**Diversity lookback uses PUBLISHED rows only.** SCRIPTED and SKIPPED rows are ignored when applying soft penalties in Step E. This ensures the diversity logic reflects what the audience actually heard, not what was drafted.
+## Next reel recommendation — [project-slug]
 
-`SCRIPTED` exists for production continuity and partial sessions only. It does not influence diversity lookback unless later promoted to `PUBLISHED`.
-
-**Environment note:** `output/history/hook-log.md` is runtime/channel memory and may be gitignored. On a fresh environment, the file may start empty. This is acceptable — the system will build history forward from that point. If migrating environments, seed the log manually from published content history before generating new reels.
-
-### Project-level — `output/[project-slug]/hook-log.md`
-
-Create when starting reel production for a project. Append one row per reel. Recompute the recommendation block each time.
-
-```markdown
-# Hook Log — [Project Name]
-Thesis type: [Quality Hold / Capital Efficiency / ...]
-
-| Reel | Format | Hook Family | Rhetorical Pattern | Brand/Perf | Date | Status |
-|------|--------|-------------|-------------------|------------|------|--------|
-| reel_01 | Format 2 | H8 — Hidden Opportunity | INVERSION | Brand | YYYY-MM-DD | SCRIPTED |
-
-## Next reel recommendation
-- Thesis Tier 1: [H7, H8] | Tier 2: [H1, H4, H9]
+- Thesis Tier 1: [...] | Tier 2: [...]
 - Project soft-penalty (last 3): [list any penalized families]
 - Channel soft-penalty (last 2): [list any penalized families]
 - Channel brand/perf (last 2): [e.g., Brand, Brand → prefer performance]
@@ -150,4 +132,10 @@ Thesis type: [Quality Hold / Capital Efficiency / ...]
 - Recommendation: [H# — Family Name, CADENCE]
 ```
 
-Same status semantics apply — see channel-level notes above.
+Add one "Next reel recommendation" section per active project. Recompute after each reel is logged.
+
+**Status values:** `SCRIPTED` (default at log time) → `PUBLISHED` (flip when the reel goes live) → `SKIPPED` (scripted but not published).
+
+**Diversity lookback uses PUBLISHED rows only.** SCRIPTED and SKIPPED rows are ignored when applying soft penalties in Step E. This ensures the diversity logic reflects what the audience actually heard, not what was drafted.
+
+**Environment note:** This file is runtime/channel memory and may be gitignored. On a fresh environment, the file may start empty — the system will build history forward. If migrating environments, seed the log manually from published content history before generating new reels.

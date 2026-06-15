@@ -76,11 +76,10 @@ Reference: `templates/hooks/hook-selection.md`
 
 Before scripting any reel:
 
-1. Read `output/history/hook-log.md` (channel-level history — create the file if it doesn't exist yet, using the template in hook-selection.md §F)
-2. Read `output/[project-slug]/hook-log.md` (project-level history — create if missing, same template)
-3. Apply the 4-step selection rule from hook-selection.md §E for each reel format being produced
-4. From the 10 generated hooks (Step 1), select the hook matching the chosen family for that reel's opening beat
-5. After each reel is scripted, append a row to both hook-log.md files and recompute the "Next reel recommendation" block in the project-level log
+1. Read `output/history/hook-log.md` (all-project hook history — create the file if it doesn't exist yet, using the template in hook-selection.md §F)
+2. Apply the 4-step selection rule from hook-selection.md §E for each reel format being produced
+3. From the 10 generated hooks (Step 1), select the hook matching the chosen family for that reel's opening beat
+4. After each reel is scripted, append a row to `output/history/hook-log.md` and recompute the "Next reel recommendation" block for this project in that file
 
 **Rules:**
 - One reel = one hook family. Do not blend families in the opening beat.
