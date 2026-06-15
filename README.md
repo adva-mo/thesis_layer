@@ -13,9 +13,11 @@ Built for trust-first real estate content:
 - Investment framing, not broker marketing
 - Consistent positioning across every platform
 
-No APIs. No databases. No infrastructure.
+No databases. No infrastructure.
 
-Just Claude Code + structured templates + repeatable workflows.
+Content generation, scripting, and strategy run entirely through Claude Code + structured templates + repeatable workflows.
+
+The reel pipeline integrates ElevenLabs (voice generation) and Kling via fal.ai (video generation) for paid media production.
 
 ---
 
