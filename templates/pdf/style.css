@@ -137,6 +137,15 @@ blockquote {
   page-break-inside: avoid;
 }
 
+.pdf-logo {
+  width: auto;
+  height: 40px;
+  max-height: none;
+  object-fit: unset;
+  margin: 0 0 24px 0;
+  border-radius: 0;
+}
+
 .brand-label {
   font-size: 10px;
   font-weight: 600;

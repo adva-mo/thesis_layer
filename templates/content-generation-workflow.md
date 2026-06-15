@@ -8,7 +8,7 @@ The master production workflow. Run this after you have a confirmed PROJECT DATA
 
 Before starting:
 - [ ] PROJECT DATA block is complete (or has documented `[MISSING]` fields)
-- [ ] CLAUDE.md has been read in this session — `market.md`, `examples/voice-examples.md`, and `primary_language.md` loaded at session init
+- [ ] CLAUDE.md has been read in this session — `market.md`, `docs/voice-examples.md`, and `primary_language.md` loaded at session init
 - [ ] Language confirmed: Hebrew / English / Both
 - [ ] `output/[project-slug]/thesis.md` exists — produced by `templates/positioning-framework.md` after positioning is confirmed
 - [ ] `output/[project-slug]/thesis.md` is loaded now — read it once here, do not re-read per step below
@@ -76,7 +76,7 @@ Reference: `templates/hooks/hook-selection.md`
 
 Before scripting any reel:
 
-1. Read `content/history/hook-log.md` (channel-level history — create the file if it doesn't exist yet, using the template in hook-selection.md §F)
+1. Read `output/history/hook-log.md` (channel-level history — create the file if it doesn't exist yet, using the template in hook-selection.md §F)
 2. Read `output/[project-slug]/hook-log.md` (project-level history — create if missing, same template)
 3. Apply the 4-step selection rule from hook-selection.md §E for each reel format being produced
 4. From the 10 generated hooks (Step 1), select the hook matching the chosen family for that reel's opening beat

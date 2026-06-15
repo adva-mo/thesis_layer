@@ -17,25 +17,27 @@ from typing import Literal, Optional
 
 from PIL import Image, ImageDraw, ImageFont
 
-from .text_overlay import FONT_PATH, TEXT_Y_RATIO, BAR_PADDING_X, BAR_PADDING_Y, BAR_RADIUS
+
+from .text_overlay import FONT_PATH, TEXT_Y_RATIO, BAR_PADDING_X, BAR_PADDING_Y, BAR_RADIUS, SHADOW_OFFSET, _draw_halo, _draw_shadow
 
 # ── Defaults ──────────────────────────────────────────────────────
 
 DEFAULT_MODE        = "highlighted_phrase"
-DEFAULT_MAX_WORDS   = 5
-DEFAULT_MAX_DUR     = 2.5
-DEFAULT_PAUSE_THR   = 0.35   # seconds between words to trigger phrase split
-DEFAULT_MAX_CHARS   = 20     # total chars (incl. spaces) per phrase — prevents wide overflow
+DEFAULT_MAX_WORDS   = 9
+DEFAULT_MAX_DUR     = 4.5
+DEFAULT_PAUSE_THR   = 0.40   # seconds between words to trigger phrase split
+DEFAULT_MAX_CHARS   = 22     # total chars (incl. spaces) per phrase — prevents wide overflow
 
-FONT_SIZE_SUBTITLE  = 77
+FONT_SIZE_SUBTITLE  = 86
 
-HIGHLIGHT_COLOR     = (255, 255, 255, 255)   # active word
-DIM_COLOR           = (255, 255, 255, 155)   # other words in phrase (~60% opacity)
-BAR_COLOR           = (0, 0, 0, 175)
+HIGHLIGHT_COLOR     = (255, 255, 255, 255)   # active word — full white
+DIM_COLOR           = (210, 210, 210, 255)   # inactive words — slightly dimmed
+SHADOW_COLOR        = (0, 0, 0, 200)         # drop shadow color
+SHADOW_DROP_OFFSET  = 3                      # directional drop shadow — all words
 
 PUNCTUATION_SPLIT   = set(".?!,—;:")
 
-LINE_GAP = 14   # px between lines in a two-line subtitle pill
+LINE_GAP = 26   # px between lines in a two-line subtitle
 
 SubtitleMode = Literal["phrase", "highlighted_phrase", "single_word"]
 
@@ -93,10 +95,13 @@ def _split_lines(words: list[str]) -> tuple[list[str], list[str]] | None:
     if not any(s == other_script for s in scripts):
         return None
     split_at = next(i for i, s in enumerate(scripts) if s == other_script)
-    # If the phrase alternates back to the first script after the split point
-    # (e.g. Hebrew → CLUB → Hebrew), don't split — let full-phrase BiDi handle it.
+    # If the phrase alternates back to the first script after the split point,
+    # only keep single-line BiDi for short continuations (e.g. Hebrew → CLUB → one Hebrew word).
+    # Substantial Hebrew continuations (>1 word) split cleanly into two lines.
     if first_script in scripts[split_at + 1:]:
-        return None
+        trailing = sum(1 for s in scripts[split_at + 1:] if s == first_script)
+        if trailing <= 1:
+            return None
     return words[:split_at], words[split_at:]
 
 
@@ -124,8 +129,15 @@ def _render_two_lines(
     space_w = space_bbox[2] - space_bbox[0]
 
     def _visual(words: list[str], script: str) -> list[str]:
+        joined = " ".join(words)
         if script == 'hebrew':
-            return _visual_hebrew(" ".join(words)).split()
+            return _visual_hebrew(joined).split()
+        # Single mixed-script tokens like "ה-Thesis:" are classified 'latin' because
+        # Latin chars outnumber Hebrew chars, but the trailing punctuation (":") is a
+        # BiDi-neutral char that resolves to RTL (left side) when the word is run through
+        # the BiDi algorithm with base_dir='R'.
+        if len(words) == 1 and any('֐' <= c <= '׿' for c in joined):
+            return _visual_hebrew(joined).split()
         return list(words)
 
     def _vis_active_idx(n: int, logical: int, script: str) -> int:
@@ -151,28 +163,27 @@ def _render_two_lines(
     total_w1 = sum(m[1] for m in met1) + space_w * max(0, n1 - 1) if met1 else 0
     total_w2 = sum(m[1] for m in met2) + space_w * max(0, n2 - 1) if met2 else 0
 
-    h1 = max(m[2][3] - m[2][1] for m in met1) if met1 else 0
-    h2 = max(m[2][3] - m[2][1] for m in met2) if met2 else 0
-    top1 = min(m[2][1] for m in met1) if met1 else 0
-    top2 = min(m[2][1] for m in met2) if met2 else 0
+    ascent, descent = font.getmetrics()
+    line_h = ascent + descent
 
     bar_w = max(total_w1, total_w2) + BAR_PADDING_X * 2
-    bar_h = h1 + LINE_GAP + h2 + BAR_PADDING_Y * 2
+    bar_h = line_h * 2 + LINE_GAP + BAR_PADDING_Y * 2
     bar_x = (width - bar_w) // 2
-    bar_y = int(height * TEXT_Y_RATIO) - bar_h // 2
-
-    draw.rounded_rectangle([bar_x, bar_y, bar_x + bar_w, bar_y + bar_h],
-                            radius=BAR_RADIUS, fill=BAR_COLOR)
+    bar_y = int(height * TEXT_Y_RATIO) - bar_h
 
     def draw_line(metrics, total_w, base_y, vis_active):
         x = bar_x + (bar_w - total_w) // 2
         for i, (word, adv, bbox) in enumerate(metrics):
-            color = HIGHLIGHT_COLOR if (highlight_all or i == vis_active) else DIM_COLOR
-            draw.text((x - bbox[0], base_y), word, font=font, fill=color)
+            is_active = highlight_all or i == vis_active
+            color = HIGHLIGHT_COLOR if is_active else DIM_COLOR
+            draw_x = x - bbox[0]
+            _draw_shadow(draw, (draw_x, base_y), word, font, SHADOW_COLOR, SHADOW_DROP_OFFSET)
+            draw.text((draw_x, base_y), word, font=font, fill=color)
             x += adv + space_w
 
-    draw_line(met1, total_w1, bar_y + BAR_PADDING_Y - top1, va1)
-    draw_line(met2, total_w2, bar_y + BAR_PADDING_Y + h1 + LINE_GAP - top2, va2)
+    # Fixed positions — no per-phrase top correction so all phrases share the same baseline.
+    draw_line(met1, total_w1, bar_y + BAR_PADDING_Y, va1)
+    draw_line(met2, total_w2, bar_y + BAR_PADDING_Y + line_h + LINE_GAP, va2)
 
     return img
 
@@ -238,7 +249,7 @@ def group_into_phrases(
 def _visual_hebrew(text: str) -> str:
     try:
         from bidi.algorithm import get_display
-        return get_display(text)
+        return get_display(text, base_dir='R')
     except ImportError:
         return text
 
@@ -251,20 +262,20 @@ def _render_uniform(text: str, color, font, width: int, height: int) -> Image.Im
 
     bbox = draw.textbbox((0, 0), visual, font=font)
     text_w = bbox[2] - bbox[0]
-    text_h = bbox[3] - bbox[1]
+    ascent, descent = font.getmetrics()
+    line_h = ascent + descent
 
     bar_w = text_w + BAR_PADDING_X * 2
-    bar_h = text_h + BAR_PADDING_Y * 2
+    # Always reserve two-line height so the block never jumps when switching
+    # between single-line and two-line phrases.
+    bar_h = line_h * 2 + LINE_GAP + BAR_PADDING_Y * 2
     bar_x = (width - bar_w) // 2
-    bar_y = int(height * TEXT_Y_RATIO) - bar_h // 2
+    bar_y = int(height * TEXT_Y_RATIO) - bar_h
 
-    draw.rounded_rectangle([bar_x, bar_y, bar_x + bar_w, bar_y + bar_h],
-                            radius=BAR_RADIUS, fill=BAR_COLOR)
-
-    # Offset by bbox[0]/bbox[1] so the bounding box top-left lands at
-    # (bar_x + PAD, bar_y + PAD) — not the raw anchor point.
     draw_x = bar_x + BAR_PADDING_X - bbox[0]
-    draw_y = bar_y + BAR_PADDING_Y - bbox[1]
+    # Anchored to the top slot — 2-line phrases share this position for line 1 and expand downward.
+    draw_y = bar_y + BAR_PADDING_Y
+    _draw_shadow(draw, (draw_x, draw_y), visual, font, SHADOW_COLOR, SHADOW_DROP_OFFSET)
     draw.text((draw_x, draw_y), visual, font=font, fill=color)
     return img
 
@@ -280,7 +291,7 @@ def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, heigh
     if split:
         line1_words, line2_words = split
         line1_script = next((_word_script(w) for w in line1_words if _word_script(w) != 'neutral'), 'latin')
-        line2_script = next((_word_script(w) for w in line2_words if _word_script(w) != 'neutral'), 'hebrew')
+        line2_script = 'hebrew' if any(_word_script(w) == 'hebrew' for w in line2_words) else 'latin'
         n1 = len(line1_words)
         if active_idx < n1:
             active_line, active_word_idx = 0, active_idx
@@ -296,8 +307,10 @@ def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, heigh
     visual_words = visual_phrase.split()
 
     n_visual = len(visual_words)
-    # BiDi reverses RTL word order; mirror the logical index into visual space
-    visual_active_idx = max(0, min(n_visual - 1, n_visual - 1 - active_idx))
+    # BiDi reverses RTL word order; only mirror the logical index for Hebrew phrases.
+    # Pure Latin phrases are unchanged by get_display, so logical == visual order.
+    is_rtl = any(_word_script(w) == 'hebrew' for w in word_texts)
+    visual_active_idx = max(0, min(n_visual - 1, (n_visual - 1 - active_idx) if is_rtl else active_idx))
 
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
@@ -312,23 +325,25 @@ def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, heigh
         word_metrics.append((word, advance_w, bbox))
 
     total_w = sum(m[1] for m in word_metrics) + space_w * max(0, n_visual - 1)
-    max_h = max(m[2][3] - m[2][1] for m in word_metrics) if word_metrics else 0
-    min_top = min(m[2][1] for m in word_metrics) if word_metrics else 0
+    ascent, descent = font.getmetrics()
+    line_h = ascent + descent
 
     bar_w = total_w + BAR_PADDING_X * 2
-    bar_h = max_h + BAR_PADDING_Y * 2
+    # Always reserve two-line height — consistent with two-line phrases so the
+    # block never jumps vertically when script switches trigger a layout change.
+    bar_h = line_h * 2 + LINE_GAP + BAR_PADDING_Y * 2
     bar_x = (width - bar_w) // 2
-    bar_y = int(height * TEXT_Y_RATIO) - bar_h // 2
-
-    draw.rounded_rectangle([bar_x, bar_y, bar_x + bar_w, bar_y + bar_h],
-                            radius=BAR_RADIUS, fill=BAR_COLOR)
+    bar_y = int(height * TEXT_Y_RATIO) - bar_h
 
     x = bar_x + BAR_PADDING_X
-    base_draw_y = bar_y + BAR_PADDING_Y - min_top
+    # Anchored to the top slot — 2-line phrases share this position for line 1 and expand downward.
+    base_draw_y = bar_y + BAR_PADDING_Y
 
     for i, (word, advance_w, word_bbox) in enumerate(word_metrics):
-        color = HIGHLIGHT_COLOR if i == visual_active_idx else DIM_COLOR
+        is_active = i == visual_active_idx
+        color = HIGHLIGHT_COLOR if is_active else DIM_COLOR
         draw_x = x - word_bbox[0]
+        _draw_shadow(draw, (draw_x, base_draw_y), word, font, SHADOW_COLOR, SHADOW_DROP_OFFSET)
         draw.text((draw_x, base_draw_y), word, font=font, fill=color)
         x += advance_w + space_w
 
@@ -361,7 +376,7 @@ def build_spans(
             if split:
                 l1, l2 = split
                 s1 = next((_word_script(w) for w in l1 if _word_script(w) != 'neutral'), 'latin')
-                s2 = next((_word_script(w) for w in l2 if _word_script(w) != 'neutral'), 'hebrew')
+                s2 = 'hebrew' if any(_word_script(w) == 'hebrew' for w in l2) else 'latin'
                 img = _render_two_lines(l1, l2, s1, s2, -1, -1, font, width, height, highlight_all=True)
             else:
                 img = _render_uniform(phrase.text, HIGHLIGHT_COLOR, font, width, height)
@@ -467,8 +482,8 @@ def _apply_timed_overlays(
             sub_img = active_image(t)
             if sub_img:
                 base = Image.frombytes("RGBA", (w, h), raw)
-                composited = Image.alpha_composite(base, sub_img)
-                writer.stdin.write(composited.tobytes())
+                base = Image.alpha_composite(base, sub_img)
+                writer.stdin.write(base.tobytes())
             else:
                 writer.stdin.write(raw)
             frame_num += 1
@@ -511,6 +526,7 @@ def apply_subtitles(
     width: int = 1080,
     height: int = 1920,
     preview_segment: Optional[tuple[float, float]] = None,
+    leading_pad_s: float = 0.0,
 ) -> Path:
     from .fal_wizper import load_transcript
 
@@ -529,8 +545,6 @@ def apply_subtitles(
 
     spans = build_spans(phrases, mode, font, width, height)
 
-    time_offset = preview_segment[0] if preview_segment else 0.0
-
     if preview_segment:
         seg_start, seg_end = preview_segment
         # Trim video to segment window first
@@ -546,4 +560,7 @@ def apply_subtitles(
         trimmed.unlink(missing_ok=True)
         return result_path
 
-    return _apply_timed_overlays(video_path, spans, output_path, time_offset=0.0)
+    # Subtract the leading pad so subtitle timestamps stay locked to the VO audio.
+    # With a pad of P seconds, video frame at time T contains VO audio at time T-P.
+    # time_offset = -P makes the frame→transcript lookup: t = frame_time - P.
+    return _apply_timed_overlays(video_path, spans, output_path, time_offset=-leading_pad_s)

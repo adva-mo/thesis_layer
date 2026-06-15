@@ -143,8 +143,7 @@ Apply to the tier structure defined in `CLAUDE.md §7`.
 
 ### Tier 2 — Medium CTA
 
-- "כתוב לי 'דובאי' בפרטי ואשלח לך את הניתוח המלא."
-- "שמור את הפוסט הזה — זה מידע שתצטרך."
+- "רוצים את ה-Thesis המלא?\nתגיבו [KEYWORD]\nואשלח את הניתוח."
 
 ### Tier 3 — Direct CTA
 

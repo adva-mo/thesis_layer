@@ -8,8 +8,8 @@ Usage:
     python3 scripts/generate/vo_combined.py <reel-file.md> --reel 1 --output-dir <path> --confirm-paid-api-call
 """
 
-import sys
 import os
+import sys
 import re
 import json
 import base64
@@ -19,8 +19,8 @@ import tempfile
 import requests
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).parent.parent.parent
-SEPARATOR = "\n\n"
+REPO_ROOT  = Path(__file__).parent.parent.parent
+SEPARATOR  = "\n\n"
 
 # ── Config ────────────────────────────────────────────────────────
 
@@ -35,19 +35,26 @@ def load_env():
             env[k.strip()] = v.strip()
     return env
 
+def load_voice_config():
+    path = REPO_ROOT / 'config' / 'voice-settings.json'
+    if path.exists():
+        return json.loads(path.read_text(encoding='utf-8'))
+    return {}
+
 ENV      = load_env()
 API_KEY  = ENV.get('ELEVENLABS_API_KEY', '')
 VOICE_ID = ENV.get('ELEVENLABS_VOICE_ID', '')
-MODEL    = 'eleven_v3'
-ATEMPO   = 1.1
 
-VOICE_SETTINGS = {
-    "stability":        0.38,
-    "similarity_boost": 0.72,
-    "style":            0.08,
+_vc            = load_voice_config()
+MODEL          = _vc.get('model_id', 'eleven_v3')
+ATEMPO         = _vc.get('ffmpeg_atempo', 1.1)
+VOICE_SETTINGS = _vc.get('voice_settings', {
+    "stability":        0.45,
+    "similarity_boost": 0.87,
+    "style":            0.15,
     "use_speaker_boost": True,
     "speed":            1.2,
-}
+})
 
 # ── Reel parsing (mirrors vo.py) ──────────────────────────────────
 
@@ -151,23 +158,12 @@ def main():
     if not segments:
         print(f"No VO segments found for reel {args.reel}"); sys.exit(1)
 
-    # Load settings.json from output dir if present
     vs = dict(VOICE_SETTINGS)
     atempo = ATEMPO
-    settings_path = output_dir / 'settings.json'
-    if settings_path.exists():
-        try:
-            saved = json.loads(settings_path.read_text(encoding='utf-8'))
-            for k, v in saved.get('voice_settings', {}).items():
-                vs[k] = v
-            if 'ffmpeg_atempo' in saved:
-                atempo = saved['ffmpeg_atempo']
-            print(f"  Settings loaded from settings.json")
-        except Exception:
-            pass
 
     # Build combined text + track offsets
-    texts   = [s['tts'] if s.get('tts') else s['text'] for s in segments]
+    texts = [s['tts'] if s.get('tts') else s['text'] for s in segments]
+
     combined = SEPARATOR.join(texts)
     offsets  = []
     pos = 0
@@ -215,6 +211,12 @@ def main():
             "text":           combined,
             "model_id":       MODEL,
             "voice_settings": vs,
+            **({
+                "pronunciation_dictionary_locators": [{
+                    "pronunciation_dictionary_id": ENV["EL_PRONUNCIATION_DICT_ID"],
+                    "version_id": ENV["EL_PRONUNCIATION_DICT_VERSION_ID"],
+                }]
+            } if ENV.get("EL_PRONUNCIATION_DICT_ID") and ENV.get("EL_PRONUNCIATION_DICT_VERSION_ID") else {}),
         },
         timeout=120,
     )
@@ -271,20 +273,6 @@ def main():
     finally:
         os.unlink(combined_tmp)
 
-    # Save settings.json
-    payload = {
-        "model_id":         MODEL,
-        "voice_settings":   vs,
-        "ffmpeg_atempo":    atempo,
-        "source_reel_file": md_path.name,
-        "reel":             args.reel,
-        "combined_call":    True,
-        "segments": {info['filename']: {k: v for k, v in info.items() if k != 'filename'}
-                     for info in segments_info},
-    }
-    (output_dir / 'settings.json').write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2), encoding='utf-8'
-    )
 
     print(f"\n  Done.  {len(segments)} segments  |  1 API call")
     print(f"  Folder: {output_dir}\n")

@@ -25,6 +25,8 @@ Outputs:
 """
 
 import argparse
+import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -76,6 +78,8 @@ def main():
                         help=f"Subtitle font size (default: {FONT_SIZE_SUBTITLE})")
     parser.add_argument("--font",       default=str(FONT_PATH),
                         help="Path to .ttf font file")
+    parser.add_argument("--leading-pad-ms", type=int, default=300, metavar="MS",
+                        help="Leading pad added by render.py — subtitles are shifted by this amount (default: 300)")
     args = parser.parse_args()
 
     video_path      = Path(args.video)
@@ -87,6 +91,8 @@ def main():
             print(f"Error: {name} not found — {p}")
             sys.exit(1)
 
+    leading_pad_ms = args.leading_pad_ms
+
     preview_segment = _parse_segment(args.preview_segment) if args.preview_segment else None
     output_path = _output_path(video_path, preview_segment)
 
@@ -97,6 +103,7 @@ def main():
     print(f"  Max words:  {args.max_words}")
     if preview_segment:
         print(f"  Segment:    {preview_segment[0]:.0f}s – {preview_segment[1]:.0f}s  (preview)")
+    print(f"  Leading pad: {leading_pad_ms}ms")
     print(f"  Output:     {output_path.name}\n")
 
     apply_subtitles(
@@ -109,10 +116,44 @@ def main():
         max_words=args.max_words,
         max_chars=args.max_chars,
         preview_segment=preview_segment,
+        leading_pad_s=leading_pad_ms / 1000.0,
     )
 
     size_mb = output_path.stat().st_size / (1024 * 1024)
-    print(f"  ✓ {output_path.name}  ({size_mb:.1f} MB)\n")
+    print(f"  ✓ {output_path.name}  ({size_mb:.1f} MB)")
+
+    if preview_segment:
+        print()
+        return
+
+    cfg_path = REPO_ROOT / "config" / "voice-settings.json"
+    vc = json.loads(cfg_path.read_text()) if cfg_path.exists() else {}
+
+    speed = vc.get("video_speed", 1.0)
+    if speed != 1.0:
+        stem = output_path.stem
+        out_stem = stem[: -len("_subtitled")] + "_final" if stem.endswith("_subtitled") else stem + "_final"
+        final_path = output_path.parent / f"{out_stem}.mp4"
+        print(f"  Compacting {speed}×  →  {final_path.name}")
+        r = subprocess.run([
+            "ffmpeg", "-y", "-i", str(output_path),
+            "-filter_complex", f"[0:v]setpts=PTS/{speed}[v];[0:a]atempo={speed}[a]",
+            "-map", "[v]", "-map", "[a]",
+            "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac",
+            str(final_path),
+        ], capture_output=True)
+        if r.returncode != 0:
+            print(f"  ✗ compact failed:\n{r.stderr.decode()[-400:]}")
+        else:
+            dur = subprocess.run(
+                ["ffprobe", "-v", "quiet", "-show_entries", "format=duration",
+                 "-of", "csv=p=0", str(final_path)],
+                capture_output=True, text=True,
+            ).stdout.strip()
+            final_mb = final_path.stat().st_size / (1024 * 1024)
+            print(f"  ✓ {final_path.name}  ({final_mb:.1f} MB  {float(dur):.1f}s)\n")
+    else:
+        print()
 
 
 if __name__ == "__main__":

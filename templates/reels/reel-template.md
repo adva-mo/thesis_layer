@@ -33,7 +33,7 @@ The reel should feel:
 
 ## Before Generation
 
-Voice calibration applies to all reel formats. `examples/voice-examples.md` is loaded at session init — no re-read needed here.
+Voice calibration applies to all reel formats. `docs/voice-examples.md` is loaded at session init — no re-read needed here.
 
 Reels should sound:
 
@@ -268,6 +268,49 @@ For CTA / text card scenes only:
 - Do not write `[VISUAL_INTENT: Timeline graphic — ...]` — deprecated. Use `timeline — label → label → label` instead.
 - Do not write thin VISUAL_INTENT like "community street, residential feel" — must include atmosphere, thesis link, and a negative cue.
 
+---
+
+### Multi-Clip Scenes (segments >11s)
+
+When a VO segment exceeds 11 seconds, evaluate whether a single Kling clip is the right visual treatment — or whether multiple cuts serve the argument better.
+
+**Trigger:** scene VO segment > 11s
+
+**Use multi-clip when ALL of these are true:**
+- VO explicitly enumerates 2–3 distinct subjects (locations, amenities, data points, timeframes)
+- Each subject has its own source image already collected or collectable
+- The cuts reinforce the VO rhythm — the enumeration IS the argument (e.g. "Golf. Park. Mall. All there, working.")
+- Thesis type is one of: Quality Hold, Infrastructure Proof, Comparison, Before/After
+
+**Do NOT use multi-clip when:**
+- Beat is a single sustained atmosphere (emotional hold, establishing shot)
+- VO is one continuous analytical thought without natural pause points
+- Only one strong image is available for the segment
+- Scene beat is "hook" — one clean establishing shot is stronger than cuts
+- Budget is tight — three 5s clips cost ~$1.68 vs one 10s clip at ~$1.12
+
+**Hard caps:**
+- Max 3 sub-clips per scene — more reads as montage, not investor content
+- Min 3s per sub-clip — shorter reads as a flash, not a scene
+- Max 1 multi-clip scene per reel unless the thesis explicitly requires more
+
+**VISUAL_INTENT format for multi-clip scenes** — list all subjects in sequence with per-cut timing:
+
+```
+[VISUAL_INTENT: Three cuts: (1) [subject] — [atmosphere], no [anti-collect] Xs → (2) [subject] — [atmosphere] Xs → (3) [subject] — [atmosphere] Xs]
+[MOTION_STYLE: (1) [movement] → (2) [movement] → (3) [movement]]
+```
+
+Example (the scene that prompted this rule):
+```
+[VISUAL_INTENT: Dubai Hills Estate — three working amenities in sequence: (1) golf course — green fairways, residential buildings behind, warm afternoon, no cranes 4s → (2) community park — families, green canopy, towers in distance 3s → (3) Dubai Hills Mall exterior — warm retail activity, real people, not a resort 4s]
+[MOTION_STYLE: (1) low-angle track right → (2) slow push-in toward park → (3) tracking shot along mall exterior]
+```
+
+For the technical workflow (how to generate, name, trim, and concat sub-clips), see `docs/reel-pipeline.md` → Multi-clip scenes section.
+
+---
+
 ### Legacy format (backwards compatible)
 
 Old files using `[VISUAL:]` and `[SCREEN:]` still parse correctly. No migration needed.
@@ -295,7 +338,7 @@ ElevenLabs at current settings (1.35× speed + 1.1× ffmpeg) speaks at roughly 3
 | 10–15s | Insight / body | 22–32 | 3–4 |
 | 13–18s | Prove / area | 28–40 | 3–5 |
 | 8–12s | Reality check | 18–26 | 2–3 |
-| 4–6s | CTA | 6–10 | 1 |
+| 5–7s | CTA | 10–14 | 1–2 |
 
 Self-check:
 1. Note the timestamp span — that is your duration target
@@ -353,8 +396,8 @@ TTS cannot expand abbreviations. When the VO text contains abbreviations (kept f
 
 **Rule E — CTA keywords**
 Keep keywords ALL-CAPS in `[VO:]` for readability. Write lowercase in `[TTS:]` so ElevenLabs pronounces them as words.
-- `[VO:] "כתבו לי CLUB לקבל את הניתוח"`
-  `[TTS:] "כתבו לי club לקבל את הניתוח"`
+- `[VO:] "רוצים את ה-Thesis המלא?\nתגיבו CLUB\nואשלח את הניתוח."`
+  `[TTS:] "רוצים את ה-thesis המלא?\nתגיבו club\nואשלח את הניתוח."`
 
 **Rule G — Decimal numbers**
 Write the rounded numeral in `[VO:]`, Hebrew words in `[TTS:]`.

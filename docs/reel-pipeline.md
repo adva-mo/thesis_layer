@@ -118,27 +118,32 @@ python3 scripts/generate/vo_combined.py \
 
 **`[TTS:]` blocks:** if a segment has a `[TTS:]` block, that string is sent to ElevenLabs instead of `[VO:]`. `settings.json` records both `vo_text` and `tts_sent` per segment.
 
-**ElevenLabs settings:** model `eleven_v3`, stability 0.38, similarity_boost 0.72, style 0.08, speed 1.2 + 1.1× ffmpeg atempo post-process.
+**ElevenLabs settings:** single source of truth is `config/voice-settings.json` — both `vo_combined.py` and `vo.py` read from it at runtime. Current values: model `eleven_v3`, stability 0.45, similarity_boost 0.87, style 0.15, speed 1.2 + 1.1× ffmpeg atempo post-process + 1.08× video speed (compact step in `subtitle.py`).
 
-**Pronunciation review (required):** the paid API call will not fire without an approved `tts_review.md`. Run `--prepare-tts-review` first, edit the file, then re-run with `--require-tts-review`.
+**Pronunciation dictionary:** active entries are in `docs/pronunciation-log.md`. The dictionary is applied automatically when `EL_PRONUNCIATION_DICT_ID` and `EL_PRONUNCIATION_DICT_VERSION_ID` are set in `.env`. Every new version created in EL Studio requires updating `EL_PRONUNCIATION_DICT_VERSION_ID` in `.env` before regenerating — the script always uses the version pinned there.
 
 ```bash
-# Step 1 — generate nikud review (no API call):
+# Generate VO audio (1 API call, produces alignment.json):
 python3 scripts/generate/vo_combined.py \
   output/[slug]/hebrew/reels/[slug]-he-reels.md \
   --reel 1 \
   --output-dir output/[slug]/hebrew/reels/reel_01/audio \
-  --prepare-tts-review
-# → writes output/[slug]/hebrew/reels/reel_01/audio/tts_review.md
-# Edit: keep nikud only on mispronounced words; set APPROVED: true
-
-# Step 2 — generate VO using approved pronunciation:
-python3 scripts/generate/vo_combined.py \
-  output/[slug]/hebrew/reels/[slug]-he-reels.md \
-  --reel 1 \
-  --output-dir output/[slug]/hebrew/reels/reel_01/audio \
-  --require-tts-review --confirm-paid-api-call
+  --confirm-paid-api-call
 ```
+
+**Post-generation pronunciation review (agent-driven):**
+
+After every VO generation, the agent asks:
+> "Do any words sound wrong and need to go into the EL dictionary?"
+
+If yes — iterate one word at a time:
+1. Agent asks: "Which word?"
+2. Agent provides the IPA transcription for that word
+3. User adds the alias rule manually in EL Studio
+4. Repeat until no more words
+
+When done: update `EL_PRONUNCIATION_DICT_VERSION_ID` in `.env` → regenerate VO with user permission.
+
 
 ---
 
@@ -187,6 +192,95 @@ python3 scripts/generate/kling_batch.py ... --scenes 2,4 --confirm-paid-api-call
 
 **Cache:** inherited from `fal_kling.py` — same inputs on a re-run are free.
 
+**VEP lifecycle for Kling scenes:**
+1. Write VEP `File` pointing to the source image (`canonical/a001_*.jpg`) — kling_batch reads these
+2. Run kling_batch → clips land in `canonical/kling_sceneXX.mp4`
+3. Update VEP `File` to point to the generated clip (`canonical/kling_sceneXX.mp4`)
+4. render.py now picks up the clip directly — no `--clip-override` needed
+
+---
+
+### Multi-clip scenes (segments >11s)
+
+When a scene segment exceeds 11 seconds, apply the editorial check in `templates/reels/reel-template.md` → Multi-Clip Scenes first. Do not start this workflow unless the check passes.
+
+**Step 1 — Plan trim math before generating**
+
+Sub-clip durations must sum to ≤ segment length. Plan on paper first:
+
+| Sub-clip | Source image | Kling duration | Trim to |
+|---|---|---|---|
+| kling_scene02a.mp4 | a001_golf.jpg | 5s | 4s |
+| kling_scene02b.mp4 | a004_park.jpg | 5s | 3s |
+| kling_scene02c.mp4 | a005_mall.jpg | 5s | 4s |
+| **concat total** | | | **11s** |
+
+Always generate 5s clips (Kling's native duration) and trim in the ffmpeg step.
+
+**Step 2 — Generate each sub-clip via `kling.py`** (not kling_batch — it only does one clip per scene)
+
+Name sub-clips `kling_sceneNNa.mp4`, `kling_sceneNNb.mp4`, `kling_sceneNNc.mp4`:
+
+```bash
+python3 scripts/generate/kling.py \
+  --image assets/[slug]/canonical/aXXX_description.jpg \
+  --prompt "[VISUAL_INTENT text for this cut]. [MOTION_STYLE for this cut]" \
+  --duration 5 \
+  --output assets/[slug]/canonical/kling_sceneNNa.mp4 \
+  --model fal-ai/kling-video/v3/pro/image-to-video \
+  --confirm-paid-api-call
+```
+
+**Step 3 — Backup before overwriting**
+
+```bash
+cp assets/[slug]/canonical/kling_sceneNN.mp4 \
+   assets/[slug]/canonical/kling_sceneNN_draft_v1.mp4
+```
+
+**Step 4 — Trim and concat**
+
+Always include `scale=1080:1920` — different source images produce slightly different portrait crop widths and the concat will fail without it:
+
+```bash
+ffmpeg -y \
+  -i assets/[slug]/canonical/kling_sceneNNa.mp4 \
+  -i assets/[slug]/canonical/kling_sceneNNb.mp4 \
+  -i assets/[slug]/canonical/kling_sceneNNc.mp4 \
+  -filter_complex "
+    [0:v]trim=duration=4,setpts=PTS-STARTPTS,scale=1080:1920:force_original_aspect_ratio=disable[v0];
+    [1:v]trim=duration=3,setpts=PTS-STARTPTS,scale=1080:1920:force_original_aspect_ratio=disable[v1];
+    [2:v]trim=duration=4,setpts=PTS-STARTPTS,scale=1080:1920:force_original_aspect_ratio=disable[v2];
+    [v0][v1][v2]concat=n=3:v=1:a=0[outv]
+  " \
+  -map "[outv]" -c:v libx264 -crf 18 -preset fast -an \
+  assets/[slug]/canonical/kling_sceneNN.mp4
+```
+
+Adjust `trim=duration=X` values to match your trim plan from Step 1.
+
+**Step 5 — Update VEP to single row pointing to concat file**
+
+```
+| 4–15s | insight | no | canonical/kling_scene02.mp4 | concat scene02a+b+c | kling-v3-pro | A |
+```
+
+One row only — NOT one row per sub-clip. The parser uses a dict keyed by timestamp; multiple rows for the same timestamp mean the last one wins and the others are silently ignored.
+
+**Step 6 — Render as normal** — no `--clip-override` needed.
+
+**Edge cases and guardrails**
+
+| Risk | What happens | Guard |
+|---|---|---|
+| Sub-clips sum > segment length | Assembler over-stretches the last clip | Plan trim math before generating; target sum = segment duration |
+| Different source image widths | `ffmpeg concat` fails: "parameters do not match" | Always include `scale=1080:1920` in filter_complex |
+| Multiple VEP rows for same timestamp | Parser last-row-wins → earlier rows silently dropped | After generation, consolidate to ONE VEP row pointing to the concat `.mp4` |
+| `kling_batch` re-run after multi-clip | Will skip the scene — VEP now points to `.mp4` → not image-type | Safe, no action needed |
+| Cost creep across multiple scenes | 3×$0.56 per scene = $1.68 vs $1.12 for 10s | Hard cap: max 1 multi-clip scene per reel |
+| Thesis mismatch | Visual cuts contradict a sustained-atmosphere beat | Apply editorial check before starting this workflow |
+| Sub-clip too short | <3s reads as a flash | Enforce 3s minimum per sub-clip in trim planning |
+
 ---
 
 ### kling.py — Single Kling I2V clip *(manual use only)*
@@ -233,7 +327,7 @@ Generates an animated red circle with a "!" for the reality-check scene.
 ```bash
 python3 scripts/generate/exclamation.py \
   --duration 9.0 \
-  --output output/[slug]/[lang]/reels/reel_01/scenes/scene04_exclamation.mp4
+  --output output/[slug]/[lang]/reels/reel_01/scenes/scene03_exclamation.mp4
 ```
 
 Animation: circle scales in (0.45s) → "!" drops in with bounce (0.4s) → holds static.
@@ -296,49 +390,53 @@ Combines audio segments and visual clips into a single MP4. Defaults to dry-run 
 ```bash
 python3 scripts/pipeline/render.py \
   --blueprint output/[slug]/[lang]/reels/[slug]-he-reels.md \
-  --audio-dir output/[slug]/[lang]/reels/reel_01/ \
+  --audio-dir output/[slug]/[lang]/reels/reel_01/audio \
   --assets-dir assets/[slug]/canonical/ \
-  --output output/[slug]/[lang]/reels/[slug]-he-reel-1-draft.mp4 \
-  --reel 1 --render \
-  --clip-override 2:output/[slug]/[lang]/reels/reel_01/scenes/scene02_timeline.mp4 \
-  --clip-override 4:output/[slug]/[lang]/reels/reel_01/scenes/scene04_exclamation.mp4 \
-  --clip-override 5:output/[slug]/[lang]/reels/reel_01/scenes/scene05_cta.mp4
+  --output output/[slug]/[lang]/reels/reel_01/reel01_draft.mp4 \
+  --reel 1 --render
 ```
 
 **Key flags:**
 - `--render` — required to produce output (omit for dry-run plan)
-- `--clip-override SCENE:PATH` — override visual for scene N with a specific pre-rendered clip (animated timeline, exclamation, CTA). Falls back to static generated graphic if omitted.
+- `--leading-pad-ms N` — freeze first frame + pad audio by N ms at start (default: 300ms)
+- `--trailing-pad-ms N` — freeze last frame + pad audio by N ms at end (default: 300ms, prevents VO cutoff)
 - `--max-scenes N` — limit to first N scenes (useful for POC testing)
 - `--keep-tmp` — keep the intermediate work directory for debugging
+- `--clip-override SCENE:PATH` — one-off override for a single scene; not needed when VEP is up to date
 
-**Visual source priority per scene:**
-1. `--clip-override` (explicit) — use for Kling clips and animated generated clips (exclamation, CTA)
-2. `asset_type == "video"` — video files referenced in VEP table (e.g. pre-rendered animations)
-3. `asset_type == "image"` — still images referenced in VEP table (used as static frame if no override)
-4. Generated graphic (timeline, text_card, etc.) from `graphic_generator.py` — static fallback
+**VEP is the single source of truth.** The `File` column in the VEP table must point to the final asset used in render:
 
-**VEP convention:** the VEP File column references the **source image** (`canonical/aNN_*.jpg`) for Kling scenes, not the Kling output clip. Kling clips are generated separately via `kling_batch.py` and applied at render time using `--clip-override`. Without `--clip-override`, the assembler falls back to a static image from the VEP.
+| Asset type | VEP File column | Example |
+|---|---|---|
+| Kling clip | `canonical/kling_sceneXX.mp4` | `canonical/kling_scene01.mp4` |
+| Animated scene clip | repo-relative path to `scenes/` | `output/[slug]/[lang]/reels/reel_01/scenes/scene03_exclamation.mp4` |
+| CTA card | repo-relative path to `scenes/` | `output/[slug]/[lang]/reels/reel_01/scenes/scene05_cta.mp4` |
+
+The parser resolves `canonical/X` via `--assets-dir`, and any other path relative to the repo root. If a VEP row is missing or the file doesn't exist, the assembler falls back to a generated graphic.
+
+**Visual source priority per scene (assembler fallback chain):**
+1. VEP `File` → video clip (`.mp4`) — used directly
+2. VEP `File` → image (`.jpg`) — converted to static clip
+3. Generated graphic (text_card, cta_card, etc.) from `graphic_generator.py` — last resort
 
 **Assembler behaviour:** if a clip is shorter than the VO audio, it is time-stretched. If longer, it is trimmed.
 
 ---
 
-### subtitle.py — Add subtitles
+### subtitle.py — Add subtitles + logo watermark
 
-Composites Hebrew subtitles onto the rendered video using the `transcript.json` alignment.
+Composites Hebrew subtitles onto the rendered video using the `transcript.json` alignment. Also automatically applies the brand logo watermark (top-right corner, 200px wide, 36px padding) from `assets/branding/logo-wide.png` on every frame. No author action required — the logo is applied if the file exists, skipped silently if not.
 
 ```bash
 python3 scripts/pipeline/subtitle.py \
   --video output/[slug]/hebrew/reels/[slug]-he-reel-1-draft.mp4 \
-  --transcript output/[slug]/[lang]/reels/reel_01/transcript.json \
-  --mode highlighted_phrase \
-  --max-words 5
+  --transcript output/[slug]/[lang]/reels/reel_01/transcript.json
 ```
 
-**Output:** `[video_name]_subtitled.mp4` (same directory as input video).
+**Output:** `_subtitled.mp4`, then auto-compacts to `_final.mp4` at `video_speed` from `config/voice-settings.json`. Preview runs (`--preview-segment`) skip the compact step.
 
 **Modes:**
-- `highlighted_phrase` (default) — active word full white, others dimmed at ~60% opacity
+- `highlighted_phrase` (default) — active word full white (255,255,255), inactive slightly dimmed (210,210,210). Directional drop shadow (black 200α, 3px bottom-right) on all words. No glow. Top-anchored stable baseline — single-line and two-line phrases share the same vertical position; two-line expands downward.
 - `phrase` — all words in phrase equally bright
 - `single_word` — one word at a time
 
@@ -347,12 +445,13 @@ python3 scripts/pipeline/subtitle.py \
 **Key constants** (in `src/reel_pipeline/`):
 | Constant | Value | File |
 |----------|-------|------|
-| `FONT_SIZE_SUBTITLE` | 77pt | `subtitles.py` |
-| `BAR_PADDING_X` | 48px | `text_overlay.py` |
-| `BAR_PADDING_Y` | 22px | `text_overlay.py` |
-| `TEXT_Y_RATIO` | 0.78 | `text_overlay.py` |
-| `DEFAULT_MAX_WORDS` | 5 | `subtitles.py` |
-| `DEFAULT_PAUSE_THR` | 0.35s | `subtitles.py` |
+| `FONT_SIZE_SUBTITLE` | 86pt | `subtitles.py` |
+| `DEFAULT_MAX_WORDS` | 9 | `subtitles.py` |
+| `DEFAULT_MAX_CHARS` | 22 | `subtitles.py` |
+| `DEFAULT_PAUSE_THR` | 0.40s | `subtitles.py` |
+| `BAR_PADDING_X` | 40px | `text_overlay.py` |
+| `BAR_PADDING_Y` | 20px | `text_overlay.py` |
+| `TEXT_Y_RATIO` | 0.75 | `text_overlay.py` |
 
 ---
 
@@ -394,9 +493,11 @@ output/[slug]/[lang]/reels/
     │   ├── ...
     │   ├── alignment.json
     │   ├── transcript.json
-    │   └── tts_review.md
+    │   └── _tests/               ← all test/experiment outputs go here (safe to delete)
+    │       ├── seg01_test_style017.mp3
+    │       └── seg04_test_no_dirham_entry.mp3
     ├── scenes/                   ← pre-rendered animated clips (exclamation, CTA, etc.)
-    │   ├── scene04_exclamation.mp4
+    │   ├── scene03_exclamation.mp4
     │   └── scene05_cta.mp4
     ├── reel01_draft.mp4
     └── reel01_draft_subtitled.mp4
@@ -422,55 +523,44 @@ AUDIO_DIR=$REEL_DIR/reel_01/audio
 SCENES_DIR=$REEL_DIR/reel_01/scenes
 ASSETS_DIR=assets/$SLUG/canonical
 
-# 1a. Generate TTS review (no API call)
+# 1. Generate VO — timing endpoint (1 API call, produces alignment.json)
 python3 scripts/generate/vo_combined.py \
   $REEL_DIR/$SLUG-he-reels.md \
   --reel 1 \
   --output-dir $AUDIO_DIR \
-  --prepare-tts-review
-# → edit $AUDIO_DIR/tts_review.md, set APPROVED: true
+  --confirm-paid-api-call
+# → listen; if mispronunciation: add word to EL dictionary, update .env, regenerate
 
-# 1b. Generate VO — timing endpoint (1 API call, produces alignment.json)
-python3 scripts/generate/vo_combined.py \
-  $REEL_DIR/$SLUG-he-reels.md \
-  --reel 1 \
-  --output-dir $AUDIO_DIR \
-  --require-tts-review --confirm-paid-api-call
-
-# 2. Generate Kling clips (paid — use kling_batch.py for automatic naming)
+# 2. Generate Kling clips (paid — VEP File column must point to source images at this stage)
 python3 scripts/generate/kling_batch.py \
   --blueprint $REEL_DIR/$SLUG-he-reels.md \
   --reel 1 \
   --assets-dir $ASSETS_DIR \
   --model fal-ai/kling-video/v3/pro/image-to-video \
   --confirm-paid-api-call
-# → produces: kling_scene01.mp4 (scene 1, 5s), kling_scene02.mp4 (scene 2, 5s), kling_scene04.mp4 (scene 4, 10s)
+# → produces: kling_scene01.mp4, kling_scene02.mp4, kling_scene04.mp4 in $ASSETS_DIR
+# After this step: update VEP File column to point to the generated clips (canonical/kling_sceneXX.mp4)
 
 # 3. Generate animated clips (free — no API call)
 python3 scripts/generate/exclamation.py \
-  --duration 9.0 --output $SCENES_DIR/scene04_exclamation.mp4
+  --duration 9.0 --output $SCENES_DIR/scene03_exclamation.mp4
 
 python3 scripts/generate/cta.py \
   --bg-asset a003_dh-family-residential-community.jpg \
   --duration 3.0 --output $SCENES_DIR/scene05_cta.mp4
 
+# After step 3: update VEP File column for these scenes to their repo-relative paths
+
 # 4. Build transcript from alignment (free — no API call)
 python3 scripts/pipeline/align_timing.py --audio-dir $AUDIO_DIR
 
-# 5. Render — Kling clips applied via --clip-override (VEP File = source images)
-#    Scene 3 (exclamation) and scene 5 (CTA) are overridden explicitly for clarity;
-#    they would also resolve from the VEP table as video-type assets.
+# 5. Render — VEP is the single source of truth; no --clip-override needed
 python3 scripts/pipeline/render.py \
   --blueprint $REEL_DIR/$SLUG-he-reels.md \
   --audio-dir $AUDIO_DIR \
   --assets-dir $ASSETS_DIR \
   --output $REEL_DIR/reel_01/reel01_draft.mp4 \
-  --reel 1 --render \
-  --clip-override 1:$ASSETS_DIR/kling_scene01.mp4 \
-  --clip-override 2:$ASSETS_DIR/kling_scene02.mp4 \
-  --clip-override 3:$SCENES_DIR/scene04_exclamation.mp4 \
-  --clip-override 4:$ASSETS_DIR/kling_scene04.mp4 \
-  --clip-override 5:$SCENES_DIR/scene05_cta.mp4
+  --reel 1 --render
 
 # 6. Subtitle
 python3 scripts/pipeline/subtitle.py \
