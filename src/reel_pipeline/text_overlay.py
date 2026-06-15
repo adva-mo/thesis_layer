@@ -40,6 +40,12 @@ def _draw_halo(draw, xy, text, font, shadow_color, offset):
             draw.text((x + dx * r, y + dy * r), text, font=font, fill=shadow_color)
 
 
+def _draw_shadow(draw, xy, text, font, shadow_color, offset):
+    """Simple directional drop shadow (bottom-right)."""
+    x, y = xy
+    draw.text((x + offset, y + offset), text, font=font, fill=shadow_color)
+
+
 def _visual_hebrew(text: str) -> str:
     """Convert logical RTL order to visual order for PIL rendering."""
     try:

@@ -18,24 +18,22 @@ from typing import Literal, Optional
 from PIL import Image, ImageDraw, ImageFont
 
 
-from .text_overlay import FONT_PATH, TEXT_Y_RATIO, BAR_PADDING_X, BAR_PADDING_Y, BAR_RADIUS, _draw_halo
+from .text_overlay import FONT_PATH, TEXT_Y_RATIO, BAR_PADDING_X, BAR_PADDING_Y, BAR_RADIUS, SHADOW_OFFSET, _draw_halo, _draw_shadow
 
 # ── Defaults ──────────────────────────────────────────────────────
 
 DEFAULT_MODE        = "highlighted_phrase"
-DEFAULT_MAX_WORDS   = 6
-DEFAULT_MAX_DUR     = 3.2
+DEFAULT_MAX_WORDS   = 9
+DEFAULT_MAX_DUR     = 4.5
 DEFAULT_PAUSE_THR   = 0.40   # seconds between words to trigger phrase split
 DEFAULT_MAX_CHARS   = 22     # total chars (incl. spaces) per phrase — prevents wide overflow
 
 FONT_SIZE_SUBTITLE  = 86
 
-HIGHLIGHT_COLOR     = (255, 255, 255, 255)   # active word
-DIM_COLOR           = (255, 255, 255, 255)   # other words — fully white, glow distinguishes active
-SHADOW_COLOR        = (0, 0, 0, 170)         # cinematic shadow (~67% opacity)
-SHADOW_OFFSET       = 4                      # px — multi-radius fill via _draw_halo
-ACTIVE_GLOW_COLOR   = (255, 255, 255, 55)    # soft white glow ring around active word
-ACTIVE_GLOW_OFFSET  = 2                      # px offset for the glow pass
+HIGHLIGHT_COLOR     = (255, 255, 255, 255)   # active word — full white
+DIM_COLOR           = (210, 210, 210, 255)   # inactive words — slightly dimmed
+SHADOW_COLOR        = (0, 0, 0, 200)         # drop shadow color
+SHADOW_DROP_OFFSET  = 3                      # directional drop shadow — all words
 
 PUNCTUATION_SPLIT   = set(".?!,—;:")
 
@@ -165,8 +163,6 @@ def _render_two_lines(
     total_w1 = sum(m[1] for m in met1) + space_w * max(0, n1 - 1) if met1 else 0
     total_w2 = sum(m[1] for m in met2) + space_w * max(0, n2 - 1) if met2 else 0
 
-    top1 = min(m[2][1] for m in met1) if met1 else 0
-    top2 = min(m[2][1] for m in met2) if met2 else 0
     ascent, descent = font.getmetrics()
     line_h = ascent + descent
 
@@ -181,14 +177,13 @@ def _render_two_lines(
             is_active = highlight_all or i == vis_active
             color = HIGHLIGHT_COLOR if is_active else DIM_COLOR
             draw_x = x - bbox[0]
-            _draw_halo(draw, (draw_x, base_y), word, font, SHADOW_COLOR, SHADOW_OFFSET)
-            if is_active and not highlight_all:
-                _draw_halo(draw, (draw_x, base_y), word, font, ACTIVE_GLOW_COLOR, ACTIVE_GLOW_OFFSET)
+            _draw_shadow(draw, (draw_x, base_y), word, font, SHADOW_COLOR, SHADOW_DROP_OFFSET)
             draw.text((draw_x, base_y), word, font=font, fill=color)
             x += adv + space_w
 
-    draw_line(met1, total_w1, bar_y + BAR_PADDING_Y - top1, va1)
-    draw_line(met2, total_w2, bar_y + BAR_PADDING_Y + line_h + LINE_GAP - top2, va2)
+    # Fixed positions — no per-phrase top correction so all phrases share the same baseline.
+    draw_line(met1, total_w1, bar_y + BAR_PADDING_Y, va1)
+    draw_line(met2, total_w2, bar_y + BAR_PADDING_Y + line_h + LINE_GAP, va2)
 
     return img
 
@@ -271,13 +266,16 @@ def _render_uniform(text: str, color, font, width: int, height: int) -> Image.Im
     line_h = ascent + descent
 
     bar_w = text_w + BAR_PADDING_X * 2
-    bar_h = line_h + BAR_PADDING_Y * 2
+    # Always reserve two-line height so the block never jumps when switching
+    # between single-line and two-line phrases.
+    bar_h = line_h * 2 + LINE_GAP + BAR_PADDING_Y * 2
     bar_x = (width - bar_w) // 2
     bar_y = int(height * TEXT_Y_RATIO) - bar_h
 
     draw_x = bar_x + BAR_PADDING_X - bbox[0]
-    draw_y = bar_y + BAR_PADDING_Y - bbox[1]
-    _draw_halo(draw, (draw_x, draw_y), visual, font, SHADOW_COLOR, SHADOW_OFFSET)
+    # Anchored to the top slot — 2-line phrases share this position for line 1 and expand downward.
+    draw_y = bar_y + BAR_PADDING_Y
+    _draw_shadow(draw, (draw_x, draw_y), visual, font, SHADOW_COLOR, SHADOW_DROP_OFFSET)
     draw.text((draw_x, draw_y), visual, font=font, fill=color)
     return img
 
@@ -309,8 +307,10 @@ def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, heigh
     visual_words = visual_phrase.split()
 
     n_visual = len(visual_words)
-    # BiDi reverses RTL word order; mirror the logical index into visual space
-    visual_active_idx = max(0, min(n_visual - 1, n_visual - 1 - active_idx))
+    # BiDi reverses RTL word order; only mirror the logical index for Hebrew phrases.
+    # Pure Latin phrases are unchanged by get_display, so logical == visual order.
+    is_rtl = any(_word_script(w) == 'hebrew' for w in word_texts)
+    visual_active_idx = max(0, min(n_visual - 1, (n_visual - 1 - active_idx) if is_rtl else active_idx))
 
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
@@ -325,24 +325,25 @@ def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, heigh
         word_metrics.append((word, advance_w, bbox))
 
     total_w = sum(m[1] for m in word_metrics) + space_w * max(0, n_visual - 1)
-    min_top = min(m[2][1] for m in word_metrics) if word_metrics else 0
     ascent, descent = font.getmetrics()
     line_h = ascent + descent
 
     bar_w = total_w + BAR_PADDING_X * 2
-    bar_h = line_h + BAR_PADDING_Y * 2
+    # Always reserve two-line height — consistent with two-line phrases so the
+    # block never jumps vertically when script switches trigger a layout change.
+    bar_h = line_h * 2 + LINE_GAP + BAR_PADDING_Y * 2
     bar_x = (width - bar_w) // 2
     bar_y = int(height * TEXT_Y_RATIO) - bar_h
 
     x = bar_x + BAR_PADDING_X
-    base_draw_y = bar_y + BAR_PADDING_Y - min_top
+    # Anchored to the top slot — 2-line phrases share this position for line 1 and expand downward.
+    base_draw_y = bar_y + BAR_PADDING_Y
 
     for i, (word, advance_w, word_bbox) in enumerate(word_metrics):
-        color = HIGHLIGHT_COLOR if i == visual_active_idx else DIM_COLOR
+        is_active = i == visual_active_idx
+        color = HIGHLIGHT_COLOR if is_active else DIM_COLOR
         draw_x = x - word_bbox[0]
-        _draw_halo(draw, (draw_x, base_draw_y), word, font, SHADOW_COLOR, SHADOW_OFFSET)
-        if i == visual_active_idx:
-            _draw_halo(draw, (draw_x, base_draw_y), word, font, ACTIVE_GLOW_COLOR, ACTIVE_GLOW_OFFSET)
+        _draw_shadow(draw, (draw_x, base_draw_y), word, font, SHADOW_COLOR, SHADOW_DROP_OFFSET)
         draw.text((draw_x, base_draw_y), word, font=font, fill=color)
         x += advance_w + space_w
 
