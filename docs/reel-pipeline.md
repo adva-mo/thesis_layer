@@ -4,6 +4,13 @@ Read this file at the start of any session involving reel generation.
 
 ---
 
+## Cadence & Quality Gate (read before scripting)
+
+- `templates/reels/cadence-rules.md` — current optimization mode (short vs long reel guidance, sprint state, audience stage). Read before choosing a reel format/length.
+- `templates/reels/reel-preflight.md` — mandatory quality gate. Run after drafting a script, before the Visual Evidence Plan or any paid asset generation (Kling, ElevenLabs).
+
+---
+
 ## Architecture
 
 ```
@@ -23,6 +30,14 @@ assets/[slug]/          ← collected image assets (canonical/)
 
 ```
 1. Write reel script (.md blueprint)
+1.5. Pre-flight gate & refine   → templates/reels/reel-preflight.md (see content-generation-workflow.md Step 2.4 — refine in place, loop until approved)
+       ↳ reel's Status field is set to SCRIPTED. STOP — present the script to the user.
+
+       ⚠ Spend gate: every reel's metadata block carries a Status field (SCRIPTED → APPROVED).
+       Do not run step 2a/2b/3 with --confirm-paid-api-call until the user explicitly approves
+       the script in conversation and Status is flipped to APPROVED. Preflight "Recommendation:
+       approved" is a content-quality verdict, not user sign-off — see reel-preflight.md.
+
 2a. Generate TTS review        → scripts/generate/vo_combined.py --prepare-tts-review
     ↳ edit tts_review.md, set APPROVED: true
 2b. Generate VO audio          → scripts/generate/vo_combined.py --require-tts-review --confirm-paid-api-call
@@ -95,6 +110,8 @@ python3 scripts/generate/kling.py \
 
 ### vo_combined.py — ElevenLabs TTS via `/with-timestamps` *(standard)*
 
+**Spend gate:** do not run with `--confirm-paid-api-call` unless the reel's `Status` field is `APPROVED`. Dry-run (no flag) is always fine.
+
 Sends all segments as one combined string to the ElevenLabs `/with-timestamps` endpoint. Returns audio + character-level alignment in a single API call, then splits the audio by alignment offsets.
 
 ```bash
@@ -159,6 +176,8 @@ python3 scripts/generate/vo.py output/[slug]/hebrew/reels/[slug]-he-reels.md \
 ---
 
 ### kling_batch.py — Batch Kling I2V *(recommended)*
+
+**Spend gate:** do not run with `--confirm-paid-api-call` unless the reel's `Status` field is `APPROVED`. Dry-run (no flag) is always fine.
 
 Reads a reel blueprint, finds all image-type scenes, and generates one Kling clip per scene. Output filenames are derived from `scene.index` — no manual counting, no naming mistakes.
 

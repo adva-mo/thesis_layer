@@ -90,9 +90,14 @@ Before scripting any reel:
 
 ### Step 2 — Generate 5 Reel Scripts
 
-Reference: `templates/reels/reel-template.md`
+Reference: `templates/reels/reel-template.md`, `templates/reels/cadence-rules.md`, `templates/reels/reel-preflight.md`
 
-Before writing: read `output/[project-slug]/thesis.md`.
+Before writing:
+1. Read `output/[project-slug]/thesis.md`.
+2. Read `templates/reels/cadence-rules.md` — pick each reel's length/format against the current sprint mode (short vs long) before scripting, not after.
+3. Read `templates/reels/reel-preflight.md` — write every script to already pass this gate on the first draft, not just to satisfy it after the fact.
+
+Step 2.4 below is a verification pass, not the first time these criteria apply — drafting against them now should mean Step 2.4 mostly confirms rather than rewrites.
 
 Produce 5 reel scripts, one per format (Data Drop, Investment Case, Myth Bust, Area Spotlight, Payment Plan Breakdown).
 
@@ -107,6 +112,35 @@ Each script includes:
 - Caption (2–3 sentences + hashtags)
 
 Save to `output/[project-slug]/[language]/reels/` — see CLAUDE.md §12.
+
+---
+
+### Step 2.4 — Pre-Flight Verification & Refine
+
+Reference: `templates/reels/reel-preflight.md`, `templates/reels/cadence-rules.md`
+
+This is a verification pass, not the first exposure to the bar — Step 2 already drafted against `cadence-rules.md` and `reel-preflight.md`. This step catches what slipped through, it doesn't introduce new requirements.
+
+For each reel scripted in Step 2:
+
+1. Run `templates/reels/reel-preflight.md` against the full script and output the `PRE-FLIGHT REVIEW` block.
+2. If `Recommendation: revise` — refine the script directly (do not just flag it), using the flagged categories as edit instructions:
+
+   | Flag | Fix |
+   |---|---|
+   | Hook Strength: weak/medium | Rewrite the hook to create curiosity, contradiction, mistake framing, money tension, myth bust, or wrong-question framing (see reel-preflight.md Hook Strength Test). If the current hook family can't be made strong for this thesis, pick a different family from `hook-selection.md`. |
+   | Payoff Timing: delayed | Move the core number/insight earlier; cut setup that precedes it. |
+   | Cognitive Load: high | Cut numbers to the 1–3 budget (reel-template.md — Numbers Must Earn Their Place); reduce to one idea per segment. |
+   | Risk Placement: incorrect | Move risk earlier; the last beat before CTA must be a reframe, thesis return, or investor question (reel-template.md — Final Impression Rule). |
+   | Ending Momentum: weak | Apply one allowed closing mechanism: return to thesis, reframe the risk, surface the investor question, compare tradeoffs, or create curiosity. |
+   | Overexplaining: trim needed | Apply preflight Q12 — remove sentences that don't weaken the thesis — until clean. |
+
+3. Re-run the preflight after refining. Repeat until `Recommendation: approved`.
+4. Set the reel's `**Status:**` field to `SCRIPTED` and present the script to the user. **Do not proceed to Step 2.5 (asset collection) or any paid API call until the user explicitly approves the script.** Preflight `Recommendation: approved` is a content-quality verdict, not spend authorization — see `reel-preflight.md` — Pre-Flight Approval ≠ Spend Authorization. Once the user approves, update `**Status:**` to `APPROVED` before continuing.
+
+**Cap: max 2 preflight reviews per reel.** If the script is still flagged `revise` after the 2nd review, stop refining and escalate to the user with the script, both `PRE-FLIGHT REVIEW` blocks, and the remaining flagged categories — do not keep looping. A script needing a 3rd pass usually means a thesis or format mismatch, not a wording fix.
+
+Do not proceed to Step 2.5 (paid asset collection) or VO generation on a script still flagged `revise`.
 
 ---
 

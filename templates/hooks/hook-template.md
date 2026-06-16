@@ -24,6 +24,10 @@
 - Do not use "incredible" or "amazing"
 - The "most people" framing is optional — use only if it's true
 
+**Additional Hebrew examples (cold-audience sprint — short reels):**
+> "למה משקיעים אוהבים נדל״ן מוכן בדובאי?"
+> "עסקה אחת. שתי תוצאות שונות לגמרי."
+
 ---
 
 ## H2 — Price Anchor
@@ -44,6 +48,9 @@
 - One specific number in the hook
 - Keep it deadpan — let the comparison do the work
 
+**Additional Hebrew example (cold-audience sprint — short reels):**
+> "150 אלף דירהאם זה מחיר כניסה — לא מחיר דירה."
+
 ---
 
 ## H3 — Payment Plan Math
@@ -63,6 +70,9 @@
 - Do the math for the reader — don't make them calculate
 - Always clarify what "down payment" actually means (not the full purchase price)
 - Never imply monthly payments = rent (they're structurally different — explain honestly)
+
+**Additional Hebrew example (cold-audience sprint — short reels):**
+> "מה אם השכירות לא מכסה את מה שנשאר לשלם?"
 
 ---
 
@@ -145,6 +155,11 @@
 - The "right thing" must be answerable — don't set up a question you can't answer
 - Don't make the reader feel stupid — make them feel like they're leveling up
 
+**Additional Hebrew examples (cold-audience sprint — short reels, wrong-question / mistake framing):**
+> "למה תשואה היא לא הדבר הראשון שאני בודקת?"
+> "הטעות שרוב המשקיעים עושים בדובאי."
+> "כולם מסתכלים על תשואה. זאת לא תמיד השאלה."
+
 ---
 
 ## H8 — Hidden Opportunity
@@ -164,6 +179,12 @@
 - Don't trash the "obvious" thing — just reframe it
 - The hidden opportunity must be real and specific
 - This hook builds authority — make sure you can back up the framing
+
+**Additional Hebrew examples (cold-audience sprint — short reels, contrarian / contradiction):**
+> "למה לוקיישן טוב לא תמיד מספיק?"
+> "לא כל פרויקט בדובאי הוא השקעה."
+> "לא כל לוקיישן טוב הוא השקעה טובה."
+> "הרבה אנשים קונים פרויקט. מעט אנשים בודקים את התזה."
 
 ---
 
