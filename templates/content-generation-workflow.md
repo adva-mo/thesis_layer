@@ -12,6 +12,7 @@ Before starting:
 - [ ] Language confirmed: Hebrew / English / Both
 - [ ] `output/[project-slug]/thesis.md` exists — produced by `templates/positioning-framework.md` after positioning is confirmed
 - [ ] `output/[project-slug]/thesis.md` is loaded now — read it once here, do not re-read per step below
+- [ ] `output/[project-slug]/project-data.md` exists — if missing, continue (do not re-run extraction). Note: `project-data.md` is mandatory in `extraction-workflow.md` Step 3 for all future projects sourced from a URL or brochure.
 - For reel sessions: `output/history/hook-log.md` and `docs/reel-pipeline.md` are also loaded at session init (CLAUDE.md §1.5). Do not re-read in Steps 1.5 or 2.
 
 If `thesis.md` is missing: run positioning first, produce thesis.md, then return here.

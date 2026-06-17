@@ -4,6 +4,30 @@ How to extract structured project data from any input type. Run this first — b
 
 ---
 
+## Step 0 — Save Source
+
+Before anything else, record and persist the input source. This step is mandatory.
+
+**URL source:** Create `input/urls/[project-slug].md` with:
+
+```
+project: [Project Name]
+slug: [project-slug]
+url: [full URL]
+date-accessed: [YYYY-MM-DD]
+source-type: developer-website / aggregator / other
+```
+
+**Brochure source:** Confirm the file is saved at `input/brochures/[project-slug].[ext]`. If not, save it before continuing.
+
+**Screenshot source:** Confirm the file is saved at `input/screenshots/[project-slug]-[n].[ext]`. If not, save it before continuing.
+
+**Text / manual notes source:** No file to save. Note `source-type: user-notes` in Extraction Notes when you reach Step 3.
+
+Do not begin Step 1 until the source is recorded.
+
+---
+
 ## Step 1 — Identify Input Type
 
 Determine what you have:
@@ -143,6 +167,8 @@ Extraction Notes: Source: developer brochure PDF. Prices as of brochure date —
 ---
 
 ## Step 3 — Save Project Data
+
+**MANDATORY. Do not proceed to `positioning-framework.md` until this file is saved.**
 
 After producing and validating the PROJECT DATA block, save it to:
 
