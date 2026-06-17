@@ -12,6 +12,7 @@ Before starting:
 - [ ] Language confirmed: Hebrew / English / Both
 - [ ] `output/[project-slug]/thesis.md` exists — produced by `templates/positioning-framework.md` after positioning is confirmed
 - [ ] `output/[project-slug]/thesis.md` is loaded now — read it once here, do not re-read per step below
+- For reel sessions: `output/history/hook-log.md` and `docs/reel-pipeline.md` are also loaded at session init (CLAUDE.md §1.5). Do not re-read in Steps 1.5 or 2.
 
 If `thesis.md` is missing: run positioning first, produce thesis.md, then return here.
 
@@ -76,7 +77,7 @@ Reference: `templates/hooks/hook-selection.md`
 
 Before scripting any reel:
 
-1. Read `output/history/hook-log.md` (all-project hook history — create the file if it doesn't exist yet, using the template in hook-selection.md §F)
+1. Use `output/history/hook-log.md` — already in session context for reel sessions (loaded at session init, CLAUDE.md §1.5). Create if missing using the template in hook-selection.md §F.
 2. Apply the 4-step selection rule from hook-selection.md §E for each reel format being produced
 3. From the 10 generated hooks (Step 1), select the hook matching the chosen family for that reel's opening beat
 4. After each reel is scripted, append a row to `output/history/hook-log.md` and recompute the "Next reel recommendation" block for this project in that file
@@ -93,9 +94,8 @@ Before scripting any reel:
 Reference: `templates/reels/reel-template.md`, `templates/reels/cadence-rules.md`, `templates/reels/reel-preflight.md`
 
 Before writing:
-1. Read `output/[project-slug]/thesis.md`.
-2. Read `templates/reels/cadence-rules.md` — pick each reel's length/format against the current sprint mode (short vs long) before scripting, not after.
-3. Read `templates/reels/reel-preflight.md` — write every script to already pass this gate on the first draft, not just to satisfy it after the fact.
+1. Read `templates/reels/cadence-rules.md` — pick each reel's length/format against the current sprint mode (short vs long) before scripting, not after.
+2. Read `templates/reels/reel-preflight.md` — write every script to already pass this gate on the first draft, not just to satisfy it after the fact.
 
 Step 2.4 below is a verification pass, not the first time these criteria apply — drafting against them now should mean Step 2.4 mostly confirms rather than rewrites.
 
@@ -117,7 +117,7 @@ Save to `output/[project-slug]/[language]/reels/` — see CLAUDE.md §12.
 
 ### Step 2.4 — Pre-Flight Verification & Refine
 
-Reference: `templates/reels/reel-preflight.md`, `templates/reels/cadence-rules.md`
+Both `templates/reels/reel-preflight.md` and `templates/reels/cadence-rules.md` are already in session context from Step 2 — no re-read needed.
 
 This is a verification pass, not the first exposure to the bar — Step 2 already drafted against `cadence-rules.md` and `reel-preflight.md`. This step catches what slipped through, it doesn't introduce new requirements.
 
@@ -169,7 +169,7 @@ Step 2.5 is skipped for: PDF-only projects, LinkedIn-only outputs, or any projec
 
 Reference: `templates/carousel/carousel-template.md`
 
-Before writing: read `output/[project-slug]/thesis.md`.
+Use `thesis.md` already in session context.
 
 Produce 7 slides. Follow the fixed structure (Hook → Project → Numbers → Area → Audience → Reality Check → CTA).
 
@@ -229,7 +229,7 @@ Save to `output/[project-slug]/hebrew/whatsapp/` — see CLAUDE.md §12.
 
 Structure: Project → Location → Key Numbers → Investment Angle → Honest Risk Note.
 
-Before writing: read `output/[project-slug]/thesis.md`.
+Use `thesis.md` already in session context.
 - Key Numbers section: use thesis.md Key Numbers block — do not reformat from context
 - Honest Risk Note: draw from thesis.md Risk Register — include 2–3 of the listed risks
 

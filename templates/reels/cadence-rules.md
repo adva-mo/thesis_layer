@@ -4,6 +4,8 @@ Runtime file. Tells the reel generation process what we are optimizing for **rig
 
 Read this alongside `templates/reels/reel-template.md` (formats) and `templates/reels/reel-preflight.md` (quality gate).
 
+**Scope note:** This file is currently wired to the reel pipeline only. It is read by `templates/content-generation-workflow.md` (Step 2), `templates/reels/reel-preflight.md`, and `docs/reel-pipeline.md`. Hook selection and positioning decisions do not reference it yet. If cadence state becomes relevant cross-system (hook selection, analysis framing, positioning), move this file to `strategy/current-mode.md` and update the referencing files. No move during this sprint.
+
 ---
 
 ## Current Optimization Mode
@@ -57,17 +59,14 @@ Use for:
 
 ---
 
-## Format Mapping (default, not rigid)
+## Format Mapping
 
-| Format | Usual length bucket |
-|---|---|
-| Format 1 — Market Signal | Short |
-| Format 2 — Investment Thesis | Long |
-| Format 3 — Myth Bust | Short |
-| Format 4 — Area Thesis | Long |
-| Format 5 — Payment Plan Thinking | Short |
+Tendencies, not rules. Choose length based on idea complexity and cold-audience fit, not the format label.
 
-This mapping is a default starting point, not a rule. **Thesis fit decides length, not the format label.** If a thesis can be compressed into one strong cold-audience insight, make it short — even if it's normally a Format 2 or 4 candidate. During this sprint, when in doubt, bias toward the short end.
+Usually short (15–25s): Formats 1, 3, 5.
+Usually long (35–50s): Formats 2, 4.
+
+**Thesis fit decides length, not the format label.** If a thesis can be compressed into one strong cold-audience insight, make it short, even if it's normally a Format 2 or 4 candidate. During this sprint, when in doubt, bias toward the short end.
 
 Do not create a 6th format. Do not rewrite Formats 1–5.
 
