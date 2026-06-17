@@ -23,6 +23,74 @@ Mandatory quality gate. Run after a reel script is drafted, before Visual Eviden
 
 ---
 
+## Cadence Label Verification
+
+Read the hook VO text directly. Verify the rhetorical structure matches the cadence label declared in the script metadata. This check runs before Hook-Insight Integrity — a mismatch means the wrong obligation check would be applied.
+
+| Label | VO must... |
+|---|---|
+| QUESTION | End with "?" or use "למה / איך / מה" as the operative final element |
+| CONTRAST | State a norm, then state the exception as a fact — no question |
+| INVERSION | State a norm, then explicitly flip it ("הפוך", negative construction, reversal) |
+| NUMBER DROP | Open with a specific number, no preamble before it |
+| CONDITION | Open with "אם / if" |
+| SURPRISE | Juxtapose two unexpected facts without transition |
+
+**FAIL (mismatch)** if the hook VO's rhetorical structure contradicts the label — e.g., label says CONTRAST but hook ends with "למה...?", or label says NUMBER DROP but hook opens with a sentence before the number.
+
+**PASS (match)** if the hook VO's structure is consistent with the label.
+
+A cadence mismatch is a hard fail. It means either the label is wrong or the hook was not written to the intended cadence. Fix by rewriting the hook to match the label, or relabeling — then re-run Hook-Insight Integrity against the correct cadence.
+
+---
+
+## Hook-Insight Integrity
+
+Every reel must pass two related tests: epistemological (are claims correctly labeled?) and structural (does the body deliver on what the hook promises?).
+
+**Part 1 — Facts vs. Interpretation**
+
+Every insight in the reel must be traceable to one of:
+- A verified fact from source material
+- A reasonable inference directly supported by verified facts
+- A clearly labeled opinion or interpretation ("this may indicate...", "one reading of this is...")
+
+Do not present assumptions, speculation, or inferred motivations as established facts.
+
+Acceptable: "This payment structure keeps 50% of the developer's revenue tied to project completion."
+Acceptable: "This may indicate greater confidence in the project's long-term success."
+Not acceptable: "The developer chose this structure because they are confident."
+Not acceptable: "The developer is not dependent on buyer payments." *(unless stated in source material)*
+
+**Part 2 — Hook Curiosity Satisfaction**
+
+Every hook creates a psychological obligation. The reel body must satisfy that curiosity before the CTA. Satisfying does not require certainty — a clearly labeled inference is enough. The CTA may deepen interest; it must never be the first place the hook's promise is fulfilled.
+
+- **QUESTION cadence** ("why?", "how?", "what explains this?"): body must provide a verified answer, a fact-based explanation, or a clearly labeled interpretation. If no defensible answer exists in the thesis, do not use QUESTION cadence.
+- **CONTRAST cadence** (norm vs. exception): body must explain why the exception is noteworthy — what is different, why it matters, what it may signal. Showing the anomaly alone is not enough.
+
+**Validation questions:**
+1. What curiosity or expectation does the hook create?
+2. Is that curiosity satisfied before the CTA?
+3. Which statements are facts?
+4. Which statements are inferences?
+5. Are all inferences supported by facts in the reel or thesis?
+6. Is any motivation, intent, or causal explanation presented as fact without evidence?
+7. Would a skeptical viewer feel the reel delivered on the promise made in the first 3–5 seconds?
+
+**FAIL if:**
+- The hook's promise is fulfilled only in the CTA
+- A causal explanation is presented as fact without source-material backing
+- The reel relies on implied motivations not supported by source material
+- The viewer is left with the same unresolved question the hook created
+
+**PASS if:**
+- The reel delivers a meaningful answer, explanation, or insight before the CTA
+- The certainty of each claim matches the strength of the underlying evidence
+- The viewer feels informed rather than teased
+
+---
+
 ## Hook Strength Test (objective, not a vibe check)
 
 A hook is strong only if it creates **at least one** of:
@@ -51,11 +119,13 @@ Cognitive Load: [low / medium / high]
 Risk Placement: [correct / incorrect]
 Ending Momentum: [strong / weak]
 Overexplaining: [clean / trim needed]
+Cadence Label: [match / mismatch]
+Hook-Insight Integrity: [pass / fail]
 Recommendation: [revise / approved]
 ```
 
 **Recommendation logic:**
-- `revise` if Hook Strength is `weak`, OR Payoff Timing is `delayed`, OR Ending Momentum is `weak`, OR Risk Placement is `incorrect`.
+- `revise` if Hook Strength is `weak`, OR Payoff Timing is `delayed`, OR Ending Momentum is `weak`, OR Risk Placement is `incorrect`, OR Cadence Label is `mismatch`, OR Hook-Insight Integrity is `fail`.
 - `approved` only if none of the above trigger and Overexplaining is `clean` (or any flagged sentence has already been cut).
 
 ---

@@ -987,6 +987,15 @@ Every reel must end with the audience thinking, not worrying.
 
 Risk and the reality check beat are required — they build credibility. But the content's last emotional note must be clarity, curiosity, or a question worth exploring. Never unresolved doubt.
 
+**Risk phrasing — specific consequences, not dramatic metaphors**
+
+Name what actually happens if the assumption fails. Do not use metaphors that amplify fear without adding information.
+
+Bad: "אין רשת ביטחון" / "יוצאים מהכיס בלי קשר" / "there is no safety net"
+Good: "השכירות עלולה להיות נמוכה מהצפוי" / "ואז התוכנית נראית אחרת לגמרי"
+
+Use "עלולה / may / might" to signal uncertainty accurately. State the specific consequence (lower rental yield, slower demand, longer vacancy) — not how frightening the scenario is. Concrete risk builds trust. Dramatic risk builds anxiety.
+
 **The reality check beat must not be the final word on the risk.** Either:
 - (a) the reality check beat itself closes with a reframe or forward question, OR
 - (b) there is a beat between reality check and CTA that anchors the risk to a decision frame

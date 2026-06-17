@@ -81,6 +81,8 @@ Every hook opening falls into one of 6 named cadences. Track the cadence alongsi
 
 Do not repeat the same cadence within the last 5 channel-level reels. If the best hook family opens naturally with a repeated cadence, rewrite the opening line to use a different cadence while preserving the hook's psychological lever.
 
+**QUESTION cadence constraint:** Before selecting QUESTION cadence, confirm that thesis.md contains a defensible answer — verified fact, supported inference, or clearly labeled hypothesis — that can be delivered within the Insight segment. If the question the hook would raise cannot be answered defensibly within the reel body, use CONTRAST cadence instead. A QUESTION hook whose answer lives only in the CTA violates the Hook-Insight Integrity rule (reel-preflight.md).
+
 ---
 
 ## E. Selection Rule

@@ -97,6 +97,7 @@ Reference: `templates/reels/reel-template.md`, `templates/reels/cadence-rules.md
 Before writing:
 1. Read `templates/reels/cadence-rules.md` — pick each reel's length/format against the current sprint mode (short vs long) before scripting, not after.
 2. Read `templates/reels/reel-preflight.md` — write every script to already pass this gate on the first draft, not just to satisfy it after the fact.
+3. Before writing each hook: identify the cadence and apply the Hook-Insight Integrity rule (reel-preflight.md). For **QUESTION cadence** — confirm the thesis contains a defensible answer (verified fact, supported inference, or clearly labeled hypothesis) that fits within the Insight segment. If no defensible answer exists, use **CONTRAST cadence** instead. For **CONTRAST cadence** — confirm the body will explain why the exception matters, not just show that it exists.
 
 Step 2.4 below is a verification pass, not the first time these criteria apply — drafting against them now should mean Step 2.4 mostly confirms rather than rewrites.
 
@@ -135,6 +136,8 @@ For each reel scripted in Step 2:
    | Risk Placement: incorrect | Move risk earlier; the last beat before CTA must be a reframe, thesis return, or investor question (reel-template.md — Final Impression Rule). |
    | Ending Momentum: weak | Apply one allowed closing mechanism: return to thesis, reframe the risk, surface the investor question, compare tradeoffs, or create curiosity. |
    | Overexplaining: trim needed | Apply preflight Q12 — remove sentences that don't weaken the thesis — until clean. |
+   | Cadence Label: mismatch | Read the hook VO and identify its actual rhetorical structure. Either rewrite the hook VO to match the declared cadence, or relabel the cadence to match what was written. Then re-run Hook-Insight Integrity against the correct cadence label. |
+   | Hook-Insight Integrity: fail | Identify which violation triggered the fail (promise deferred to CTA, or claim presented as fact without evidence). If deferred: rewrite the Insight segment to answer the hook before the CTA, or change the hook cadence to CONTRAST. If unsupported fact: relabel the claim as inference ("this may indicate...", "one reading of this is...") or remove it. |
 
 3. Re-run the preflight after refining. Repeat until `Recommendation: approved`.
 4. Set the reel's `**Status:**` field to `SCRIPTED` and present the script to the user. **Do not proceed to Step 2.5 (asset collection) or any paid API call until the user explicitly approves the script.** Preflight `Recommendation: approved` is a content-quality verdict, not spend authorization — see `reel-preflight.md` — Pre-Flight Approval ≠ Spend Authorization. Once the user approves, update `**Status:**` to `APPROVED` before continuing.
