@@ -27,6 +27,7 @@ Usage:
 
 import argparse
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -65,6 +66,17 @@ def _update_vep_render_column(blueprint: Path, start_s: float, end_s: float, ren
     if n:
         blueprint.write_text(new_content, encoding="utf-8")
     return bool(n)
+
+
+def _open_for_review(path: Path) -> None:
+    """Open the clip in the default player immediately after generation."""
+    try:
+        if sys.platform == "darwin":
+            subprocess.Popen(["open", str(path)])
+        elif sys.platform.startswith("linux"):
+            subprocess.Popen(["xdg-open", str(path)])
+    except Exception:
+        pass  # non-fatal — user can open manually
 
 
 def _clip_duration(segment_s: float) -> int:
@@ -207,6 +219,8 @@ def main() -> None:
         try:
             fal_kling.generate_clip(scene.asset_path, prompt, dur, model, out_path)
             print(f"    ✓ {out_path.name}")
+            _open_for_review(out_path)
+            print(f"    → opening for review (re-run with --scenes {scene.index} to regenerate)")
             updated = _update_vep_render_column(blueprint, scene.start_s, scene.end_s, f"canonical/{out_path.name}")
             if updated:
                 print(f"    ✓ VEP Render column updated → canonical/{out_path.name}")
