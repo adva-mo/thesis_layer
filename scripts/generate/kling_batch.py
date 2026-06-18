@@ -84,8 +84,8 @@ def _clip_duration(segment_s: float) -> int:
     return 10 if segment_s > 5 else 5
 
 
-def _output_path(assets_dir: Path, scene_index: int) -> Path:
-    return assets_dir / f"kling_scene{scene_index:02d}.mp4"
+def _output_path(assets_dir: Path, start_s: float, end_s: float) -> Path:
+    return assets_dir / f"kling_{int(start_s):02d}-{int(end_s):02d}s.mp4"
 
 
 def _estimate_cost(scenes_to_generate: list, model: str) -> str:
@@ -99,12 +99,12 @@ def _estimate_cost(scenes_to_generate: list, model: str) -> str:
     }
     per_5s = next((v for k, v in costs.items() if k in model), 0.56)
     total = sum(per_5s * (_clip_duration(s.end_s - s.start_s) / 5) for s in scenes_to_generate)
-    return f"~${total:.2f} ({', '.join(f'scene{s.index}=${per_5s * _clip_duration(s.end_s - s.start_s) / 5:.2f}' for s in scenes_to_generate)})"
+    return f"~${total:.2f} ({', '.join(f'{int(s.start_s)}-{int(s.end_s)}s=${per_5s * _clip_duration(s.end_s - s.start_s) / 5:.2f}' for s in scenes_to_generate)})"
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Batch Kling I2V — auto-names clips from scene index."
+        description="Batch Kling I2V — names clips from scene timestamps, not scene index."
     )
     parser.add_argument("--blueprint",  required=True, help="Path to reel .md blueprint")
     parser.add_argument("--reel",       type=int, default=1, help="Reel number (default: 1)")
@@ -163,7 +163,7 @@ def main() -> None:
             continue
 
         dur       = _clip_duration(scene.end_s - scene.start_s)
-        out_path  = _output_path(assets_dir, scene.index)
+        out_path  = _output_path(assets_dir, scene.start_s, scene.end_s)
         prompt    = " ".join(filter(None, [scene.visual_intent, scene.motion_style]))
 
         # Portrait crop detection
@@ -212,7 +212,7 @@ def main() -> None:
     errors = []
     for scene in to_generate:
         dur      = _clip_duration(scene.end_s - scene.start_s)
-        out_path = _output_path(assets_dir, scene.index)
+        out_path = _output_path(assets_dir, scene.start_s, scene.end_s)
         prompt   = " ".join(filter(None, [scene.visual_intent, scene.motion_style]))
 
         print(f"  Generating scene {scene.index} → {out_path.name}  ({dur}s) …")
