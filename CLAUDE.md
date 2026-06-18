@@ -90,7 +90,7 @@ Check `market.md` — Languages section for the primary language setting.
 For domain terms (glossary), see `primary_language.md` — Domain Terms (only if primary language is not English).
 
 **Primary language naturalizer:**
-If a file exists at `templates/languages/[primary-language]-naturalizer.md`, apply it to every public-facing primary language output before saving. Skip for Analysis Mode outputs and English content. Current file: `templates/languages/hebrew-naturalizer.md`. The naturalizer is a language-quality pass only — it runs after content decisions are finalized.
+If a file exists at `templates/languages/[primary-language]-naturalizer.md`, apply it to every public-facing primary language output before saving. Skip for Analysis Mode outputs and English content. Current file: `templates/languages/hebrew-naturalizer.md`. The naturalizer is a language-quality pass only — it runs after content decisions are finalized. Run it on every Hebrew content file before considering the file done, including ad-hoc generation outside the formal workflow. No Hebrew file is complete without a naturalizer sign-off.
 
 ---
 

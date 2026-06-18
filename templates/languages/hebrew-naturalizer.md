@@ -100,6 +100,7 @@ The fix is always: rewrite the sentence construction around Thesis.
 "השקעה מבוססת thesis"
 "ה-thesis שלך"
 "אלא בגלל ה-thesis." [standalone, no logic follows]
+"הנחת ה-Thesis" [noun construct — turns Thesis into an academic premise, not a thinking framework]
 
 Bad → fix: "אלא בגלל ה-thesis." → "אלא בגלל ה-Thesis: Wynn פותח ב-2027 ממש לידה."
 
@@ -168,6 +169,18 @@ Bad:
 Good:
 לפי מה שאנחנו רואים
 לפי הנתונים שיש כרגע
+
+---
+
+**מפתח → יזם**
+
+Bad:
+מפתח שמוכן לחכות לחלק הגדול מהכסף עד המסירה
+
+Good:
+יזם שמוכן לחכות לחלק הגדול מהכסף עד המסירה
+
+Rule: Always use יזם. Applies to all content — VO, captions, carousels, LinkedIn, analysis outputs.
 
 ---
 

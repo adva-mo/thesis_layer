@@ -158,6 +158,15 @@ Prefer:
 - `[TEXT_CARD:]` = explicit text on screen. Use sparingly — CTA, number breakdowns, risk disclaimers only. Subtitles handle everything else. No default text overlays.
 - `[VO:]` = spoken voiceover (ElevenLabs). Write as natural spoken Hebrew. Use the Investment Signals table and Decision Anchor as internal reasoning — they inform what thought to express, not what to list. Write the conclusion of the reasoning, not the structure of it. One clean insight per segment. High reasoning density, low explanation density.
 
+**`[VO:]` and `[TTS:]` are two-line tags — the one exception to the inline pattern above.** `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`, and `[TEXT_CARD:]` are all single-line inline tags (`[TAG: content]`). `[VO:]` and `[TTS:]` are NOT — the tag sits alone on its own line, and the quoted text follows on the line(s) below:
+
+```
+[VO:]
+"the spoken text goes here"
+```
+
+NOT inline: `[VO: "the spoken text"]` — `vo_combined.py` and `vo.py` search for the literal substring `[VO:]` followed by a quote mark; the inline form will not be found and the script will silently produce zero segments ("No VO segments found for reel N"). Every Rule example below that shows `` `[VO:] "text"` `` inline is shorthand for readability in running prose — when writing an actual `.md` blueprint, always split it across two lines as shown above.
+
 **Architecture is internal reasoning, not narration**
 
 The Investment Signals table, Decision Anchor, and thesis type exist to sharpen the reasoning underneath the sentence — not to appear in the sentence.
@@ -415,6 +424,24 @@ Visual pacing:
 
 ---
 
+## Per-Reel Header Block
+
+Every generated reel section must open with this metadata block immediately after the `## Reel N` heading. Set `**Status:** SCRIPTED` at generation time — do not leave it blank or omit it. The status field progresses through the pipeline: `SCRIPTED` → `RETENTION-REVIEWED` → `NATURALIZER-SIGNED` → `APPROVED`.
+
+```
+## Reel N — [Format Name] ([duration]s) | [Hook Family] | [Cadence]
+
+**Format:** Format N — [Format Name]
+**Sprint mode:** [cadence-rules.md sprint label, e.g. "short reel (cadence-rules.md — 15–25s band)"]
+**Hook family:** [hook family code + name, e.g. "H7 — Investment Psychology"]
+**Cadence:** [cadence label + description, e.g. "CONTRAST (wrong focus → right focus, both stated as facts)"]
+**Voice style:** [style number + name, e.g. "Style 3 — Skeptical Investor"]
+**CTA keyword:** [keyword]
+**Status:** SCRIPTED
+```
+
+---
+
 # Format 1 — Market Signal (30s)
 
 ### Purpose
@@ -447,58 +474,58 @@ Best for:
 ```text
 [VISUAL: Strong text hook]
 
-[VO]
+[VO:]
 "[Interesting signal]."
 
 [PAUSE]
 
 [VISUAL: Supporting visual]
 
-[VO]
+[VO:]
 "The interesting part isn't [surface thing].
 
 It's what this might suggest."
 
 [VISUAL: Explanation graphic]
 
-[VO]
+[VO:]
 "[Explain the signal in plain language]."
 
 [VISUAL: Project connection]
 
-[VO]
+[VO:]
 "In [Project Name],
 that's what makes this interesting."
 
 [VISUAL: CTA]
 
-[VO]
+[VO:]
 "[Tier 2 CTA]"
 ```
 
 ### Hebrew Example — Sierra
 
 ```text
-[VO]
+[VO:]
 "70% בחתימה.
 
 זה לא רק תשלום."
 
 [PAUSE]
 
-[VO]
+[VO:]
 "לפעמים תוכנית תשלומים
 מספרת יותר מהברושור."
 
-[VO]
+[VO:]
 "אם יזם מבקש את רוב הכסף מוקדם —
 שווה לשאול למה."
 
-[VO]
+[VO:]
 "וזאת אחת השאלות
 שהייתי בודקת ב-Sierra."
 
-[VO]
+[VO:]
 "כתבו לי SIERRA
 ואשלח את הניתוח."
 ```
@@ -543,56 +570,56 @@ Best for:
 ```text
 [VISUAL: Strong hook]
 
-[VO]
+[VO:]
 "The interesting question here isn't [obvious thing]."
 
 [VISUAL: Market context]
 
-[VO]
+[VO:]
 "[Explain bigger market dynamic]."
 
 [VISUAL: Project connection]
 
-[VO]
+[VO:]
 "[Project Name]
 gets interesting if you believe [thesis]."
 
 [VISUAL: Reality check → reframe]
 
-[VO]
+[VO:]
 "The honest risk: [real risk].
 [Reframe question or return to thesis — this is the last VO line before CTA.]"
 
 [VISUAL: CTA]
 
-[VO]
+[VO:]
 "[Tier 2 CTA]"
 ```
 
 ### Hebrew Example — Costa Mare
 
 ```text
-[VO]
+[VO:]
 "כולם מסתכלים על Wynn.
 
 פחות אנשים מסתכלים
 על מה שקורה סביבו."
 
-[VO]
+[VO:]
 "בנדל״ן,
 המחיר הרבה פעמים זז
 לפני שהתשתית נפתחת."
 
-[VO]
+[VO:]
 "זה מה שהופך את Costa Mare
 למעניין."
 
-[VO]
+[VO:]
 "לא בלי סיכון.
 RAK עדיין שוק צעיר יותר מדובאי.
 השאלה היא אם הקצב של Wynn מצדיק את הפרמיום."
 
-[VO]
+[VO:]
 "כתבו לי RAK
 ואשלח את הניתוח המלא."
 ```
@@ -624,6 +651,8 @@ Prefer investor myths.
 - "Payment plans make projects affordable"
 - "Branded residence = good investment"
 - "New area = early opportunity"
+- "8% תשואה זה אומר עסקה טובה" (a high yield number alone doesn't mean the deal is good)
+- "לוקיישן טוב זה תמיד השקעה טובה" (a good location doesn't guarantee a good investment)
 
 ### Structure
 
@@ -639,55 +668,55 @@ Prefer investor myths.
 ```text
 [VISUAL: Myth statement]
 
-[VO]
+[VO:]
 "'[Myth]'"
 
 [PAUSE]
 
 [VISUAL: Contradiction]
 
-[VO]
+[VO:]
 "Sometimes true.
 
 Often not."
 
 [VISUAL: Explanation]
 
-[VO]
+[VO:]
 "[Explain what actually matters]."
 
 [VISUAL: Investor implication]
 
-[VO]
+[VO:]
 "The better question is:
 [actionable investor question]."
 
 [VISUAL: CTA]
 
-[VO]
+[VO:]
 "[Tier 2 CTA]"
 ```
 
 ### Hebrew Example
 
 ```text
-[VO]
+[VO:]
 "'יוקרה אומרת השקעה בטוחה יותר.'"
 
 [PAUSE]
 
-[VO]
+[VO:]
 "לפעמים.
 
 אבל יוקרה
 לא מגינה עליך
 מלשלם יותר מדי."
 
-[VO]
+[VO:]
 "השאלה המעניינת:
 מה כבר מתומחר?"
 
-[VO]
+[VO:]
 "כתבו לי DUBAI
 ואשלח את הניתוח."
 ```
@@ -728,56 +757,56 @@ Focus on:
 ```text
 [VISUAL: Area name]
 
-[VO]
+[VO:]
 "[Area Name].
 
 Here's what most investors miss."
 
 [VISUAL: Area context]
 
-[VO]
+[VO:]
 "[Demand driver / pricing story / infrastructure]."
 
 [VISUAL: Timing signal — include risk here if relevant]
 
-[VO]
+[VO:]
 "[Why this matters now.]
 [If risk applies: state the risk here, not below.]"
 
 [VISUAL: Thesis return]
 
-[VO]
+[VO:]
 "[Project Name] only matters if you believe [thesis].
 [Surface the investor question that connects thesis to decision.]"
 
 [VISUAL: CTA]
 
-[VO]
+[VO:]
 "[Tier 2 CTA]"
 ```
 
 ### Hebrew Example — JVC
 
 ```text
-[VO]
+[VO:]
 "JVC לא מעניין
 כי הוא טרנדי."
 
-[VO]
+[VO:]
 "הוא מעניין
 כי הביקוש לשכירות
 כבר קיים."
 
-[VO]
+[VO:]
 "וזה משנה
 איך מסתכלים
 על דירות מרוהטות."
 
-[VO]
+[VO:]
 "בגלל זה פרויקטים כמו Pearl House
 שווים בדיקה."
 
-[VO]
+[VO:]
 "כתבו לי JVC
 ואשלח את הניתוח."
 ```
@@ -809,19 +838,19 @@ Payment structure = signal.
 ```text
 [VISUAL: Payment plan timeline]
 
-[VO]
+[VO:]
 "[X]% upfront.
 
 Let's talk about what that might mean."
 
 [VISUAL: Breakdown]
 
-[VO]
+[VO:]
 "[Explain structure briefly]."
 
 [VISUAL: Interpretation]
 
-[VO]
+[VO:]
 "The interesting part isn't the math.
 
 It's what this may suggest
@@ -829,27 +858,27 @@ about the project."
 
 [VISUAL: CTA]
 
-[VO]
+[VO:]
 "[Tier 2 CTA]"
 ```
 
 ### Hebrew Example
 
 ```text
-[VO]
+[VO:]
 "20% בחתימה
 נשמע נגיש."
 
-[VO]
+[VO:]
 "אבל זה לא תמיד
 החלק המעניין."
 
-[VO]
+[VO:]
 "השאלה הטובה יותר:
 מה קורה
 עד המסירה?"
 
-[VO]
+[VO:]
 "כתבו לי PLAN
 ואשלח את הניתוח."
 ```
@@ -976,6 +1005,15 @@ Every reel must end with the audience thinking, not worrying.
 
 Risk and the reality check beat are required — they build credibility. But the content's last emotional note must be clarity, curiosity, or a question worth exploring. Never unresolved doubt.
 
+**Risk phrasing — specific consequences, not dramatic metaphors**
+
+Name what actually happens if the assumption fails. Do not use metaphors that amplify fear without adding information.
+
+Bad: "אין רשת ביטחון" / "יוצאים מהכיס בלי קשר" / "there is no safety net"
+Good: "השכירות עלולה להיות נמוכה מהצפוי" / "ואז התוכנית נראית אחרת לגמרי"
+
+Use "עלולה / may / might" to signal uncertainty accurately. State the specific consequence (lower rental yield, slower demand, longer vacancy) — not how frightening the scenario is. Concrete risk builds trust. Dramatic risk builds anxiety.
+
 **The reality check beat must not be the final word on the risk.** Either:
 - (a) the reality check beat itself closes with a reframe or forward question, OR
 - (b) there is a beat between reality check and CTA that anchors the risk to a decision frame
@@ -1031,8 +1069,10 @@ Anti-collect: [3–5 specific things NOT to collect — be explicit about what l
 
 | Segment | Beat | Critical | File | Collect | Source | Copyright tier |
 |---|---|---|---|---|---|---|
-| [timestamp] | [establish / prove / reinforce / texture] | [yes / no] | canonical/a[NNN]_[description].jpg | [what to search for] | [source per matrix in asset-collection.md] | [A / B / C] |
+| 0–4s | establish / prove / reinforce / texture | yes / no | canonical/a[NNN]_[description].jpg | what to search for | source per matrix in asset-collection.md | A / B / C |
 ```
+
+**Brackets in this scaffold are placeholder notation, not literal syntax — strip them when filling in real values.** This applies to every field, but the **Segment column is the one most often gotten wrong**: the timestamp appears bracketed in the script body (`[10–17s]`) because that's how the script tags themselves work, but the VEP table's Segment cell must be bracket-free (`10–17s`) — the asset-resolution parser builds its lookup key as bare digits and dashes, with no brackets. A bracketed Segment cell (`| [10–17s] | ... |`) parses without error but silently fails to match any scene, so the real image is dropped and the scene falls back to a generated graphic. Always write the Segment column exactly as `0–4s`, never `[0–4s]`.
 
 **VEP File column convention:**
 - For image-type scenes (Kling input): reference the **source image** — `canonical/aNN_*.jpg`. Kling clips are generated from this source via `kling_batch.py` and applied at render time using `--clip-override`. Do not reference Kling output clips here.

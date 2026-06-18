@@ -81,6 +81,8 @@ Every hook opening falls into one of 6 named cadences. Track the cadence alongsi
 
 Do not repeat the same cadence within the last 5 channel-level reels. If the best hook family opens naturally with a repeated cadence, rewrite the opening line to use a different cadence while preserving the hook's psychological lever.
 
+**QUESTION cadence constraint:** Before selecting QUESTION cadence, confirm that thesis.md contains a defensible answer — verified fact, supported inference, or clearly labeled hypothesis — that can be delivered within the Insight segment. If the question the hook would raise cannot be answered defensibly within the reel body, use CONTRAST cadence instead. A QUESTION hook whose answer lives only in the CTA violates the Hook-Insight Integrity rule (reel-preflight.md).
+
 ---
 
 ## E. Selection Rule
@@ -94,10 +96,11 @@ Look up Tier 1 and Tier 2 for this project's thesis type (from thesis.md → Mat
 Read `output/history/hook-log.md`, filter rows by project slug. Filter to PUBLISHED rows only — SCRIPTED and SKIPPED rows do not count toward the fatigue lookback. If a hook family appears in the last 3 PUBLISHED reels for this project, apply a soft penalty: prefer an alternative candidate. Override (repeat anyway) only if the repeated family is uniquely Tier 1 AND no other Tier 1/2 candidate has strong format fit.
 
 **Step 3 — Channel-level diversity**
-Read `output/history/hook-log.md`. Filter to PUBLISHED rows only — SCRIPTED and SKIPPED rows are ignored. Apply three soft penalties:
+Read `output/history/hook-log.md`. Filter to PUBLISHED rows only — SCRIPTED and SKIPPED rows are ignored. Apply four soft checks:
 - **Hook family:** If a Tier 1 candidate appears in the last 2 PUBLISHED channel-level reels, prefer an alternative. Same override rule.
 - **Brand/perf balance:** If the last 2 PUBLISHED channel-level reels both used brand hooks, prefer a performance candidate from the list; vice versa. Override if no performance candidate is Tier 1/2 for this thesis type.
 - **Rhetorical freshness:** Identify the likely opening cadence for each candidate (Pattern D). If a cadence appears in the last 5 PUBLISHED channel-level reels, prefer a candidate that opens with a different cadence. Override if no alternative cadence is available at Tier 1/2.
+- **Brand frame drift:** Scan the `Brand Frames` column of the last 5 PUBLISHED rows. If "Thesis" does not appear in any of them, flag it and note it in the "Next reel recommendation" block — prioritize a reel format and hook where naming "Thesis" feels natural in the script. Do not force it if the script doesn't support it cleanly.
 
 **Step 4 — Pick and log**
 Rank remaining candidates by (thesis tier → format fit). Pick the top. After scripting, append a row to `output/history/hook-log.md` and recompute the "Next reel recommendation" block for this project in that file.
@@ -115,9 +118,9 @@ Single file. Append one row per reel, across all projects. Project-level history
 ```markdown
 # Channel Hook Log
 
-| Scripted | Published | Project | Reel | Hook Family | Rhetorical Pattern | Brand/Perf | Platforms | Status |
-|----------|-----------|---------|------|-------------|-------------------|------------|-----------|--------|
-| YYYY-MM-DD | YYYY-MM-DD | [project-slug] | reel_01 | H8 — Hidden Opportunity | INVERSION | Brand | Instagram, TikTok | PUBLISHED |
+| Scripted | Published | Project | Reel | Hook Family | Rhetorical Pattern | Brand/Perf | Platforms | Brand Frames | Status |
+|----------|-----------|---------|------|-------------|-------------------|------------|-----------|--------------|--------|
+| YYYY-MM-DD | YYYY-MM-DD | [project-slug] | reel_01 | H8 — Hidden Opportunity | INVERSION | Brand | Instagram, TikTok | Thesis | PUBLISHED |
 
 ---
 
@@ -134,7 +137,9 @@ Single file. Append one row per reel, across all projects. Project-level history
 
 Add one "Next reel recommendation" section per active project. Recompute after each reel is logged.
 
-**Status values:** `SCRIPTED` (default at log time) → `PUBLISHED` (flip when the reel goes live) → `SKIPPED` (scripted but not published).
+**Status values:** `SCRIPTED` (default at log time) → `NATURALIZER-SIGNED` (after retention + naturalizer pass) → `APPROVED` (user approved, paid APIs unlocked) → `PUBLISHED` (flip when the reel goes live) → `SKIPPED` (scripted but not published).
+
+**Brand Frames column:** Leave `—` at log time. Fill in after the retention layer pass (Step 2.4b) using the "Framework terms named" field from the post-retention integrity block. Values are comma-separated framework terms explicitly named in the script (e.g., `Thesis`, `Thesis, Risk`). Diversity lookback (Step E, Step 3) uses PUBLISHED rows only.
 
 **Diversity lookback uses PUBLISHED rows only.** SCRIPTED and SKIPPED rows are ignored when applying soft penalties in Step E. This ensures the diversity logic reflects what the audience actually heard, not what was drafted.
 
