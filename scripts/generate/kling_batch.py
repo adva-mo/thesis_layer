@@ -35,7 +35,7 @@ REPO_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from reel_pipeline import config, fal_kling
-from reel_pipeline.parser import parse_reel_file
+from reel_pipeline.parser import parse_reel_file, read_reel_status
 
 
 def _is_kling_scene(scene) -> bool:
@@ -206,6 +206,15 @@ def main() -> None:
             print("\n  All clips cached — no API cost.")
         print("  Pass --confirm-paid-api-call to generate.\n")
         return
+
+    # ── Status gate ───────────────────────────────────────────────────
+    status = read_reel_status(blueprint, args.reel)
+    if status is None:
+        print("Error: **Status:** field not found in reel header — add it before running paid generation.")
+        sys.exit(1)
+    if status.upper() != "APPROVED":
+        print(f"Error: reel {args.reel} status is '{status}' — must be APPROVED before paid generation.")
+        sys.exit(1)
 
     # ── Paid run ──────────────────────────────────────────────────────
     print()

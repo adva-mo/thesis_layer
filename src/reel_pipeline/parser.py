@@ -158,6 +158,22 @@ def _ts_key(start_s: float, end_s: float) -> str:
     return f"{int(start_s)}–{int(end_s)}s"
 
 
+def read_reel_status(md_path: Path, reel_number: int) -> Optional[str]:
+    """
+    Read the **Status:** value from the reel metadata block.
+    Returns the raw status string (e.g. 'APPROVED', 'SCRIPTED') or None if not found.
+    """
+    content = md_path.read_text(encoding="utf-8")
+    reel_splits = re.split(r"^## (Reel \d+ — .+?)$", content, flags=re.MULTILINE)
+    for i in range(1, len(reel_splits), 2):
+        num_match = re.match(r"Reel (\d+)", reel_splits[i])
+        if num_match and int(num_match.group(1)) == reel_number:
+            body = reel_splits[i + 1]
+            m = re.search(r"\*\*Status:\*\*\s*(\S+)", body)
+            return m.group(1).strip() if m else None
+    return None
+
+
 def parse_reel_file(
     md_path: Path,
     reel_number: int = 1,
@@ -275,6 +291,15 @@ def parse_reel_file(
             asset_path=asset_path,
             critical=ts_key in critical_keys,
         ))
+
+    for s in scenes:
+        if not s.critical and s.visual_type in ("kling", "static") and s.asset_path is None:
+            warnings.warn(
+                f"Reel {reel_number}, scene {s.index} [{s.start_s:.0f}–{s.end_s:.0f}s] "
+                f"({s.visual_type}): asset not found — falling back to generated graphic. "
+                f"Add asset to VEP Source column or mark Critical=yes to enforce a hard stop.",
+                stacklevel=2,
+            )
 
     missing_critical = [
         s for s in scenes
