@@ -98,7 +98,7 @@ python3 scripts/generate/kling.py \
   --prompt "slow cinematic push-in, warm daylight, smooth camera" \
   --duration 5 \
   --model fal-ai/kling-video/v2.5/turbo/image-to-video \
-  --output assets/[slug]/canonical/kling_00-04s.mp4 \
+  --output assets/[slug]/canonical/kling_r1_00-04s.mp4 \
   --confirm-paid-api-call
 ```
 
@@ -201,7 +201,7 @@ python3 scripts/generate/kling_batch.py \
 python3 scripts/generate/kling_batch.py ... --scenes 2,4 --confirm-paid-api-call
 ```
 
-**Naming:** output is `canonical/kling_{start:02d}-{end:02d}s.mp4` derived from the scene's timestamp (e.g. `kling_04-12s.mp4`). Timestamp-based naming is stable across scene insertions and reorders — no collision risk if scenes shift index. Generated or video scenes are skipped automatically.
+**Naming:** output is `canonical/kling_r{reel}_{start:02d}-{end:02d}s.mp4` (e.g. `kling_r1_04-12s.mp4`). Reel number scopes clips within the shared canonical folder — no collision if two reels have scenes at the same timestamp. Timestamp makes names stable across scene insertions and reorders. Generated or video scenes are skipped automatically.
 
 **Prompt construction:** concatenates `VISUAL_INTENT` + `MOTION_STYLE` from the blueprint. Both fields must be Kling-ready (see `templates/reels/reel-template.md`).
 
@@ -213,7 +213,7 @@ python3 scripts/generate/kling_batch.py ... --scenes 2,4 --confirm-paid-api-call
 
 **VEP lifecycle for Kling scenes:**
 1. Write VEP `Source` pointing to the source image (`canonical/a001_*.jpg`) — kling_batch reads these. Leave `Render` blank.
-2. Run kling_batch → clips land in `canonical/kling_XX-XXs.mp4` (e.g. `kling_04-12s.mp4`). `kling_batch.py` writes the clip path into the `Render` column automatically.
+2. Run kling_batch → clips land in `canonical/kling_r1_XX-XXs.mp4` (e.g. `kling_r1_04-12s.mp4`). `kling_batch.py` writes the clip path into the `Render` column automatically.
 3. render.py reads `Render` first; `Source` is untouched and always points to the original image.
 
 ---
@@ -228,23 +228,23 @@ Sub-clip durations must sum to ≤ segment length. Plan on paper first:
 
 | Sub-clip | Source image | Kling duration | Trim to |
 |---|---|---|---|
-| kling_04-15s_a.mp4 | a001_golf.jpg | 5s | 4s |
-| kling_04-15s_b.mp4 | a004_park.jpg | 5s | 3s |
-| kling_04-15s_c.mp4 | a005_mall.jpg | 5s | 4s |
+| kling_r1_04-15s_a.mp4 | a001_golf.jpg | 5s | 4s |
+| kling_r1_04-15s_b.mp4 | a004_park.jpg | 5s | 3s |
+| kling_r1_04-15s_c.mp4 | a005_mall.jpg | 5s | 4s |
 | **concat total** | | | **11s** |
 
 Always generate 5s clips (Kling's native duration) and trim in the ffmpeg step.
 
 **Step 2 — Generate each sub-clip via `kling.py`** (not kling_batch — it only does one clip per scene)
 
-Name sub-clips `kling_XX-XXs_a.mp4`, `kling_XX-XXs_b.mp4`, `kling_XX-XXs_c.mp4` (timestamp of the parent segment + suffix):
+Name sub-clips `kling_r1_XX-XXs_a.mp4`, `kling_r1_XX-XXs_b.mp4`, `kling_r1_XX-XXs_c.mp4` (reel number + timestamp of the parent segment + suffix):
 
 ```bash
 python3 scripts/generate/kling.py \
   --image assets/[slug]/canonical/aXXX_description.jpg \
   --prompt "[VISUAL_INTENT text for this cut]. [MOTION_STYLE for this cut]" \
   --duration 5 \
-  --output assets/[slug]/canonical/kling_XX-XXs_a.mp4 \
+  --output assets/[slug]/canonical/kling_rN_XX-XXs_a.mp4 \
   --model fal-ai/kling-video/v3/pro/image-to-video \
   --confirm-paid-api-call
 ```
@@ -252,8 +252,8 @@ python3 scripts/generate/kling.py \
 **Step 3 — Backup before overwriting**
 
 ```bash
-cp assets/[slug]/canonical/kling_XX-XXs.mp4 \
-   assets/[slug]/canonical/kling_XX-XXs_draft_v1.mp4
+cp assets/[slug]/canonical/kling_rN_XX-XXs.mp4 \
+   assets/[slug]/canonical/kling_rN_XX-XXs_draft_v1.mp4
 ```
 
 **Step 4 — Trim and concat**
@@ -262,9 +262,9 @@ Always include `scale=1080:1920` — different source images produce slightly di
 
 ```bash
 ffmpeg -y \
-  -i assets/[slug]/canonical/kling_XX-XXs_a.mp4 \
-  -i assets/[slug]/canonical/kling_XX-XXs_b.mp4 \
-  -i assets/[slug]/canonical/kling_XX-XXs_c.mp4 \
+  -i assets/[slug]/canonical/kling_rN_XX-XXs_a.mp4 \
+  -i assets/[slug]/canonical/kling_rN_XX-XXs_b.mp4 \
+  -i assets/[slug]/canonical/kling_rN_XX-XXs_c.mp4 \
   -filter_complex "
     [0:v]trim=duration=4,setpts=PTS-STARTPTS,scale=1080:1920:force_original_aspect_ratio=disable[v0];
     [1:v]trim=duration=3,setpts=PTS-STARTPTS,scale=1080:1920:force_original_aspect_ratio=disable[v1];
@@ -272,7 +272,7 @@ ffmpeg -y \
     [v0][v1][v2]concat=n=3:v=1:a=0[outv]
   " \
   -map "[outv]" -c:v libx264 -crf 18 -preset fast -an \
-  assets/[slug]/canonical/kling_XX-XXs.mp4
+  assets/[slug]/canonical/kling_rN_XX-XXs.mp4
 ```
 
 Adjust `trim=duration=X` values to match your trim plan from Step 1.
@@ -280,7 +280,7 @@ Adjust `trim=duration=X` values to match your trim plan from Step 1.
 **Step 5 — Update VEP to single row pointing to concat file**
 
 ```
-| 4–15s | insight | no | canonical/kling_04-15s.mp4 | concat _a+_b+_c | kling-v3-pro | A |
+| 4–15s | insight | no | canonical/kling_r1_04-15s.mp4 | concat _a+_b+_c | kling-v3-pro | A |
 ```
 
 One row only — NOT one row per sub-clip. The parser uses a dict keyed by timestamp; multiple rows for the same timestamp mean the last one wins and the others are silently ignored.
@@ -310,7 +310,7 @@ python3 scripts/generate/kling.py \
   --image assets/[slug]/canonical/a001_description.jpg \
   --prompt "slow cinematic push-in, warm daylight, smooth camera" \
   --duration 5 \
-  --output assets/[slug]/canonical/kling_XX-XXs.mp4 \
+  --output assets/[slug]/canonical/kling_rN_XX-XXs.mp4 \
   --confirm-paid-api-call
 ```
 
@@ -426,7 +426,7 @@ python3 scripts/pipeline/render.py \
 
 | Asset type | VEP Source column | VEP Render column |
 |---|---|---|
-| Kling clip | `canonical/a001_*.jpg` (source image) | `canonical/kling_XX-XXs.mp4` (written by kling_batch) |
+| Kling clip | `canonical/a001_*.jpg` (source image) | `canonical/kling_rN_XX-XXs.mp4` (written by kling_batch) |
 | Animated scene clip | `scenes/sceneNN_*.mp4` | same as Source |
 | CTA card | `scenes/sceneNN_*.mp4` | same as Source |
 | Static image | `canonical/a001_*.jpg` | blank → assembler reads Source |
@@ -524,9 +524,9 @@ output/[slug]/[lang]/reels/
 assets/[slug]/
 ├── canonical/                    ← validated source images + Kling output clips
 │   ├── a001_description.jpg
-│   ├── kling_00-04s.mp4          ← Kling output (generated by kling_batch.py)
-│   ├── kling_04-12s.mp4
-│   └── kling_20-28s.mp4
+│   ├── kling_r1_00-04s.mp4       ← Kling output (generated by kling_batch.py)
+│   ├── kling_r1_04-12s.mp4
+│   └── kling_r2_00-08s.mp4       ← reel 2 clip — same canonical folder, no collision
 ├── manifest.md
 └── raw/
 ```
@@ -557,8 +557,8 @@ python3 scripts/generate/kling_batch.py \
   --assets-dir $ASSETS_DIR \
   --model fal-ai/kling-video/v3/pro/image-to-video \
   --confirm-paid-api-call
-# → produces: kling_00-04s.mp4, kling_04-12s.mp4, etc. in $ASSETS_DIR (named by segment timestamp)
-# → kling_batch.py writes each canonical/kling_XX-XXs.mp4 path into the VEP Render column automatically
+# → produces: kling_r1_00-04s.mp4, kling_r1_04-12s.mp4, etc. in $ASSETS_DIR
+# → kling_batch.py writes each canonical/kling_r1_XX-XXs.mp4 path into the VEP Render column automatically
 
 # 3. Generate animated clips (free — no API call)
 python3 scripts/generate/exclamation.py \
