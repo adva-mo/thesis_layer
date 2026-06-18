@@ -424,6 +424,24 @@ Visual pacing:
 
 ---
 
+## Per-Reel Header Block
+
+Every generated reel section must open with this metadata block immediately after the `## Reel N` heading. Set `**Status:** SCRIPTED` at generation time — do not leave it blank or omit it. The status field progresses through the pipeline: `SCRIPTED` → `RETENTION-REVIEWED` → `NATURALIZER-SIGNED` → `APPROVED`.
+
+```
+## Reel N — [Format Name] ([duration]s) | [Hook Family] | [Cadence]
+
+**Format:** Format N — [Format Name]
+**Sprint mode:** [cadence-rules.md sprint label, e.g. "short reel (cadence-rules.md — 15–25s band)"]
+**Hook family:** [hook family code + name, e.g. "H7 — Investment Psychology"]
+**Cadence:** [cadence label + description, e.g. "CONTRAST (wrong focus → right focus, both stated as facts)"]
+**Voice style:** [style number + name, e.g. "Style 3 — Skeptical Investor"]
+**CTA keyword:** [keyword]
+**Status:** SCRIPTED
+```
+
+---
+
 # Format 1 — Market Signal (30s)
 
 ### Purpose

@@ -136,7 +136,7 @@ For each reel scripted in Step 2:
    | Cognitive Load: high | Cut numbers to the 1–3 budget (reel-template.md — Numbers Must Earn Their Place); reduce to one idea per segment. |
    | Risk Placement: incorrect | Move risk earlier; the last beat before CTA must be a reframe, thesis return, or investor question (reel-template.md — Final Impression Rule). |
    | Ending Momentum: weak | Apply one allowed closing mechanism: return to thesis, reframe the risk, surface the investor question, compare tradeoffs, or create curiosity. |
-   | Overexplaining: trim needed | Apply preflight Q12 — remove sentences that don't weaken the thesis — until clean. |
+   | Overexplaining: trim needed | Apply the Q12 compression test ("can one sentence be removed without weakening the thesis?") — remove any sentence where the answer is yes — until clean. |
    | Cadence Label: mismatch | Read the hook VO and identify its actual rhetorical structure. Either rewrite the hook VO to match the declared cadence, or relabel the cadence to match what was written. Then re-run Hook-Insight Integrity against the correct cadence label. |
    | Hook-Insight Integrity: fail | Identify which violation triggered the fail (promise deferred to CTA, or claim presented as fact without evidence). If deferred: rewrite the Insight segment to answer the hook before the CTA, or change the hook cadence to CONTRAST. If unsupported fact: relabel the claim as inference ("this may indicate...", "one reading of this is...") or remove it. |
 
