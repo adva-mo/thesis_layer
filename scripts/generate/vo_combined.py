@@ -19,8 +19,11 @@ import tempfile
 import requests
 from pathlib import Path
 
-REPO_ROOT  = Path(__file__).parent.parent.parent
-SEPARATOR  = "\n\n"
+REPO_ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(REPO_ROOT / "src"))
+from reel_pipeline.parser import read_reel_status  # noqa: E402
+
+SEPARATOR = "\n\n"
 
 # ── Config ────────────────────────────────────────────────────────
 
@@ -192,6 +195,14 @@ def main():
     if not args.confirm_paid_api_call:
         print("  Dry run only. Add --confirm-paid-api-call to generate.\n")
         return
+
+    status = read_reel_status(md_path, args.reel)
+    if status is None:
+        print("Error: **Status:** field not found in reel header — add it before running paid generation.")
+        sys.exit(1)
+    if status.upper() != "APPROVED":
+        print(f"Error: reel {args.reel} status is '{status}' — must be APPROVED before paid generation.")
+        sys.exit(1)
 
     if not API_KEY or not VOICE_ID:
         print("Error: ELEVENLABS_API_KEY or ELEVENLABS_VOICE_ID missing from .env"); sys.exit(1)

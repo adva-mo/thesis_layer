@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
 Batch Kling I2V generator — reads a reel blueprint and generates one clip per
-image-type scene, with output filenames derived from scene index.
+kling-type scene, with output filenames derived from scene index.
 
 Eliminates manual --output path naming (the source of kling_scene03-vs-04 bugs).
+After generation, writes the clip path into the VEP Render column automatically.
 
 Usage:
     # Dry run (default — free, prints plan):
@@ -25,6 +26,8 @@ Usage:
 """
 
 import argparse
+import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -32,16 +35,57 @@ REPO_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from reel_pipeline import config, fal_kling
-from reel_pipeline.parser import parse_reel_file
+from reel_pipeline.parser import parse_reel_file, read_reel_status
+
+
+def _is_kling_scene(scene) -> bool:
+    """True if this scene should be processed by kling_batch."""
+    if scene.visual_type is not None:
+        return scene.visual_type == "kling"
+    # Legacy blueprint without [VISUAL_TYPE:] — fall back to asset_type
+    return scene.asset_type == "image"
+
+
+def _skip_label(scene) -> str:
+    if scene.visual_type in ("generated", "timeline"):
+        return "generated — skip"
+    if scene.visual_type == "static":
+        return "static — skip"
+    return "generated — skip"
+
+
+def _update_vep_render_column(blueprint: Path, start_s: float, end_s: float, render_filename: str) -> bool:
+    """
+    Write the Render column for the VEP row matching this scene's timestamp.
+    Returns True if the row was found and updated, False if not found.
+    """
+    content = blueprint.read_text(encoding="utf-8")
+    ts_pat = rf"{int(start_s)}[–—\-]{int(end_s)}s"
+    row_pat = rf"(^\|[ \t]*{ts_pat}[ \t]*\|[^|]*\|[^|]*\|[^|]*\|)[^|]*(\|)"
+    new_content, n = re.subn(row_pat, rf"\g<1> {render_filename} \2", content, flags=re.MULTILINE)
+    if n:
+        blueprint.write_text(new_content, encoding="utf-8")
+    return bool(n)
+
+
+def _open_for_review(path: Path) -> None:
+    """Open the clip in the default player immediately after generation."""
+    try:
+        if sys.platform == "darwin":
+            subprocess.Popen(["open", str(path)])
+        elif sys.platform.startswith("linux"):
+            subprocess.Popen(["xdg-open", str(path)])
+    except Exception:
+        pass  # non-fatal — user can open manually
 
 
 def _clip_duration(segment_s: float) -> int:
-    """Segments > 7s get a 10s clip; shorter get 5s. Matches Kling's two supported durations."""
-    return 10 if segment_s > 7 else 5
+    """Pick the smallest Kling duration that covers the segment. Trim is neutral; stretch is not."""
+    return 10 if segment_s > 5 else 5
 
 
-def _output_path(assets_dir: Path, scene_index: int) -> Path:
-    return assets_dir / f"kling_scene{scene_index:02d}.mp4"
+def _output_path(assets_dir: Path, reel_number: int, start_s: float, end_s: float) -> Path:
+    return assets_dir / f"kling_r{reel_number}_{int(start_s):02d}-{int(end_s):02d}s.mp4"
 
 
 def _estimate_cost(scenes_to_generate: list, model: str) -> str:
@@ -55,12 +99,12 @@ def _estimate_cost(scenes_to_generate: list, model: str) -> str:
     }
     per_5s = next((v for k, v in costs.items() if k in model), 0.56)
     total = sum(per_5s * (_clip_duration(s.end_s - s.start_s) / 5) for s in scenes_to_generate)
-    return f"~${total:.2f} ({', '.join(f'scene{s.index}=${per_5s * _clip_duration(s.end_s - s.start_s) / 5:.2f}' for s in scenes_to_generate)})"
+    return f"~${total:.2f} ({', '.join(f'{int(s.start_s)}-{int(s.end_s)}s=${per_5s * _clip_duration(s.end_s - s.start_s) / 5:.2f}' for s in scenes_to_generate)})"
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Batch Kling I2V — auto-names clips from scene index."
+        description="Batch Kling I2V — names clips from scene timestamps, not scene index."
     )
     parser.add_argument("--blueprint",  required=True, help="Path to reel .md blueprint")
     parser.add_argument("--reel",       type=int, default=1, help="Reel number (default: 1)")
@@ -99,7 +143,7 @@ def main() -> None:
     for scene in scenes:
         if scene_filter and scene.index not in scene_filter:
             continue
-        if scene.asset_type != "image":
+        if not _is_kling_scene(scene):
             continue
         if scene.asset_path is None or not scene.asset_path.exists():
             print(f"  Scene {scene.index}: asset_path missing or not found — skip")
@@ -113,13 +157,13 @@ def main() -> None:
 
     for scene in scenes:
         in_filter = not scene_filter or scene.index in scene_filter
-        if scene.asset_type != "image" or not in_filter:
-            label = "generated — skip" if scene.asset_type != "image" else "filtered — skip"
+        if not _is_kling_scene(scene) or not in_filter:
+            label = _skip_label(scene) if not _is_kling_scene(scene) else "filtered — skip"
             print(f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]  {label}")
             continue
 
         dur       = _clip_duration(scene.end_s - scene.start_s)
-        out_path  = _output_path(assets_dir, scene.index)
+        out_path  = _output_path(assets_dir, args.reel, scene.start_s, scene.end_s)
         prompt    = " ".join(filter(None, [scene.visual_intent, scene.motion_style]))
 
         # Portrait crop detection
@@ -163,18 +207,34 @@ def main() -> None:
         print("  Pass --confirm-paid-api-call to generate.\n")
         return
 
+    # ── Status gate ───────────────────────────────────────────────────
+    status = read_reel_status(blueprint, args.reel)
+    if status is None:
+        print("Error: **Status:** field not found in reel header — add it before running paid generation.")
+        sys.exit(1)
+    if status.upper() != "APPROVED":
+        print(f"Error: reel {args.reel} status is '{status}' — must be APPROVED before paid generation.")
+        sys.exit(1)
+
     # ── Paid run ──────────────────────────────────────────────────────
     print()
     errors = []
     for scene in to_generate:
         dur      = _clip_duration(scene.end_s - scene.start_s)
-        out_path = _output_path(assets_dir, scene.index)
+        out_path = _output_path(assets_dir, args.reel, scene.start_s, scene.end_s)
         prompt   = " ".join(filter(None, [scene.visual_intent, scene.motion_style]))
 
         print(f"  Generating scene {scene.index} → {out_path.name}  ({dur}s) …")
         try:
             fal_kling.generate_clip(scene.asset_path, prompt, dur, model, out_path)
             print(f"    ✓ {out_path.name}")
+            _open_for_review(out_path)
+            print(f"    → opening for review (re-run with --scenes {scene.index} to regenerate)")
+            updated = _update_vep_render_column(blueprint, scene.start_s, scene.end_s, f"canonical/{out_path.name}")
+            if updated:
+                print(f"    ✓ VEP Render column updated → canonical/{out_path.name}")
+            else:
+                print(f"    ⚠ VEP Render column not found for scene {scene.index} — update manually")
         except Exception as e:
             print(f"    ✗ scene {scene.index} failed: {e}")
             errors.append(scene.index)

@@ -153,8 +153,9 @@ Prefer:
 
 ### Tags (current format)
 
-- `[VISUAL_INTENT:]` = what the scene should visually show — written at script time, abstract intent only. No asset paths here. Asset paths are assigned later via Visual Evidence Plan (Step 2.5).
-- `[MOTION_STYLE:]` = camera movement and style direction for Kling generation. e.g. "slow cinematic push-in, stable camera, warm light". Omit for generated graphic scenes.
+- `[VISUAL_TYPE:]` = **required on every scene.** Declares the scene's render path. Valid values: `kling` (collect image → Kling I2V clip), `static` (collect image → used as still, no Kling), `generated` (programmatic graphic card), `timeline` (animated sequence card). Parser errors on missing or unrecognized values — no silent fallback.
+- `[VISUAL_INTENT:]` = what the scene should visually show — written at script time, abstract intent only. No asset paths here. Asset paths are assigned later via Visual Evidence Plan (Step 2.5). For `kling` scenes, this becomes part of the Kling prompt.
+- `[MOTION_STYLE:]` = camera movement and style direction for Kling generation. Required for `kling` scenes. Omit for `generated`, `static`, and `timeline` scenes.
 - `[TEXT_CARD:]` = explicit text on screen. Use sparingly — CTA, number breakdowns, risk disclaimers only. Subtitles handle everything else. No default text overlays.
 - `[VO:]` = spoken voiceover (ElevenLabs). Write as natural spoken Hebrew. Use the Investment Signals table and Decision Anchor as internal reasoning — they inform what thought to express, not what to list. Write the conclusion of the reasoning, not the structure of it. One clean insight per segment. High reasoning density, low explanation density.
 
@@ -212,12 +213,14 @@ These two tags together must be specific enough to pass directly as a Kling `--p
 
 **Before:**
 ```
+[VISUAL_TYPE: kling]
 [VISUAL_INTENT: Dubai Hills Estate community street or park — family residential feel]
 [MOTION_STYLE: slow pan, warm daylight]
 ```
 
 **After:**
 ```
+[VISUAL_TYPE: kling]
 [VISUAL_INTENT: Dubai Hills Estate residential street — warm afternoon, lived-in, families visible softly in background, neighborhood already operating — no construction, no cranes, not a render]
 [MOTION_STYLE: gentle forward push, deliberate pace, eye-level camera, warm afternoon light, steady no shake]
 ```
@@ -230,20 +233,23 @@ These two tags together must be specific enough to pass directly as a Kling `--p
 #### Generated graphic scenes (no Kling clip)
 
 ```
-[VISUAL_INTENT: generated — brief description of the graphic (payment plan, comparison table, etc.)]
+[VISUAL_TYPE: generated]
+[VISUAL_INTENT: brief description of the graphic (payment plan, comparison table, etc.)]
 ```
 
-The word "generated" at the start signals: no Kling clip, create the graphic programmatically.
+`VISUAL_TYPE: generated` signals: no Kling clip, no asset collection. The graphic is created programmatically from the description.
 
 #### Timeline / argument sequence scenes
 
 ```
-[VISUAL_INTENT: timeline — <label 1> → <label 2> → <label 3>]
+[VISUAL_TYPE: timeline]
+[VISUAL_INTENT: <label 1> → <label 2> → <label 3>]
 ```
 
 4-step variant:
 ```
-[VISUAL_INTENT: timeline — <label 1> → <label 2> → <label 3> → <label 4>]
+[VISUAL_TYPE: timeline]
+[VISUAL_INTENT: <label 1> → <label 2> → <label 3> → <label 4>]
 ```
 
 Timeline label rules:
@@ -270,12 +276,13 @@ For CTA / text card scenes only:
 
 ### What NOT to write
 
+- Do not omit `[VISUAL_TYPE:]` — it is required on every scene block. A missing type is a parser error, not a silent fallback to Kling.
 - Do not write `[SCREEN:]` — deprecated. Use `[TEXT_CARD:]` only for explicit cards.
-- Do not write `[VISUAL:]` — deprecated. Use `[VISUAL_INTENT:]`.
+- Do not write `[VISUAL:]` — deprecated. Use `[VISUAL_TYPE:]` + `[VISUAL_INTENT:]`.
 - Do not write asset file paths in `[VISUAL_INTENT:]` — those come from the Visual Evidence Plan.
 - Do not add text overlays as a default — subtitles render the VO text.
-- Do not write `[VISUAL_INTENT: Timeline graphic — ...]` — deprecated. Use `timeline — label → label → label` instead.
-- Do not write thin VISUAL_INTENT like "community street, residential feel" — must include atmosphere, thesis link, and a negative cue.
+- Do not write `[VISUAL_INTENT: generated — ...]` or `[VISUAL_INTENT: timeline — ...]` — deprecated. Use `[VISUAL_TYPE: generated]` or `[VISUAL_TYPE: timeline]` instead, with a clean description in `[VISUAL_INTENT:]`.
+- Do not write thin VISUAL_INTENT like "community street, residential feel" for `kling` scenes — must include atmosphere, thesis link, and a negative cue.
 
 ---
 
@@ -306,12 +313,14 @@ When a VO segment exceeds 11 seconds, evaluate whether a single Kling clip is th
 **VISUAL_INTENT format for multi-clip scenes** — list all subjects in sequence with per-cut timing:
 
 ```
+[VISUAL_TYPE: kling]
 [VISUAL_INTENT: Three cuts: (1) [subject] — [atmosphere], no [anti-collect] Xs → (2) [subject] — [atmosphere] Xs → (3) [subject] — [atmosphere] Xs]
 [MOTION_STYLE: (1) [movement] → (2) [movement] → (3) [movement]]
 ```
 
 Example (the scene that prompted this rule):
 ```
+[VISUAL_TYPE: kling]
 [VISUAL_INTENT: Dubai Hills Estate — three working amenities in sequence: (1) golf course — green fairways, residential buildings behind, warm afternoon, no cranes 4s → (2) community park — families, green canopy, towers in distance 3s → (3) Dubai Hills Mall exterior — warm retail activity, real people, not a resort 4s]
 [MOTION_STYLE: (1) low-angle track right → (2) slow push-in toward park → (3) tracking shot along mall exterior]
 ```
@@ -1067,17 +1076,23 @@ Skip these — they are generated, not collected:
 Thesis type: [appreciation / infrastructure | yield / rental | tourism | luxury / lifestyle | entry-level / accessible]
 Anti-collect: [3–5 specific things NOT to collect — be explicit about what looks relevant but isn't]
 
-| Segment | Beat | Critical | File | Collect | Source | Copyright tier |
-|---|---|---|---|---|---|---|
-| 0–4s | establish / prove / reinforce / texture | yes / no | canonical/a[NNN]_[description].jpg | what to search for | source per matrix in asset-collection.md | A / B / C |
+| Segment | Beat | Critical | Source | Render | Collect | Source type | Copyright tier |
+|---|---|---|---|---|---|---|---|
+| 0–4s | establish / prove / reinforce / texture | yes / no | canonical/a[NNN]_[description].jpg | (blank — filled by kling_batch.py) | what to search for | source per matrix in asset-collection.md | A / B / C |
 ```
 
 **Brackets in this scaffold are placeholder notation, not literal syntax — strip them when filling in real values.** This applies to every field, but the **Segment column is the one most often gotten wrong**: the timestamp appears bracketed in the script body (`[10–17s]`) because that's how the script tags themselves work, but the VEP table's Segment cell must be bracket-free (`10–17s`) — the asset-resolution parser builds its lookup key as bare digits and dashes, with no brackets. A bracketed Segment cell (`| [10–17s] | ... |`) parses without error but silently fails to match any scene, so the real image is dropped and the scene falls back to a generated graphic. Always write the Segment column exactly as `0–4s`, never `[0–4s]`.
 
-**VEP File column convention:**
-- For image-type scenes (Kling input): reference the **source image** — `canonical/aNN_*.jpg`. Kling clips are generated from this source via `kling_batch.py` and applied at render time using `--clip-override`. Do not reference Kling output clips here.
-- For generated/animated scenes (exclamation, CTA, timeline): reference the pre-rendered clip — `scenes/sceneNN_*.mp4`.
-- For reused assets (already in canonical/ from another reel): write `reuse — canonical/[filename]`. No new download.
+**VEP column conventions:**
+
+- `Source` — the collected input asset. **Never mutates after collection.**
+  - `kling` / `static` scenes: the canonical image — `canonical/aNN_*.jpg`
+  - `generated` / `timeline` scenes: the pre-rendered animated clip — `scenes/sceneNN_*.mp4`
+  - Reused assets: `reuse — canonical/[filename]`
+- `Render` — the final file `render.py` reads. Starts blank.
+  - `kling` scenes: `kling_batch.py` writes `canonical/kling_rN_XX-XXs.mp4` here automatically after generation
+  - `static` / `generated` / `timeline` scenes: copy the Source path here (no separate render step)
+  - `render.py` reads `Render` first; if blank, falls back to `Source` (treated as static)
 
 ### After the table
 
