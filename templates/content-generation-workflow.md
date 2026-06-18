@@ -81,12 +81,13 @@ Before scripting any reel:
 1. Use `output/history/hook-log.md` — already in session context for reel sessions (loaded at session init, CLAUDE.md §1.5). Create if missing using the template in hook-selection.md §F.
 2. Apply the 4-step selection rule from hook-selection.md §E for each reel format being produced
 3. From the 10 generated hooks (Step 1), select the hook matching the chosen family for that reel's opening beat
-4. After each reel is scripted, append a row to `output/history/hook-log.md` and recompute the "Next reel recommendation" block for this project in that file
+4. After each reel is scripted, append a row to `output/history/hook-log.md` and recompute the "Next reel recommendation" block for this project in that file. After the reel is retention-reviewed (Step 2.4b), fill in the `brand_frames` column from the post-retention integrity block's "Framework terms named" field.
 
 **Rules:**
 - One reel = one hook family. Do not blend families in the opening beat.
 - Thesis fit takes priority over diversity. Only diversify when a strong-fit alternative exists.
 - Log every reel before moving to the next one.
+- **Channel brand frame drift check:** Before selecting each reel's hook, scan the last 5 PUBLISHED rows in `hook-log.md`. If "Thesis" does not appear in the `brand_frames` column of any of those rows, flag it and prioritize a reel format and hook where naming "Thesis" is natural — but do not force it if the script doesn't support it cleanly.
 
 ---
 
@@ -99,7 +100,7 @@ Before writing:
 2. Read `templates/reels/reel-preflight.md` — write every script to already pass this gate on the first draft, not just to satisfy it after the fact.
 3. Before writing each hook: identify the cadence and apply the Hook-Insight Integrity rule (reel-preflight.md). For **QUESTION cadence** — confirm the thesis contains a defensible answer (verified fact, supported inference, or clearly labeled hypothesis) that fits within the Insight segment. If no defensible answer exists, use **CONTRAST cadence** instead. For **CONTRAST cadence** — confirm the body will explain why the exception matters, not just show that it exists.
 
-Step 2.4 below is a verification pass, not the first time these criteria apply — drafting against them now should mean Step 2.4 mostly confirms rather than rewrites.
+Step 2.4a below is a verification pass, not the first time these criteria apply — drafting against them now should mean Step 2.4a mostly confirms rather than rewrites.
 
 Produce 5 reel scripts, one per format (Data Drop, Investment Case, Myth Bust, Area Spotlight, Payment Plan Breakdown).
 
@@ -117,7 +118,7 @@ Save to `output/[project-slug]/[language]/reels/` — see CLAUDE.md §12.
 
 ---
 
-### Step 2.4 — Pre-Flight Verification & Refine
+### Step 2.4a — Pre-Flight Verification & Refine
 
 Both `templates/reels/reel-preflight.md` and `templates/reels/cadence-rules.md` are already in session context from Step 2 — no re-read needed.
 
@@ -140,11 +141,45 @@ For each reel scripted in Step 2:
    | Hook-Insight Integrity: fail | Identify which violation triggered the fail (promise deferred to CTA, or claim presented as fact without evidence). If deferred: rewrite the Insight segment to answer the hook before the CTA, or change the hook cadence to CONTRAST. If unsupported fact: relabel the claim as inference ("this may indicate...", "one reading of this is...") or remove it. |
 
 3. Re-run the preflight after refining. Repeat until `Recommendation: approved`.
-4. Set the reel's `**Status:**` field to `SCRIPTED` and present the script to the user. **Do not proceed to Step 2.5 (asset collection) or any paid API call until the user explicitly approves the script.** Preflight `Recommendation: approved` is a content-quality verdict, not spend authorization — see `reel-preflight.md` — Pre-Flight Approval ≠ Spend Authorization. Once the user approves, update `**Status:**` to `APPROVED` before continuing.
+4. Set the reel's `**Status:**` field to `SCRIPTED`. Proceed to Step 2.4b. Do not present the script to the user yet — the user reviews the final naturalizer-signed version after Step 2.4c.
 
 **Cap: max 2 preflight reviews per reel.** If the script is still flagged `revise` after the 2nd review, stop refining and escalate to the user with the script, both `PRE-FLIGHT REVIEW` blocks, and the remaining flagged categories — do not keep looping. A script needing a 3rd pass usually means a thesis or format mismatch, not a wording fix.
 
-Do not proceed to Step 2.5 (paid asset collection) or VO generation on a script still flagged `revise`.
+Do not proceed to Step 2.4b on a script still flagged `revise`.
+
+---
+
+### Step 2.4b — Retention Optimization Layer
+
+Reference: `templates/reels/retention-layer.md`
+
+Runs on the pre-flight-approved script (Status: SCRIPTED). Compresses scaffolding without touching facts, certainty labels, or Brand Frames.
+
+1. Run `templates/reels/retention-layer.md` against the full script. Produce a per-beat diff output.
+2. Run the post-retention integrity check (5 checks: new claims, hook promise, risk placement, ending momentum, brand frames).
+3. If verdict is `revert-beat`: restore the flagged beat and re-run integrity on that beat only.
+4. Set the reel's `**Status:**` field to `RETENTION-REVIEWED`. Proceed to Step 2.4c.
+5. Copy the `Framework terms named` field from the post-retention integrity block — you'll add this to hook-log.md when you log the reel.
+
+---
+
+### Step 2.4c — Naturalizer for Reel VO
+
+Reference: `templates/languages/hebrew-naturalizer.md`
+
+Applies to reel VO text only. Runs after retention optimization, before user approval — so the user reviews and approves the final polished Hebrew, not an intermediate.
+
+Apply the naturalizer to the retention-optimized VO text for all `[VO:]` blocks in the reel. Apply rules from `templates/languages/hebrew-naturalizer.md` exactly as they apply to other Hebrew content: TTS compliance, register checks, em-dash removal, expansion of abbreviations, VO-specific rules.
+
+Write the naturalizer sign-off in the reel file:
+- `_Naturalizer applied: [date] — No meaningful language issues._`
+- `_Naturalizer applied: [date] — [list of changes made]_`
+
+After naturalizer sign-off: set reel's `**Status:**` field to `NATURALIZER-SIGNED`. **Present the script to the user now.**
+
+**Do not proceed to Step 2.5 (asset collection) or any paid API call until the user explicitly approves the script.** Naturalizer sign-off is a language-quality verdict, not spend authorization. Once the user approves, update `**Status:**` to `APPROVED` before continuing.
+
+Status progression: `SCRIPTED` → `RETENTION-REVIEWED` → `NATURALIZER-SIGNED` → `APPROVED`
 
 ---
 
@@ -257,9 +292,9 @@ Reference: `templates/languages/hebrew-naturalizer.md`
 
 Apply the naturalizer **inline during generation** — not as a separate post-generation re-read pass.
 
-**Applies to:** every Hebrew public-facing file generated in Steps 1–7.
+**Applies to:** every Hebrew public-facing file generated in Steps 1–7, **except reel VO text** — reel VO naturalizer runs at Step 2.4c (before user approval). Step 8 covers hooks, carousel, LinkedIn, WhatsApp, and all non-reel outputs.
 
-**Does not apply to:** English files, Analysis Mode outputs.
+**Does not apply to:** English files, Analysis Mode outputs, or reel VO text (handled at Step 2.4c).
 
 As you write each Hebrew file, apply naturalizer rules from `templates/languages/hebrew-naturalizer.md`. Do not re-read output files after writing — run the check as you draft each section.
 
