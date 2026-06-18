@@ -19,10 +19,11 @@ import tempfile
 import requests
 from pathlib import Path
 
-REPO_ROOT  = Path(__file__).parent.parent.parent
+REPO_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
-from reel_pipeline.parser import read_reel_status
-SEPARATOR  = "\n\n"
+from reel_pipeline.parser import read_reel_status  # noqa: E402
+
+SEPARATOR = "\n\n"
 
 # ── Config ────────────────────────────────────────────────────────
 

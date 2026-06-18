@@ -158,6 +158,12 @@ def _ts_key(start_s: float, end_s: float) -> str:
     return f"{int(start_s)}–{int(end_s)}s"
 
 
+def _extract_status(body: str) -> Optional[str]:
+    """Extract **Status:** value from a reel section body string."""
+    m = re.search(r"\*\*Status:\*\*\s*(\S+)", body)
+    return m.group(1).strip() if m else None
+
+
 def read_reel_status(md_path: Path, reel_number: int) -> Optional[str]:
     """
     Read the **Status:** value from the reel metadata block.
@@ -168,9 +174,7 @@ def read_reel_status(md_path: Path, reel_number: int) -> Optional[str]:
     for i in range(1, len(reel_splits), 2):
         num_match = re.match(r"Reel (\d+)", reel_splits[i])
         if num_match and int(num_match.group(1)) == reel_number:
-            body = reel_splits[i + 1]
-            m = re.search(r"\*\*Status:\*\*\s*(\S+)", body)
-            return m.group(1).strip() if m else None
+            return _extract_status(reel_splits[i + 1])
     return None
 
 

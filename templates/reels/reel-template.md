@@ -1090,7 +1090,7 @@ Anti-collect: [3–5 specific things NOT to collect — be explicit about what l
   - `generated` / `timeline` scenes: the pre-rendered animated clip — `scenes/sceneNN_*.mp4`
   - Reused assets: `reuse — canonical/[filename]`
 - `Render` — the final file `render.py` reads. Starts blank.
-  - `kling` scenes: `kling_batch.py` writes `canonical/kling_sceneNN.mp4` here automatically after generation
+  - `kling` scenes: `kling_batch.py` writes `canonical/kling_rN_XX-XXs.mp4` here automatically after generation
   - `static` / `generated` / `timeline` scenes: copy the Source path here (no separate render step)
   - `render.py` reads `Render` first; if blank, falls back to `Source` (treated as static)
 
