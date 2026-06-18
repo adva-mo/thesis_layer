@@ -68,8 +68,8 @@ def _update_vep_render_column(blueprint: Path, start_s: float, end_s: float, ren
 
 
 def _clip_duration(segment_s: float) -> int:
-    """Segments > 7s get a 10s clip; shorter get 5s. Matches Kling's two supported durations."""
-    return 10 if segment_s > 7 else 5
+    """Pick the smallest Kling duration that covers the segment. Trim is neutral; stretch is not."""
+    return 10 if segment_s > 5 else 5
 
 
 def _output_path(assets_dir: Path, scene_index: int) -> Path:

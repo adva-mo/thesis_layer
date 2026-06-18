@@ -11,6 +11,9 @@ Unrecognised type raises ValueError — no silent fallback to Kling.
 
 Asset paths come from the Visual Evidence Plan table (Step 2.5), not [VISUAL_INTENT:].
 New VEP format: Source + Render columns. Old format (single File column) still parses.
+
+VEP rows with Critical=yes where the resolved asset is missing raise CriticalAssetMissingError
+— a hard stop, not a warning. The assembler must never silently fall back for critical beats.
 """
 
 import re
@@ -21,6 +24,10 @@ from typing import Optional
 
 
 VALID_VISUAL_TYPES = frozenset({"kling", "static", "generated", "timeline"})
+
+
+class CriticalAssetMissingError(RuntimeError):
+    """Raised when one or more VEP rows marked Critical=yes have no resolved asset."""
 
 
 @dataclass
@@ -34,6 +41,7 @@ class Scene:
     text_card: Optional[str]       # [TEXT_CARD:] or [SCREEN:] fallback
     asset_type: str                # "image" | "video" | "generated" — what the assembler uses
     asset_path: Optional[Path]     # resolved asset; None when generated
+    critical: bool = False         # True when VEP Critical column is "yes"
 
 
 def _parse_timestamp(ts: str) -> tuple[float, float]:
@@ -88,23 +96,25 @@ def _parse_vep_table(
     body: str,
     assets_dir: Optional[Path],
     repo_root: Optional[Path] = None,
-) -> tuple[dict[str, Path], dict[str, Path]]:
+) -> tuple[dict[str, Path], dict[str, Path], set[str]]:
     """
     Parse the Visual Evidence Plan table.
 
     New VEP format: | Segment | Beat | Critical | Source | Render | ...
     Old VEP format: | Segment | Beat | Critical | File | ...
 
-    Returns (source_mapping, render_mapping) keyed by normalised timestamp string.
+    Returns (source_mapping, render_mapping, critical_keys).
       source_mapping: collected input asset (original image or pre-rendered clip) — never mutates
       render_mapping: final Kling clip written by kling_batch.py after generation
+      critical_keys: set of ts_keys where the Critical column is "yes"
     """
     source_mapping: dict[str, Path] = {}
     render_mapping: dict[str, Path] = {}
+    critical_keys: set[str] = set()
 
     vep_match = re.search(r"### Visual Evidence Plan", body)
     if not vep_match:
-        return source_mapping, render_mapping
+        return source_mapping, render_mapping, critical_keys
 
     vep_body = body[vep_match.start():]
 
@@ -118,14 +128,18 @@ def _parse_vep_table(
     }
 
     for row in re.finditer(r"^\|([^|]+)\|([^|]+)\|([^|]+)\|([^|]+)\|([^|]*)\|", vep_body, re.MULTILINE):
-        ts_cell     = row.group(1).strip()
-        source_cell = row.group(4).strip()
-        render_cell = row.group(5).strip() if has_render_col else ""
+        ts_cell      = row.group(1).strip()
+        critical_cell = row.group(3).strip().lower()
+        source_cell  = row.group(4).strip()
+        render_cell  = row.group(5).strip() if has_render_col else ""
 
         if not re.search(r"\d+[–—-]\d+s", ts_cell):
             continue
 
         ts_key = re.sub(r"[–—]", "–", ts_cell)
+
+        if critical_cell == "yes":
+            critical_keys.add(ts_key)
 
         if source_cell and source_cell.lower() not in _skip:
             p = _resolve_path(source_cell, assets_dir, repo_root)
@@ -137,7 +151,7 @@ def _parse_vep_table(
             if p:
                 render_mapping[ts_key] = p
 
-    return source_mapping, render_mapping
+    return source_mapping, render_mapping, critical_keys
 
 
 def _ts_key(start_s: float, end_s: float) -> str:
@@ -167,7 +181,7 @@ def parse_reel_file(
     full_reel_body = reel_splits[target_heading_idx + 1]
     script_body = re.split(r"^### Caption", full_reel_body, maxsplit=1, flags=re.MULTILINE)[0]
 
-    source_mapping, render_mapping = _parse_vep_table(full_reel_body, assets_dir, repo_root)
+    source_mapping, render_mapping, critical_keys = _parse_vep_table(full_reel_body, assets_dir, repo_root)
 
     blocks = re.split(r"\n---+\n", script_body)
 
@@ -259,6 +273,21 @@ def parse_reel_file(
             text_card=text_card,
             asset_type=asset_type,
             asset_path=asset_path,
+            critical=ts_key in critical_keys,
         ))
+
+    missing_critical = [
+        s for s in scenes
+        if s.critical and s.visual_type in ("kling", "static") and s.asset_path is None
+    ]
+    if missing_critical:
+        lines = [
+            f"  Scene {s.index} [{s.start_s:.0f}–{s.end_s:.0f}s] ({s.visual_type}): no asset found"
+            for s in missing_critical
+        ]
+        raise CriticalAssetMissingError(
+            f"Reel {reel_number}: {len(missing_critical)} critical asset(s) missing — "
+            f"reel cannot proceed:\n" + "\n".join(lines)
+        )
 
     return scenes
