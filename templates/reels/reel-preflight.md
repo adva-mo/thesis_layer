@@ -23,6 +23,28 @@ Mandatory quality gate. Run after a reel script is drafted, before Visual Eviden
 
 ---
 
+## Scene Type Validation
+
+Run before any other check. This is a structural gate — a scene with a missing or invalid type cannot be safely processed downstream.
+
+**Check every scene block:**
+1. Does every scene have `[VISUAL_TYPE:]`?
+2. Is the value one of: `kling`, `static`, `generated`, `timeline`?
+3. Does every scene with `beat = hook` or `beat = cta` in the VEP have `VISUAL_TYPE: generated`? If a hook or CTA scene has any other type, flag it — these beats must never trigger asset collection or Kling.
+
+**FAIL if:**
+- Any scene is missing `[VISUAL_TYPE:]`
+- Any value is not in the valid vocabulary
+- A hook or CTA beat has `VISUAL_TYPE` other than `generated`
+
+**PASS if:**
+- Every scene has a valid `[VISUAL_TYPE:]`
+- All hook and CTA beats are `generated`
+
+A scene type failure is a hard stop — do not proceed to cadence or content checks until it is resolved.
+
+---
+
 ## Cadence Label Verification
 
 Read the hook VO text directly. Verify the rhetorical structure matches the cadence label declared in the script metadata. This check runs before Hook-Insight Integrity — a mismatch means the wrong obligation check would be applied.
@@ -113,6 +135,7 @@ Run this against the full script (all segments, hook through CTA) and output exa
 ```
 PRE-FLIGHT REVIEW
 
+Scene Type Validation: [pass / fail]
 Hook Strength: [weak / medium / strong]
 Payoff Timing: [good / delayed]
 Cognitive Load: [low / medium / high]
@@ -125,7 +148,7 @@ Recommendation: [revise / approved]
 ```
 
 **Recommendation logic:**
-- `revise` if Hook Strength is `weak`, OR Payoff Timing is `delayed`, OR Ending Momentum is `weak`, OR Risk Placement is `incorrect`, OR Cadence Label is `mismatch`, OR Hook-Insight Integrity is `fail`.
+- `revise` if Scene Type Validation is `fail`, OR Hook Strength is `weak`, OR Payoff Timing is `delayed`, OR Ending Momentum is `weak`, OR Risk Placement is `incorrect`, OR Cadence Label is `mismatch`, OR Hook-Insight Integrity is `fail`.
 - `approved` only if none of the above trigger and Overexplaining is `clean` (or any flagged sentence has already been cut).
 
 ---

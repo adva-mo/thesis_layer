@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
 Batch Kling I2V generator — reads a reel blueprint and generates one clip per
-image-type scene, with output filenames derived from scene index.
+kling-type scene, with output filenames derived from scene index.
 
 Eliminates manual --output path naming (the source of kling_scene03-vs-04 bugs).
+After generation, writes the clip path into the VEP Render column automatically.
 
 Usage:
     # Dry run (default — free, prints plan):
@@ -25,6 +26,7 @@ Usage:
 """
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -33,6 +35,36 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from reel_pipeline import config, fal_kling
 from reel_pipeline.parser import parse_reel_file
+
+
+def _is_kling_scene(scene) -> bool:
+    """True if this scene should be processed by kling_batch."""
+    if scene.visual_type is not None:
+        return scene.visual_type == "kling"
+    # Legacy blueprint without [VISUAL_TYPE:] — fall back to asset_type
+    return scene.asset_type == "image"
+
+
+def _skip_label(scene) -> str:
+    if scene.visual_type in ("generated", "timeline"):
+        return "generated — skip"
+    if scene.visual_type == "static":
+        return "static — skip"
+    return "generated — skip"
+
+
+def _update_vep_render_column(blueprint: Path, start_s: float, end_s: float, render_filename: str) -> bool:
+    """
+    Write the Render column for the VEP row matching this scene's timestamp.
+    Returns True if the row was found and updated, False if not found.
+    """
+    content = blueprint.read_text(encoding="utf-8")
+    ts_pat = rf"{int(start_s)}[–—\-]{int(end_s)}s"
+    row_pat = rf"(^\|[ \t]*{ts_pat}[ \t]*\|[^|]*\|[^|]*\|[^|]*\|)[^|]*(\|)"
+    new_content, n = re.subn(row_pat, rf"\g<1> {render_filename} \2", content, flags=re.MULTILINE)
+    if n:
+        blueprint.write_text(new_content, encoding="utf-8")
+    return bool(n)
 
 
 def _clip_duration(segment_s: float) -> int:
@@ -99,7 +131,7 @@ def main() -> None:
     for scene in scenes:
         if scene_filter and scene.index not in scene_filter:
             continue
-        if scene.asset_type != "image":
+        if not _is_kling_scene(scene):
             continue
         if scene.asset_path is None or not scene.asset_path.exists():
             print(f"  Scene {scene.index}: asset_path missing or not found — skip")
@@ -113,8 +145,8 @@ def main() -> None:
 
     for scene in scenes:
         in_filter = not scene_filter or scene.index in scene_filter
-        if scene.asset_type != "image" or not in_filter:
-            label = "generated — skip" if scene.asset_type != "image" else "filtered — skip"
+        if not _is_kling_scene(scene) or not in_filter:
+            label = _skip_label(scene) if not _is_kling_scene(scene) else "filtered — skip"
             print(f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]  {label}")
             continue
 
@@ -175,6 +207,11 @@ def main() -> None:
         try:
             fal_kling.generate_clip(scene.asset_path, prompt, dur, model, out_path)
             print(f"    ✓ {out_path.name}")
+            updated = _update_vep_render_column(blueprint, scene.start_s, scene.end_s, f"canonical/{out_path.name}")
+            if updated:
+                print(f"    ✓ VEP Render column updated → canonical/{out_path.name}")
+            else:
+                print(f"    ⚠ VEP Render column not found for scene {scene.index} — update manually")
         except Exception as e:
             print(f"    ✗ scene {scene.index} failed: {e}")
             errors.append(scene.index)

@@ -212,10 +212,9 @@ python3 scripts/generate/kling_batch.py ... --scenes 2,4 --confirm-paid-api-call
 **Cache:** inherited from `fal_kling.py` — same inputs on a re-run are free.
 
 **VEP lifecycle for Kling scenes:**
-1. Write VEP `File` pointing to the source image (`canonical/a001_*.jpg`) — kling_batch reads these
-2. Run kling_batch → clips land in `canonical/kling_sceneXX.mp4`
-3. Update VEP `File` to point to the generated clip (`canonical/kling_sceneXX.mp4`)
-4. render.py now picks up the clip directly — no `--clip-override` needed
+1. Write VEP `Source` pointing to the source image (`canonical/a001_*.jpg`) — kling_batch reads these. Leave `Render` blank.
+2. Run kling_batch → clips land in `canonical/kling_sceneXX.mp4`. `kling_batch.py` writes the clip path into the `Render` column automatically.
+3. render.py reads `Render` first; `Source` is untouched and always points to the original image.
 
 ---
 
@@ -423,19 +422,20 @@ python3 scripts/pipeline/render.py \
 - `--keep-tmp` — keep the intermediate work directory for debugging
 - `--clip-override SCENE:PATH` — one-off override for a single scene; not needed when VEP is up to date
 
-**VEP is the single source of truth.** The `File` column in the VEP table must point to the final asset used in render:
+**VEP is the single source of truth.** The `Render` column in the VEP table is what `render.py` reads. If `Render` is blank, it falls back to `Source` (treated as static image):
 
-| Asset type | VEP File column | Example |
+| Asset type | VEP Source column | VEP Render column |
 |---|---|---|
-| Kling clip | `canonical/kling_sceneXX.mp4` | `canonical/kling_scene01.mp4` |
-| Animated scene clip | repo-relative path to `scenes/` | `output/[slug]/[lang]/reels/reel_01/scenes/scene03_exclamation.mp4` |
-| CTA card | repo-relative path to `scenes/` | `output/[slug]/[lang]/reels/reel_01/scenes/scene05_cta.mp4` |
+| Kling clip | `canonical/a001_*.jpg` (source image) | `canonical/kling_sceneXX.mp4` (written by kling_batch) |
+| Animated scene clip | `scenes/sceneNN_*.mp4` | same as Source |
+| CTA card | `scenes/sceneNN_*.mp4` | same as Source |
+| Static image | `canonical/a001_*.jpg` | blank → assembler reads Source |
 
-The parser resolves `canonical/X` via `--assets-dir`, and any other path relative to the repo root. If a VEP row is missing or the file doesn't exist, the assembler falls back to a generated graphic.
+The parser resolves `canonical/X` via `--assets-dir`, and any other path relative to the repo root. If a `Render` path is missing or the file doesn't exist, the assembler falls back to a generated graphic.
 
 **Visual source priority per scene (assembler fallback chain):**
-1. VEP `File` → video clip (`.mp4`) — used directly
-2. VEP `File` → image (`.jpg`) — converted to static clip
+1. VEP `Render` → video clip (`.mp4`) — used directly
+2. VEP `Source` → image (`.jpg`) — converted to static clip
 3. Generated graphic (text_card, cta_card, etc.) from `graphic_generator.py` — last resort
 
 **Assembler behaviour:** if a clip is shorter than the VO audio, it is time-stretched. If longer, it is trimmed.
@@ -550,7 +550,7 @@ python3 scripts/generate/vo_combined.py \
   --confirm-paid-api-call
 # → listen; if mispronunciation: add word to EL dictionary, update .env, regenerate
 
-# 2. Generate Kling clips (paid — VEP File column must point to source images at this stage)
+# 2. Generate Kling clips (paid — VEP Source column must point to source images; Render is blank)
 python3 scripts/generate/kling_batch.py \
   --blueprint $REEL_DIR/$SLUG-he-reels.md \
   --reel 1 \
@@ -558,7 +558,7 @@ python3 scripts/generate/kling_batch.py \
   --model fal-ai/kling-video/v3/pro/image-to-video \
   --confirm-paid-api-call
 # → produces: kling_scene01.mp4, kling_scene02.mp4, kling_scene04.mp4 in $ASSETS_DIR
-# After this step: update VEP File column to point to the generated clips (canonical/kling_sceneXX.mp4)
+# → kling_batch.py writes canonical/kling_sceneXX.mp4 into the VEP Render column automatically
 
 # 3. Generate animated clips (free — no API call)
 python3 scripts/generate/exclamation.py \
@@ -568,7 +568,7 @@ python3 scripts/generate/cta.py \
   --bg-asset a003_dh-family-residential-community.jpg \
   --duration 3.0 --output $SCENES_DIR/scene05_cta.mp4
 
-# After step 3: update VEP File column for these scenes to their repo-relative paths
+# After step 3: write the scenes/ paths into the VEP Render column for these scenes
 
 # 4. Build transcript from alignment (free — no API call)
 python3 scripts/pipeline/align_timing.py --audio-dir $AUDIO_DIR
