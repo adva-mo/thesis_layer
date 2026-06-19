@@ -49,9 +49,21 @@ assets/[slug]/          ← collected image assets (canonical/)
 4. Build transcript            → scripts/pipeline/align_timing.py  ← from alignment.json (free)
 5. Render reel                 → scripts/pipeline/render.py
 6. Add subtitles               → scripts/pipeline/subtitle.py
+7. Publish                     → post to channel; set **Status: PUBLISHED** in blueprint; update hook-log.md row to PUBLISHED
 ```
 
 Steps 2b–3 can run in any order. Step 2a must complete (and be approved) before 2b. Step 4 requires step 2b to be complete (needs `alignment.json`). Step 4 must come before step 6.
+
+**Status progression:**
+```
+SCRIPTED → RETENTION-REVIEWED → NATURALIZER-SIGNED → APPROVED → PUBLISHED
+```
+`PUBLISHED` is the terminal state. The blueprint `**Status:**` field is the single source of truth — not the hook-log (which is an audit mirror).
+
+**What PUBLISHED locks:**
+- `kling_batch.py` and `vo_combined.py` hard-stop on PUBLISHED reels — no regeneration allowed
+- `render.py` warns but allows re-render (technical re-export is legitimate; content is unchanged)
+- The agent refuses to edit any content in a published reel section (see `CLAUDE.md §0`)
 
 ---
 
@@ -103,6 +115,106 @@ python3 scripts/generate/kling.py \
 ```
 
 **Cache note:** the cache key includes the model string. Switching models on an existing scene triggers a new API call and a new cache entry — the old clip is not overwritten.
+
+---
+
+## Motion Language System
+
+All motion decisions — Kling camera movement, Ken Burns on static images, card animation timing — are controlled by `src/reel_pipeline/motion.py`. This is the single source of truth. Do not define motion constants in individual scripts.
+
+---
+
+### [MOTION_STYLE:] resolution
+
+When `kling_batch.py` builds the Kling prompt, `[MOTION_STYLE:]` is resolved through `resolve_motion_style()` **before any API call**:
+
+| Input | Result |
+|---|---|
+| Known `MV_*` token | Expanded to full Kling prompt description — no warning |
+| Unknown `MV_*` token | **Hard stop** — abort before any API spend (almost certainly a typo) |
+| Empty / no tag | Inferred from `BEAT_MOTION_MAP` using `[BEAT:]` — one warning printed |
+| Free-form text (non-`MV_*`) | Passed through as-is + deprecation warning — outside the controlled vocabulary |
+
+Always use a token. Unknown tokens block generation.
+
+---
+
+### Motion vocabulary (MOTION_VOCAB)
+
+| Token | Camera movement |
+|---|---|
+| `MV_PUSH_SLOW` | Slow cinematic push-in, deliberate pace, steady, no shake |
+| `MV_PUSH_ULTRA` | Ultra-slow push-in, barely perceptible forward drift, locked-off feel |
+| `MV_PULL_REVEAL` | Slow pull-back revealing scene context, camera retreats and lifts slightly |
+| `MV_TRACK_RIGHT` | Slow lateral track right, camera moves parallel to scene, eye-level |
+| `MV_TRACK_LEFT` | Slow lateral track left |
+| `MV_DRIFT_AERIAL` | Slow aerial drift forward, camera glides over scene from above, minimal vertical change |
+| `MV_PAN_REVEAL` | Slow pan from left to right, horizontal pivot, tripod-smooth, even pace |
+| `MV_PUSH_EYE` | Gentle forward push at eye level, slight drift to reveal depth, unhurried, warm light |
+| `MV_LOCKED` | Camera locked off, zero movement, static frame |
+
+---
+
+### Beat-to-motion defaults (BEAT_MOTION_MAP)
+
+When `[MOTION_STYLE:]` is absent, motion is inferred from `[BEAT:]`:
+
+| Beat | Default token |
+|---|---|
+| `hook` | `MV_PUSH_SLOW` |
+| `establish` | `MV_DRIFT_AERIAL` |
+| `insight` | `MV_TRACK_RIGHT` |
+| `prove` | `MV_PUSH_EYE` |
+| `reinforce` | `MV_PAN_REVEAL` |
+| `reality_check` | — (none — use explicit token) |
+| `cta` | — (none — generated scene, no Kling) |
+
+---
+
+### Ken Burns — static images and Kling fallbacks
+
+When a scene uses `visual_type: static`, or when a Kling scene has no generated clip yet (`visual_type: kling`, `asset_type: image`), `image_to_clip_kenburns()` in `local_clip.py` generates the visual:
+
+- **Portrait source** (src ratio ≤ 9:16): Ken Burns fills the full portrait frame. Scale + pan driven by `KEN_BURNS_PARAMS` in `motion.py`, keyed by `[PHOTO_TYPE:]` or inferred from the filename.
+- **Landscape source** (src ratio > 9:16): blur-fill composite — full landscape image letterboxed in center (100% content visible), blurred version of same image fills the top/bottom bars. No content is cropped or lost. This is the correct treatment for all landscape assets; no re-collection is needed.
+
+Override the Ken Burns parameters per scene with `[PHOTO_TYPE:]`:
+
+| Value | Behavior |
+|---|---|
+| `photo_aerial` | Slow zoom-out from center |
+| `photo_street` | Slow zoom-in, pan right-to-left |
+| `photo_community` | Slow zoom-in, pan up |
+| `satellite_map` | Slow zoom-in from center |
+| `listing_screenshot` | Static, no movement |
+| `developer_render` | Slow zoom-in from center |
+| `default` | Slow zoom-in from center |
+
+---
+
+### Kling fallback quality gate
+
+`render.py` enforces a quality gate before production renders:
+
+| Condition | Behavior |
+|---|---|
+| Kling scene with no clip, `Critical=yes` in VEP | Hard stop — exit before render starts |
+| Kling scene with no clip, `Critical=no` in VEP | Warning — render proceeds with blur-fill |
+| `--draft` flag present | Skip all fallback checks (work-in-progress render only) |
+
+Blur-fill Ken Burns is the fallback for ungenerated Kling scenes. It is never production-ready for critical beats.
+
+---
+
+### [KLING_AVOID:] — sent as negative_prompt
+
+The `[KLING_AVOID:]` tag is parsed from the blueprint and sent to the Kling API as `negative_prompt`. Use it for elements that Kling reliably hallucinates for a specific scene — people in close foreground, motion blur, construction equipment, beach or water, branded signage, etc.
+
+```
+[KLING_AVOID: people in close foreground, motion blur, construction equipment, beach or water in frame]
+```
+
+The avoid string is included in the cache key — changing it invalidates the existing cache entry and triggers a new API call. A scene with no `[KLING_AVOID:]` tag sends no negative_prompt.
 
 ---
 
@@ -203,7 +315,7 @@ python3 scripts/generate/kling_batch.py ... --scenes 2,4 --confirm-paid-api-call
 
 **Naming:** output is `canonical/kling_r{reel}_{start:02d}-{end:02d}s.mp4` (e.g. `kling_r1_04-12s.mp4`). Reel number scopes clips within the shared canonical folder — no collision if two reels have scenes at the same timestamp. Timestamp makes names stable across scene insertions and reorders. Generated or video scenes are skipped automatically.
 
-**Prompt construction:** concatenates `VISUAL_INTENT` + `MOTION_STYLE` from the blueprint. Both fields must be Kling-ready (see `templates/reels/reel-template.md`).
+**Prompt construction:** `VISUAL_INTENT` + resolved `MOTION_STYLE`. The `MOTION_STYLE` value is resolved through the Motion Language System before being concatenated — `MV_*` tokens are expanded to their full descriptions, beat inference fills missing tokens, unknown tokens abort before any API call, free-form text triggers a deprecation warning but passes through. The resolved prompt is printed in both dry-run and paid-run output so you can verify what Kling receives. See Motion Language System section above.
 
 **Duration logic:** segments > 5s → 10s clip; ≤5s → 5s clip. Always picks the smallest Kling duration that covers the segment — trim is neutral, stretch is not.
 
@@ -325,7 +437,7 @@ python3 scripts/generate/kling.py \
 
 ### timeline.py — Animated timeline card
 
-Generates an animated MP4 showing the timeline boxes (הבטחה → שנים → מציאות) revealing sequentially.
+Generates an animated MP4 showing labeled argument boxes revealing sequentially (e.g. הבטחה → שנים → מציאות).
 
 ```bash
 python3 scripts/generate/timeline.py \
@@ -334,7 +446,7 @@ python3 scripts/generate/timeline.py \
 ```
 
 Items are hardcoded for Club Place. For other projects, edit the `ITEMS` list in the script.
-Animation: ease-out-cubic fade + 20px upward slide per element, ~2.7s reveal phase then static hold.
+Animation constants from `motion.py` → `CARD_ENTRY`: boxes rise 12px upward into position with ease-out-cubic over 0.35s, first element starts at 0.20s, each subsequent box advances by 0.15s arrow lead. Reveal phase ~2.7s, then static hold.
 
 ---
 
@@ -348,13 +460,13 @@ python3 scripts/generate/exclamation.py \
   --output output/[slug]/[lang]/reels/reel_01/scenes/scene03_exclamation.mp4
 ```
 
-Animation: circle scales in (0.45s) → "!" drops in with bounce (0.4s) → holds static.
+Animation: circle scales in (0.45s) → "!" settles 20px into position with ease-out-cubic → micro-pulse at hold. No bounce. Easing from `motion.py`.
 
 ---
 
 ### cta.py — CTA card with blurred background
 
-Generates a CTA card: blurred canonical asset background + dark overlay + Hebrew keyword text.
+Generates a CTA card: blurred canonical asset background + dark overlay + Hebrew keyword text. Frames are streamed via PIL→FFmpeg pipe (same pattern as Ken Burns), not a frozen frame.
 
 ```bash
 python3 scripts/generate/cta.py \
@@ -364,7 +476,7 @@ python3 scripts/generate/cta.py \
   --output output/[slug]/[lang]/reels/reel_01/scenes/scene05_cta.mp4
 ```
 
-Text layout (centered, 48% height): `"כתבו לי"` / `"CLUB"` (large) / `"לניתוח המלא"` (dimmed).
+Text layout (centered, 48% height): `"כתבו לי"` / `"CLUB"` (large) / `"לניתוח המלא"` (dimmed). Text fades in and rises 12px over 0.70s starting at 0.20s, using `motion.py` → `CARD_ENTRY` constants.
 
 ---
 
@@ -387,17 +499,34 @@ python3 scripts/pipeline/align_timing.py \
 
 ---
 
-### align.py — Proportional word alignment *(fallback for vo.py runs)*
+### align.py — Proportional word alignment *(dev/test only)*
 
-Use only when audio was generated with `vo.py` (no `alignment.json` available). Distributes word timestamps proportionally across each segment's audio duration.
+Distributes word timestamps proportionally across each segment's audio duration.
+**Not for production.** Proportional timing is an approximation — subtitle sync will
+be off. For accurate subtitles, use `align_timing.py` after `vo_combined.py`.
+
+**Default behavior:** hard-fails if `alignment.json` is absent. This prevents
+accidental use of approximate timing when proper ElevenLabs alignment is available.
 
 ```bash
+# Dev/test only — requires --approximate flag when alignment.json is missing
 python3 scripts/pipeline/align.py \
   --blueprint output/[slug]/hebrew/reels/[slug]-he-reels.md \
   --audio-dir output/[slug]/[lang]/reels/reel_01/audio \
   --output output/[slug]/[lang]/reels/reel_01/audio/transcript.json \
-  --reel 1
+  --reel 1 \
+  --approximate
 ```
+
+**Flags:**
+- `--approximate` — required when `alignment.json` is absent. Prints a warning and
+  proceeds with proportional timing. Never use this flag on production renders.
+
+**Errors:**
+- `✗ Audio directory not found` — `--audio-dir` path does not exist
+- `✗ alignment.json not found` — ElevenLabs audio not generated yet; run
+  `vo_combined.py` then `align_timing.py` instead
+- `✗ No audio found for segNN` — a segment mp3 is missing; re-run `vo_combined.py`
 
 ---
 
@@ -416,6 +545,8 @@ python3 scripts/pipeline/render.py \
 
 **Key flags:**
 - `--render` — required to produce output (omit for dry-run plan)
+- `--draft` — skip Kling fallback quality gate; allows rendering with blur-fill placeholders. Work-in-progress only — not production-ready.
+- `--transitions` — add cross-dissolve xfade transitions between scenes (re-encodes; slower). Transition style per beat is defined in `motion.py` → `get_transition()`.
 - `--leading-pad-ms N` — freeze first frame + pad audio by N ms at start (default: 300ms)
 - `--trailing-pad-ms N` — freeze last frame + pad audio by N ms at end (default: 300ms, prevents VO cutoff)
 - `--max-scenes N` — limit to first N scenes (useful for POC testing)
@@ -596,13 +727,14 @@ python3 scripts/pipeline/subtitle.py \
 
 | File | Purpose |
 |------|---------|
-| `assembler.py` | Core reel assembly — combines clips + audio into MP4 |
-| `parser.py` | Parses reel `.md` blueprints into `Scene` objects |
+| `motion.py` | **Motion Language System** — single source of truth for all motion constants: easing functions, `CARD_ENTRY` animation timing, `MOTION_VOCAB` (9 tokens), `BEAT_MOTION_MAP`, `KEN_BURNS_PARAMS`, `resolve_motion_style()`, `get_transition()` |
+| `assembler.py` | Core reel assembly — combines clips + audio into MP4; routes image scenes to Ken Burns, Kling fallbacks to blur-fill composite, optional xfade transitions |
+| `parser.py` | Parses reel `.md` blueprints into `Scene` objects; handles `[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`, `[BEAT:]`, `[PHOTO_TYPE:]`, `[TEXT_CARD:]`, VEP table |
 | `graphic_generator.py` | PIL renderers for generated scenes (timeline, text_card, cta_card) |
 | `subtitles.py` | Subtitle grouping, BiDi rendering, PIL frame compositing |
 | `text_overlay.py` | `[SCREEN:]` text overlay (constants shared with subtitles) |
-| `local_clip.py` | FFmpeg wrappers: image→clip, clip resize, audio duration |
-| `fal_kling.py` | fal.ai Kling I2V API client with caching |
+| `local_clip.py` | Image→clip (Ken Burns + blur-fill composite via PIL AFFINE), clip resize, audio duration |
+| `fal_kling.py` | fal.ai Kling I2V API client with caching; landscape→portrait crop before upload |
 | `fal_wizper.py` | fal.ai Whisper transcription client |
 | `vo_estimator.py` | Estimates VO duration from word count (word budget tool) |
 | `config.py` | Shared config constants |

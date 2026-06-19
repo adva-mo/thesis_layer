@@ -7,14 +7,15 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from .graphic_generator import detect_type, generate_graphic_clip
+from .graphic_generator import detect_type, generate_graphic_clip, generate_graphic_png, validate_generated_scene
 from .local_clip import (
     color_card_to_clip,
     existing_clip_to_clip,
     get_audio_duration,
     get_clip_duration,
-    image_to_clip,
+    image_to_clip_kenburns,
 )
+from .motion import get_transition
 from .parser import Scene
 from .text_overlay import FONT_PATH, FONT_SIZE, add_screen_text
 
@@ -37,6 +38,117 @@ def _ffmpeg(*args: str, label: str = "ffmpeg") -> None:
         sys.exit(1)
 
 
+def _resolve_beat(scene: Scene, total_scenes: int) -> str | None:
+    """Infer beat from explicit tag or scene position when [BEAT:] is absent."""
+    if scene.beat:
+        return scene.beat
+    if scene.index == 1:
+        return "hook"
+    if scene.index == total_scenes:
+        return "cta"
+    return None
+
+
+def _render_generated_over_real(
+    visual_intent: str,
+    real_asset: Path,
+    duration: float,
+    output: Path,
+    font_path: Path,
+    width: int,
+    height: int,
+) -> None:
+    """Composite a generated graphic over a blurred real-asset background.
+
+    Layer 1 — blurred real asset (Ken Burns, heavy blur + dark overlay).
+    Layer 2 — transparent graphic PNG overlaid via FFmpeg.
+    """
+    bg_clip = output.parent / f"{output.stem}_bg.mp4"
+    fg_png  = output.parent / f"{output.stem}_fg.png"
+
+    image_to_clip_kenburns(
+        real_asset, duration, bg_clip,
+        width=width, height=height,
+        blur_overlay=True,
+    )
+
+    generate_graphic_png(visual_intent, fg_png, font_path, width, height, transparent_bg=True)
+
+    _ffmpeg(
+        "-i", str(bg_clip),
+        "-i", str(fg_png),
+        "-filter_complex",
+        f"[1:v]scale={width}:{height},format=rgba[fg];[0:v][fg]overlay=0:0[out]",
+        "-map", "[out]",
+        "-c:v", "libx264", "-crf", "18", "-preset", "fast",
+        "-r", "30", "-pix_fmt", "yuv420p", "-an",
+        str(output),
+        label="composite generated over real",
+    )
+
+    bg_clip.unlink(missing_ok=True)
+    fg_png.unlink(missing_ok=True)
+
+
+def _concat_with_transitions(
+    scene_clips: list[Path],
+    scenes: list[Scene],
+    output: Path,
+    work_dir: Path,
+    width: int,
+    height: int,
+) -> None:
+    """Assemble scene clips with xfade transitions via filter_complex (re-encode)."""
+    if len(scene_clips) == 1:
+        # Single scene — copy directly, no transition needed
+        _ffmpeg("-i", str(scene_clips[0]), "-c:v", "libx264", "-crf", "18",
+                "-preset", "fast", "-an", str(output), label="single-scene copy")
+        return
+
+    n = len(scene_clips)
+    total = len(scenes)
+    inputs: list[str] = []
+    for p in scene_clips:
+        inputs += ["-i", str(p)]
+
+    filter_parts: list[str] = []
+    cumulative_offset = 0.0
+    prev_label = "[0:v]"
+
+    for i in range(n - 1):
+        to_beat = _resolve_beat(scenes[i + 1], total)
+        from_type = scenes[i].visual_type or "generated"
+        to_type   = scenes[i + 1].visual_type or "generated"
+        xf_name, xf_dur = get_transition(from_type, to_type, to_beat)
+
+        clip_dur = get_clip_duration(scene_clips[i])
+
+        offset = cumulative_offset + clip_dur - xf_dur
+        cumulative_offset += clip_dur - xf_dur
+
+        next_input = f"[{i + 1}:v]"
+        out_label  = f"[xf{i:02d}]"
+
+        filter_parts.append(
+            f"{prev_label}{next_input}xfade=transition={xf_name}"
+            f":duration={xf_dur:.3f}:offset={offset:.3f}{out_label}"
+        )
+        prev_label = out_label
+
+    final_label = prev_label.strip("[]")
+    filter_complex = ";".join(filter_parts)
+
+    _ffmpeg(
+        *inputs,
+        "-filter_complex", filter_complex,
+        "-map", f"[{final_label}]",
+        "-c:v", "libx264", "-crf", "18", "-preset", "fast",
+        "-r", str(30), "-pix_fmt", "yuv420p", "-an",
+        str(output),
+        label="concat with transitions",
+    )
+
+
 def assemble_reel(
     scenes: list[Scene],
     audio_dir: Path,
@@ -49,12 +161,32 @@ def assemble_reel(
     clip_overrides: Optional[dict[int, Path]] = None,
     leading_pad_ms: int = 0,
     trailing_pad_ms: int = 0,
+    transitions: bool = False,
 ) -> Path:
     work_dir.mkdir(parents=True, exist_ok=True)
     clip_overrides = clip_overrides or {}
 
+    # ── Pre-flight: validate all generated scenes before any rendering ───────
+    errors: list[str] = []
+    for scene in scenes:
+        if scene.asset_type not in ("image", "video") and scene.index not in clip_overrides:
+            try:
+                validate_generated_scene(scene.visual_intent or "")
+            except ValueError as e:
+                errors.append(f"  Scene {scene.index}: {e}")
+    if errors:
+        print("✗ Generated scene validation failed — fix the reel script and re-run:\n" + "\n".join(errors))
+        sys.exit(1)
+
     scene_clips: list[Path] = []
     audio_files: list[Path] = []
+    # Pre-scan: find first real asset anywhere in the reel so generated scenes
+    # that appear before the first real scene still get a background.
+    _first_real_asset: Optional[Path] = next(
+        (s.asset_path for s in scenes if s.asset_type in ("image", "video") and s.asset_path),
+        None,
+    )
+    last_real_asset: Optional[Path] = None   # tracks nearest preceding real image
 
     for scene in scenes:
         print(f"\n  Scene {scene.index}:")
@@ -82,13 +214,32 @@ def assemble_reel(
             action = "stretch" if clip_dur < duration else "trim"
             print(f"    Visual:   video → {scene.asset_path.name} ({clip_dur:.1f}s → {duration:.1f}s, {action})")
             existing_clip_to_clip(scene.asset_path, duration, base_clip, width, height)
+            last_real_asset = scene.asset_path
         elif scene.asset_type == "image":
-            print(f"    Visual:   image → {scene.asset_path.name}")
-            image_to_clip(scene.asset_path, duration, base_clip, width, height)
+            if scene.visual_type == "kling":
+                print(f"    Visual:   KLING FALLBACK (blur-fill) → {scene.asset_path.name}")
+            else:
+                print(f"    Visual:   image (Ken Burns) → {scene.asset_path.name}")
+            image_to_clip_kenburns(
+                scene.asset_path, duration, base_clip,
+                photo_type=scene.photo_type,
+                width=width, height=height,
+            )
+            last_real_asset = scene.asset_path
         else:
             gtype = detect_type(scene.visual_intent)
-            print(f"    Visual:   generated graphic ({gtype})")
-            generate_graphic_clip(scene.visual_intent, duration, base_clip, font_path, width, height)
+            beat  = _resolve_beat(scene, len(scenes))
+            bg_asset = last_real_asset or _first_real_asset
+            if bg_asset and beat != "cta":
+                print(f"    Visual:   generated ({gtype}) over real → {bg_asset.name}")
+                _render_generated_over_real(
+                    scene.visual_intent, bg_asset, duration, base_clip,
+                    font_path, width, height,
+                )
+            else:
+                reason = "cta" if beat == "cta" else "no real assets in reel"
+                print(f"    Visual:   generated graphic ({gtype}) [{reason}]")
+                generate_graphic_clip(scene.visual_intent, duration, base_clip, font_path, width, height)
 
         # ── Add text card overlay (CTA / data / risk only) ───────
         if scene.text_card:
@@ -105,20 +256,24 @@ def assemble_reel(
         print(f"    ✓ {final_clip.name}")
 
     # ── Concatenate video clips ───────────────────────────────────
-    print("\n  Concatenating video clips...")
-    concat_list = work_dir / "concat_video.txt"
-    concat_list.write_text(
-        "\n".join(f"file '{p.resolve()}'" for p in scene_clips),
-        encoding="utf-8",
-    )
     video_only = work_dir / "video_only.mp4"
-    _ffmpeg(
-        "-f", "concat", "-safe", "0",
-        "-i", str(concat_list),
-        "-c", "copy",
-        str(video_only),
-        label="concat video",
-    )
+    if transitions and len(scene_clips) > 1:
+        print("\n  Concatenating video clips (with transitions)...")
+        _concat_with_transitions(scene_clips, scenes, video_only, work_dir, width, height)
+    else:
+        print("\n  Concatenating video clips...")
+        concat_list = work_dir / "concat_video.txt"
+        concat_list.write_text(
+            "\n".join(f"file '{p.resolve()}'" for p in scene_clips),
+            encoding="utf-8",
+        )
+        _ffmpeg(
+            "-f", "concat", "-safe", "0",
+            "-i", str(concat_list),
+            "-c", "copy",
+            str(video_only),
+            label="concat video",
+        )
 
     # ── Concatenate audio segments ────────────────────────────────
     print("  Concatenating audio segments...")

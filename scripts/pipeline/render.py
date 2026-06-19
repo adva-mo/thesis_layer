@@ -31,7 +31,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 from reel_pipeline.assembler import _find_audio, assemble_reel
 from reel_pipeline.graphic_generator import detect_type
 from reel_pipeline.local_clip import get_audio_duration, get_clip_duration
-from reel_pipeline.parser import parse_reel_file
+from reel_pipeline.parser import parse_reel_file, read_reel_status
 from reel_pipeline.text_overlay import FONT_PATH
 
 
@@ -73,7 +73,10 @@ def print_dry_run(scenes, audio_dir, output_path, clip_overrides):
             action = "stretch" if clip_dur < dur else "trim"
             vsource = f"video: {scene.asset_path.name} ({clip_dur:.1f}s→{dur:.1f}s, {action})"
         elif scene.asset_type == "image":
-            vsource = f"image: {scene.asset_path.name}"
+            if scene.visual_type == "kling":
+                vsource = f"KLING FALLBACK (no clip) — {scene.asset_path.name}"
+            else:
+                vsource = f"image (Ken Burns): {scene.asset_path.name}"
         else:
             vsource = f"generated ({detect_type(scene.visual_intent)})"
 
@@ -94,6 +97,8 @@ def main():
     parser.add_argument("--reel",        type=int, default=1, help="Reel number to render (default: 1)")
     parser.add_argument("--max-scenes",  type=int, default=None, help="Limit to first N scenes")
     parser.add_argument("--render",        action="store_true", help="Actually run FFmpeg (default: dry-run)")
+    parser.add_argument("--draft",         action="store_true", help="Skip Kling fallback check — allows rendering with blur-fill placeholders (not production-ready)")
+    parser.add_argument("--transitions",   action="store_true", help="Add cross-dissolve transitions between scenes (re-encodes; slower)")
     parser.add_argument("--keep-tmp",      action="store_true", help="Keep work directory after render")
     parser.add_argument("--font",          default=str(FONT_PATH), help="Path to .ttf font for Hebrew text")
     parser.add_argument("--clip-override", action="append", default=[], metavar="SCENE:PATH",
@@ -132,6 +137,33 @@ def main():
         print_dry_run(scenes, audio_dir, output, clip_overrides)
         return
 
+    # ── Kling fallback gate ───────────────────────────────────────
+    if not args.draft:
+        kling_fallbacks = [
+            s for s in scenes
+            if s.visual_type == "kling" and s.asset_type == "image"
+        ]
+        if kling_fallbacks:
+            print("\n  Kling scenes without generated clips:")
+            for s in kling_fallbacks:
+                tag = " [CRITICAL]" if s.critical else ""
+                name = s.asset_path.name if s.asset_path else "(none)"
+                print(f"    Scene {s.index} [{s.start_s:.0f}–{s.end_s:.0f}s]{tag} → {name}")
+            critical_fallbacks = [s for s in kling_fallbacks if s.critical]
+            if critical_fallbacks:
+                print(f"\n  ✗ {len(critical_fallbacks)} critical Kling scene(s) have no clip — reel is not production-ready.")
+                print("    Run kling_batch.py first, or use --draft to render with blur-fill fallback.")
+                sys.exit(1)
+            else:
+                print(f"\n  ✱ {len(kling_fallbacks)} non-critical Kling scene(s) will use blur-fill fallback.")
+                print()
+
+    # ── Published content warning ─────────────────────────────────
+    _pub_status = read_reel_status(blueprint, args.reel)
+    if _pub_status and _pub_status.upper() == "PUBLISHED":
+        print(f"  ⚠  Reel {args.reel} is PUBLISHED — rendering anyway (technical re-export only, content unchanged).")
+        print()
+
     # ── Render ────────────────────────────────────────────────────
     print(f"\nThesisLayer Reel Renderer")
     print(f"  Blueprint: {blueprint.name}")
@@ -153,6 +185,7 @@ def main():
             clip_overrides=clip_overrides,
             leading_pad_ms=args.leading_pad_ms,
             trailing_pad_ms=args.trailing_pad_ms,
+            transitions=args.transitions,
         )
     finally:
         if not args.keep_tmp:

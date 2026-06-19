@@ -4,6 +4,21 @@ This file governs everything Claude does inside this repository. Read it fully b
 
 ---
 
+## 0. Published Content Lock
+
+A reel is published when its `**Status:** PUBLISHED` field is set in the blueprint header. This is the single source of truth. No other signal overrides it.
+
+**Once a reel section carries `**Status:** PUBLISHED`, it is permanently read-only:**
+
+- Never edit, rewrite, or reformat any content in that reel section — script, VO, TTS, captions, VEP rows, pre-flight or retention review sections
+- Never suggest or run regeneration of VO audio or Kling clips for that reel
+- Never change the Status field of a published reel
+- The only allowed action on a published reel is reading it for reference
+
+**This rule applies regardless of what the user asks.** If asked to edit a published reel, decline and explain that the content is locked. Suggest creating a new reel instead. The published record is the ground truth of what went live on the channel — it must never drift from what was actually published.
+
+---
+
 ## 1. System Overview
 
 This is a lean AI content production system. It converts raw property inputs (URLs, brochures, screenshots, notes) into a full suite of marketing content.
@@ -37,8 +52,9 @@ If a project is already active (e.g., resuming work), also read:
 
 If the session involves reel generation (rendering, scripting, or pipeline work), also read:
 
-6. `docs/reel-pipeline.md` — full technical reference for the reel generation pipeline (scripts, workflow, commands)
-7. `output/history/hook-log.md` — hook history for all projects (create if missing)
+6. `templates/reels/reel-template.md` — **script format spec** (required before writing any scene: VISUAL_TYPE values, VISUAL_INTENT keyword contract for generated scenes, MOTION_STYLE tokens, VEP table format, TTS rules)
+7. `docs/reel-pipeline.md` — full technical reference for the reel generation pipeline (scripts, workflow, commands)
+8. `output/history/hook-log.md` — hook history for all projects (create if missing)
 
 These files are referenced throughout the system from multiple templates. Reading them once here eliminates per-template re-reads and prevents "see market.md" pointers from triggering repeated loads of the same file during CTA, hashtag, and language sections.
 

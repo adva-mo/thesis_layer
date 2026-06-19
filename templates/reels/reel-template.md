@@ -151,11 +151,15 @@ Prefer:
 
 ## Script Conventions
 
+> **Format lock:** Use only the tags defined in this section. `[VISUAL:]` and `[SCREEN:]` are deprecated — do not write them. Full deprecation list at the end of this section (§What NOT to write).
+
 ### Tags (current format)
 
 - `[VISUAL_TYPE:]` = **required on every scene.** Declares the scene's render path. Valid values: `kling` (collect image → Kling I2V clip), `static` (collect image → used as still, no Kling), `generated` (programmatic graphic card), `timeline` (animated sequence card). Parser errors on missing or unrecognized values — no silent fallback.
 - `[VISUAL_INTENT:]` = what the scene should visually show — written at script time, abstract intent only. No asset paths here. Asset paths are assigned later via Visual Evidence Plan (Step 2.5). For `kling` scenes, this becomes part of the Kling prompt.
-- `[MOTION_STYLE:]` = camera movement and style direction for Kling generation. Required for `kling` scenes. Omit for `generated`, `static`, and `timeline` scenes.
+- `[MOTION_STYLE:]` = camera movement token for Kling generation. Required for `kling` scenes. Must be one of the `MV_*` tokens from the Motion Language System (see Motion vocabulary below). The token is expanded to a full Kling prompt description before the API call — do not write free-form text here. If omitted, motion is inferred from `[BEAT:]` with a warning. Unknown tokens block generation before any API spend. Omit entirely for `generated`, `static`, and `timeline` scenes.
+- `[BEAT:]` = narrative beat label for this scene. Optional but recommended on every scene. Used for: (a) motion inference when `[MOTION_STYLE:]` is absent, (b) cross-dissolve transition style between scenes. Valid values: `hook`, `establish`, `insight`, `prove`, `reinforce`, `reality_check`, `cta`.
+- `[PHOTO_TYPE:]` = Ken Burns parameter override for `static` scenes and Kling fallback images. Optional. Valid values: `photo_aerial`, `photo_street`, `photo_community`, `satellite_map`, `listing_screenshot`, `developer_render`. If omitted, type is inferred from the asset filename. See `docs/reel-pipeline.md` → Ken Burns section.
 - `[TEXT_CARD:]` = explicit text on screen. Use sparingly — CTA, number breakdowns, risk disclaimers only. Subtitles handle everything else. No default text overlays.
 - `[VO:]` = spoken voiceover (ElevenLabs). Write as natural spoken Hebrew. Use the Investment Signals table and Decision Anchor as internal reasoning — they inform what thought to express, not what to list. Write the conclusion of the reasoning, not the structure of it. One clean insight per segment. High reasoning density, low explanation density.
 
@@ -192,8 +196,10 @@ Good (same reasoning, investor arriving at a thought):
 #### Real image scenes (Kling clip will be generated from this)
 
 ```
+[VISUAL_TYPE: kling]
+[BEAT: <beat label>]
 [VISUAL_INTENT: <location/subject> — <state and atmosphere> — <thesis relevance> — no <anti-collect items>]
-[MOTION_STYLE: <movement type>, <speed>, <camera height/angle>, <light quality>, <stability>]
+[MOTION_STYLE: MV_TOKEN]
 ```
 
 **`[VISUAL_INTENT:]` must include:**
@@ -202,42 +208,79 @@ Good (same reasoning, investor arriving at a thought):
 - Thesis link: one phrase explaining why this specific image, not just "nice shot"
 - At least one negative cue: what NOT to show — drawn from the thesis anti-collect rules
 
-**`[MOTION_STYLE:]` must include:**
-- Movement type: push-in / pan (left-to-right or right-to-left) / pull-back / static / handheld drift
-- Speed: slow / ultra-slow / deliberate / subtle
-- Camera height: aerial / slightly elevated / eye-level / low
-- Light quality: golden hour / overcast soft / warm afternoon / clear midday
-- Stability: smooth / no shake / steady
+**`[MOTION_STYLE:]` must be a single `MV_*` token from the Motion Language System:**
 
-These two tags together must be specific enough to pass directly as a Kling `--prompt` string without human editing at generation time.
+| Token | When to use |
+|---|---|
+| `MV_PUSH_SLOW` | Establishing shots, hook beats — forward momentum, cinematic, neutral |
+| `MV_PUSH_ULTRA` | Proof shots where stability matters more than energy |
+| `MV_PULL_REVEAL` | Reveal beats — pulling back to show context or scale |
+| `MV_TRACK_RIGHT` | Side-to-side insight beats — camera parallel to scene, analytical feel |
+| `MV_TRACK_LEFT` | Same as TRACK_RIGHT, rightward direction |
+| `MV_DRIFT_AERIAL` | Establish beats, area context — aerial glide above, broad context |
+| `MV_PAN_REVEAL` | Reinforcement beats — horizontal pivot, sweeping, evidence of breadth |
+| `MV_PUSH_EYE` | Risk and reality beats — eye-level, warm, unhurried, honest register |
+| `MV_LOCKED` | Static subjects where any movement would read as restless |
 
-**Before:**
+The token is expanded to its full Kling prompt description before the API call. Unknown tokens abort generation before any API spend.
+
+**Investment framing rule:** motion must match the beat's emotional register. A risk beat with `MV_DRIFT_AERIAL` aestheticizes a moment that needs to feel honest. An establish beat with `MV_LOCKED` loses the forward momentum that draws the viewer in. Choose the token that fits the VO's register, not just the visual.
+
+**Example:**
 ```
 [VISUAL_TYPE: kling]
-[VISUAL_INTENT: Dubai Hills Estate community street or park — family residential feel]
-[MOTION_STYLE: slow pan, warm daylight]
+[BEAT: reality_check]
+[VISUAL_INTENT: Ras Al Khaimah low-rise residential street — warm afternoon light, lived-in neighborhood, quiet street, real occupancy visible — no Wynn signage, no Dubai skyline, no construction cranes]
+[MOTION_STYLE: MV_PUSH_EYE]
+[KLING_AVOID: people in close foreground, motion blur, construction equipment, beach or water in frame]
 ```
 
-**After:**
-```
-[VISUAL_TYPE: kling]
-[VISUAL_INTENT: Dubai Hills Estate residential street — warm afternoon, lived-in, families visible softly in background, neighborhood already operating — no construction, no cranes, not a render]
-[MOTION_STYLE: gentle forward push, deliberate pace, eye-level camera, warm afternoon light, steady no shake]
-```
-
-**Optional — add `[KLING_AVOID:]` for scenes where Kling reliably hallucinates:**
-```
-[KLING_AVOID: people in close foreground, motion blur, shaky camera, construction equipment]
-```
+**`[KLING_AVOID:]`** is sent to the Kling API as `negative_prompt`. Use it when Kling reliably hallucinates something that contradicts the scene intent. The string is included in the cache key — editing it triggers a new API call even if everything else is unchanged.
 
 #### Generated graphic scenes (no Kling clip)
 
+`VISUAL_TYPE: generated` signals: no Kling clip, no asset collection. The graphic is created programmatically from the `[VISUAL_INTENT:]` description.
+
+**The VISUAL_INTENT keyword is the contract with the renderer.** The renderer reads the description and selects a graphic type based on the first matching keyword below. Use the exact keyword forms listed — the match is substring-based and case-insensitive.
+
+| Keyword in VISUAL_INTENT | Graphic type | What renders |
+|---|---|---|
+| `text card` or `bold text` or `text on screen` | text_card | Centered text extracted from `"quoted string"` in the description |
+| `split text card` | text_card | Two quoted strings joined with ` \| ` — use for contrast/comparison hooks |
+| `cta card` | cta_card | Plain dark background — VO + subtitles carry the CTA text |
+| `timeline` or `payment plan` or `breakdown` | timeline | Step sequence — labels from `→`-separated items after `—` separator (see Timeline section below) |
+| `reality check` or `overlay` or `implication` | text_card | Same as text_card — use when the beat framing matters |
+| *(anything else)* | **HARD ERROR** | Assembler stops before any rendering and prints the unrecognized keyword |
+
+**Unrecognized keywords are a hard error.** The assembler validates all generated scenes before starting any render work. A bad keyword fails fast with a clear message — no partial renders, no blank cards.
+
+**Format rules by graphic type:**
+
+*text_card / split text card:*
 ```
 [VISUAL_TYPE: generated]
-[VISUAL_INTENT: brief description of the graphic (payment plan, comparison table, etc.)]
+[VISUAL_INTENT: text card — "text to display on screen"]
 ```
+```
+[VISUAL_TYPE: generated]
+[VISUAL_INTENT: split text card: "left side text" | "right side text"]
+```
+Wrap display text in double quotes. For split cards, separate the two parts with ` | `. The renderer extracts and displays all quoted strings.
 
-`VISUAL_TYPE: generated` signals: no Kling clip, no asset collection. The graphic is created programmatically from the description.
+*cta card:*
+```
+[VISUAL_TYPE: generated]
+[VISUAL_INTENT: CTA card]
+[TEXT_CARD: exact CTA text]
+```
+The display text comes from `[TEXT_CARD:]`, not from VISUAL_INTENT.
+
+*payment plan (timeline format):*
+```
+[VISUAL_TYPE: generated]
+[VISUAL_INTENT: payment plan breakdown — 10% חתימה → 40% בנייה → 50% מסירה]
+```
+`payment plan` and `breakdown` resolve to the timeline renderer. Use `→` to separate steps, not `/`. The `—` separator before the steps is required.
 
 #### Timeline / argument sequence scenes
 
@@ -277,12 +320,14 @@ For CTA / text card scenes only:
 ### What NOT to write
 
 - Do not omit `[VISUAL_TYPE:]` — it is required on every scene block. A missing type is a parser error, not a silent fallback to Kling.
+- Do not write free-form text in `[MOTION_STYLE:]` — use `MV_*` tokens only. Free-form text triggers a deprecation warning and is outside the controlled vocabulary. Unknown `MV_*` tokens block generation before any API spend.
 - Do not write `[SCREEN:]` — deprecated. Use `[TEXT_CARD:]` only for explicit cards.
 - Do not write `[VISUAL:]` — deprecated. Use `[VISUAL_TYPE:]` + `[VISUAL_INTENT:]`.
 - Do not write asset file paths in `[VISUAL_INTENT:]` — those come from the Visual Evidence Plan.
 - Do not add text overlays as a default — subtitles render the VO text.
 - Do not write `[VISUAL_INTENT: generated — ...]` or `[VISUAL_INTENT: timeline — ...]` — deprecated. Use `[VISUAL_TYPE: generated]` or `[VISUAL_TYPE: timeline]` instead, with a clean description in `[VISUAL_INTENT:]`.
 - Do not write thin VISUAL_INTENT like "community street, residential feel" for `kling` scenes — must include atmosphere, thesis link, and a negative cue.
+- `[KLING_AVOID:]` is sent as `negative_prompt` — use it when Kling reliably hallucinates something. Editing it invalidates the cache entry for that scene.
 
 ---
 
@@ -314,15 +359,19 @@ When a VO segment exceeds 11 seconds, evaluate whether a single Kling clip is th
 
 ```
 [VISUAL_TYPE: kling]
+[BEAT: <beat label>]
 [VISUAL_INTENT: Three cuts: (1) [subject] — [atmosphere], no [anti-collect] Xs → (2) [subject] — [atmosphere] Xs → (3) [subject] — [atmosphere] Xs]
-[MOTION_STYLE: (1) [movement] → (2) [movement] → (3) [movement]]
+[MOTION_STYLE: (1) MV_TOKEN → (2) MV_TOKEN → (3) MV_TOKEN]
 ```
+
+Multi-clip `[MOTION_STYLE:]` uses the `(N) MV_TOKEN` notation — one token per sub-clip. Each token is resolved independently before being passed to `kling.py` for that sub-clip. Do not use free-form descriptions here.
 
 Example (the scene that prompted this rule):
 ```
 [VISUAL_TYPE: kling]
+[BEAT: prove]
 [VISUAL_INTENT: Dubai Hills Estate — three working amenities in sequence: (1) golf course — green fairways, residential buildings behind, warm afternoon, no cranes 4s → (2) community park — families, green canopy, towers in distance 3s → (3) Dubai Hills Mall exterior — warm retail activity, real people, not a resort 4s]
-[MOTION_STYLE: (1) low-angle track right → (2) slow push-in toward park → (3) tracking shot along mall exterior]
+[MOTION_STYLE: (1) MV_TRACK_RIGHT → (2) MV_PUSH_SLOW → (3) MV_TRACK_RIGHT]
 ```
 
 For the technical workflow (how to generate, name, trim, and concat sub-clips), see `docs/reel-pipeline.md` → Multi-clip scenes section.
@@ -435,7 +484,13 @@ Visual pacing:
 
 ## Per-Reel Header Block
 
-Every generated reel section must open with this metadata block immediately after the `## Reel N` heading. Set `**Status:** SCRIPTED` at generation time — do not leave it blank or omit it. The status field progresses through the pipeline: `SCRIPTED` → `RETENTION-REVIEWED` → `NATURALIZER-SIGNED` → `APPROVED`.
+Every generated reel section must open with this metadata block immediately after the `## Reel N` heading. Set `**Status:** SCRIPTED` at generation time — do not leave it blank or omit it.
+
+**Status progression (the blueprint `**Status:**` field is the single source of truth):**
+```
+SCRIPTED → RETENTION-REVIEWED → NATURALIZER-SIGNED → APPROVED → PUBLISHED
+```
+`PUBLISHED` is the terminal state. Once a reel is published, its blueprint section is permanently read-only — no edits, no regeneration of VO or Kling clips, no status changes. Update `output/history/hook-log.md` to mirror the PUBLISHED state when a reel ships.
 
 ```
 ## Reel N — [Format Name] ([duration]s) | [Hook Family] | [Cadence]

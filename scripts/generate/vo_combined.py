@@ -200,6 +200,9 @@ def main():
     if status is None:
         print("Error: **Status:** field not found in reel header — add it before running paid generation.")
         sys.exit(1)
+    if status.upper() == "PUBLISHED":
+        print(f"Error: reel {args.reel} is PUBLISHED — content is locked. No regeneration allowed.")
+        sys.exit(1)
     if status.upper() != "APPROVED":
         print(f"Error: reel {args.reel} status is '{status}' — must be APPROVED before paid generation.")
         sys.exit(1)

@@ -21,6 +21,7 @@ REPO_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from reel_pipeline.graphic_generator import _visual
+from reel_pipeline.motion import CARD_ENTRY, ease_out_cubic
 
 # ── Visual constants (mirror graphic_generator.py) ────────────────
 WIDTH, HEIGHT = 1080, 1920
@@ -41,11 +42,7 @@ FONT_PATH  = Path("/System/Library/Fonts/Supplemental/Arial Unicode.ttf")
 
 ITEMS = ["הבטחה", "שנים", "מציאות"]
 
-SLIDE_PX = 20    # px upward slide distance
-
-
-def ease_out_cubic(t: float) -> float:
-    return 1.0 - (1.0 - t) ** 3
+SLIDE_PX = int(CARD_ENTRY["slide_px"])    # px rise distance for box entry
 
 
 def _progress(t: float, start: float, dur: float) -> float:
@@ -71,7 +68,7 @@ def render_frame(t: float, font_text: ImageFont.FreeTypeFont,
 
         alpha = int(255 * p)
         y_offset = int(SLIDE_PX * (1.0 - p))
-        y = start_y + i * (BOX_H + ARROW_GAP) - y_offset
+        y = start_y + i * (BOX_H + ARROW_GAP) + y_offset  # rises up into position
 
         # Box (RGBA layer, composited onto base)
         box_img = Image.new("RGBA", (BOX_W, BOX_H), (0, 0, 0, 0))
@@ -125,10 +122,9 @@ def generate(output: Path, duration: float) -> None:
 
     n = len(ITEMS)
     # Spread reveal across 85% of scene so the viewer feels time passing.
-    # Arrows appear 0.5s before the next box as a transition cue.
-    first_start     = 0.30
-    box_dur         = 0.45
-    arrow_adv       = 0.50
+    first_start     = float(CARD_ENTRY["first_element_start"])  # 0.20s
+    box_dur         = float(CARD_ENTRY["fade_dur_fast"])         # 0.35s per element
+    arrow_adv       = float(CARD_ENTRY["arrow_adv"])            # 0.15s before next box
     last_reveal_end = duration * 0.85
     interval        = (last_reveal_end - box_dur - first_start) / max(n - 1, 1)
     box_schedule    = [(first_start + i * interval, box_dur) for i in range(n)]
