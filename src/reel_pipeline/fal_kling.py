@@ -171,7 +171,6 @@ def generate_clip(
     }
     if negative_prompt:
         api_args["negative_prompt"] = negative_prompt
-        print(f"  Avoid:         {negative_prompt}")
 
     result = fal_client.subscribe(
         model,
