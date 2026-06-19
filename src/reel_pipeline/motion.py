@@ -6,6 +6,8 @@ Import from here instead of defining motion values in individual scripts.
 
 from __future__ import annotations
 
+import re
+
 
 # ── Easing functions ───────────────────────────────────────────────────────────
 
@@ -182,3 +184,59 @@ def get_transition(
     if from_visual_type == "generated" and to_visual_type == "generated":
         return "dissolve", 0.25
     return "dissolve", 0.35
+
+
+# ── Motion style resolution ────────────────────────────────────────────────────
+
+_TOKEN_PATTERN = re.compile(r"^MV_[A-Z_]+$")
+
+
+def resolve_motion_style(
+    motion_style: str | None,
+    beat: str | None,
+) -> tuple[str | None, list[str]]:
+    """
+    Resolve a [MOTION_STYLE:] value to its full Kling prompt string.
+
+    Returns (prompt_fragment, warnings).
+
+    Rules:
+    - Known token (MV_PUSH_SLOW etc.)       → expand to full description, no warnings.
+    - No token + known beat                 → infer from BEAT_MOTION_MAP, one warning.
+    - No token + unknown/no beat            → return None, no warnings.
+    - Unknown MV_* token                    → raises ValueError (typo or invented vocab).
+    - Free-form text (not MV_* pattern)     → pass through as-is, deprecation warning.
+
+    Unknown tokens raise instead of returning (None, warnings) so the caller can
+    distinguish "no motion style available" from "bad token that must be fixed."
+    """
+    warns: list[str] = []
+
+    if not motion_style:
+        # No MOTION_STYLE tag — infer from beat if possible
+        inferred_token = BEAT_MOTION_MAP.get(beat) if beat else None
+        if inferred_token and inferred_token in MOTION_VOCAB:
+            warns.append(
+                f"[MOTION_STYLE:] missing — inferred {inferred_token} from beat '{beat}'"
+            )
+            return MOTION_VOCAB[inferred_token], warns
+        return None, warns
+
+    # Known token → expand
+    if motion_style in MOTION_VOCAB:
+        return MOTION_VOCAB[motion_style], warns
+
+    # Looks like a token (MV_SOMETHING) but not in vocab → hard stop.
+    # Return None is ambiguous with "no motion style" — raise instead.
+    if _TOKEN_PATTERN.match(motion_style):
+        raise ValueError(
+            f"Unknown motion token '{motion_style}' — not in MOTION_VOCAB. "
+            f"Fix the typo or add it. Valid tokens: {', '.join(sorted(MOTION_VOCAB))}"
+        )
+
+    # Free-form text — deprecated but pass through
+    warns.append(
+        f"Free-form MOTION_STYLE '{motion_style}' is outside the motion vocabulary. "
+        f"Replace with a MOTION_VOCAB token before the next Kling run."
+    )
+    return motion_style, warns

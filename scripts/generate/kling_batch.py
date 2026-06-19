@@ -35,6 +35,7 @@ REPO_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from reel_pipeline import config, fal_kling
+from reel_pipeline.motion import resolve_motion_style
 from reel_pipeline.parser import parse_reel_file, read_reel_status
 
 
@@ -150,6 +151,37 @@ def main() -> None:
             continue
         to_generate.append(scene)
 
+    # ── Motion style resolution + validation ──────────────────────────────────
+    # Runs before the plan print so the scan loop can use resolved prompts for
+    # accurate cache key computation. Unknown MV_* tokens → hard stop before
+    # any money is spent. Free-form text → deprecation warning, passes through.
+    resolved_prompts: dict[int, str] = {}  # scene.index → full Kling prompt
+    motion_warnings: list[tuple[int, str]] = []
+    motion_errors:   list[tuple[int, str]] = []
+
+    for scene in to_generate:
+        try:
+            resolved_motion, warns = resolve_motion_style(scene.motion_style, scene.beat)
+        except ValueError as e:
+            motion_errors.append((scene.index, str(e)))
+            continue
+        for w in warns:
+            motion_warnings.append((scene.index, w))
+        resolved_prompts[scene.index] = " ".join(filter(None, [scene.visual_intent, resolved_motion]))
+
+    if motion_warnings:
+        print()
+        for idx, w in motion_warnings:
+            print(f"  ⚠  Scene {idx}: {w}")
+
+    if motion_errors:
+        print()
+        for idx, e in motion_errors:
+            print(f"  ✗  Scene {idx}: {e}")
+        print(f"\n  Abort — fix unknown motion token(s) before generating clips.")
+        sys.exit(1)
+
+    # ── Plan print ────────────────────────────────────────────────────
     print(f"\nKling batch — Reel {args.reel}")
     print(f"  Blueprint: {blueprint}")
     print(f"  Model:     {model}")
@@ -162,9 +194,9 @@ def main() -> None:
             print(f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]  {label}")
             continue
 
-        dur       = _clip_duration(scene.end_s - scene.start_s)
-        out_path  = _output_path(assets_dir, args.reel, scene.start_s, scene.end_s)
-        prompt    = " ".join(filter(None, [scene.visual_intent, scene.motion_style]))
+        dur      = _clip_duration(scene.end_s - scene.start_s)
+        out_path = _output_path(assets_dir, args.reel, scene.start_s, scene.end_s)
+        prompt   = resolved_prompts.get(scene.index, "")
 
         # Portrait crop detection
         try:
@@ -185,6 +217,8 @@ def main() -> None:
             f"image  {scene.asset_path.name}  →  {out_path.name}  ({dur}s)"
             f"{crop_note}{cache_note}"
         )
+        if prompt:
+            print(f"    Prompt: {prompt}")
 
     if not to_generate:
         print("\n  Nothing to generate.")
@@ -195,7 +229,7 @@ def main() -> None:
                       if not fal_kling.get_cached_path(
                           fal_kling.compute_cache_key(
                               s.asset_path,
-                              " ".join(filter(None, [s.visual_intent, s.motion_style])),
+                              resolved_prompts.get(s.index, ""),
                               _clip_duration(s.end_s - s.start_s),
                               model,
                           )
@@ -222,9 +256,10 @@ def main() -> None:
     for scene in to_generate:
         dur      = _clip_duration(scene.end_s - scene.start_s)
         out_path = _output_path(assets_dir, args.reel, scene.start_s, scene.end_s)
-        prompt   = " ".join(filter(None, [scene.visual_intent, scene.motion_style]))
+        prompt   = resolved_prompts[scene.index]
 
         print(f"  Generating scene {scene.index} → {out_path.name}  ({dur}s) …")
+        print(f"    Prompt: {prompt}")
         try:
             fal_kling.generate_clip(scene.asset_path, prompt, dur, model, out_path)
             print(f"    ✓ {out_path.name}")
