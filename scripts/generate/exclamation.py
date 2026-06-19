@@ -20,6 +20,8 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 REPO_ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(REPO_ROOT / "src"))
+from reel_pipeline.motion import ease_out_cubic, ease_out_quad
 
 WIDTH, HEIGHT = 1080, 1920
 FPS           = 30
@@ -33,31 +35,17 @@ FONT_PATH = Path("/System/Library/Fonts/Supplemental/Arial Unicode.ttf")
 EXCL_SIZE = 220
 
 PHASE1_END = 0.45   # circle fully scaled in
-PHASE2_END = 0.85   # "!" fully dropped in
+PHASE2_END = 0.85   # "!" fully settled in
+
+# micro-pulse: circle briefly brightens 1.5s after "!" arrives
+PULSE_START     = PHASE2_END + 1.50
+PULSE_DUR       = 0.15   # rise duration
+PULSE_COLOR     = (235, 50, 50)  # slightly brighter than CIRCLE_COLOR
 
 
-def ease_out_cubic(t: float) -> float:
-    return 1.0 - (1.0 - t) ** 3
-
-
-def ease_out_bounce(t: float) -> float:
-    n1, d1 = 7.5625, 2.75
-    if t < 1 / d1:
-        return n1 * t * t
-    elif t < 2 / d1:
-        t -= 1.5 / d1
-        return n1 * t * t + 0.75
-    elif t < 2.5 / d1:
-        t -= 2.25 / d1
-        return n1 * t * t + 0.9375
-    else:
-        t -= 2.625 / d1
-        return n1 * t * t + 0.984375
-
-
-def _draw_circle(draw: ImageDraw.ImageDraw, r: int) -> None:
+def _draw_circle(draw: ImageDraw.ImageDraw, r: int, color: tuple = CIRCLE_COLOR) -> None:
     cx, cy = CIRCLE_CX, CIRCLE_CY
-    draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=CIRCLE_COLOR, outline=WHITE, width=4)
+    draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=color, outline=WHITE, width=4)
 
 
 def _draw_exclamation(img: Image.Image, draw: ImageDraw.ImageDraw, y_center: int) -> None:
@@ -85,14 +73,28 @@ def render_frame(t: float) -> Image.Image:
 
     elif t < PHASE2_END:
         _draw_circle(draw, CIRCLE_R)
-        p = ease_out_bounce((t - PHASE1_END) / (PHASE2_END - PHASE1_END))
-        # "!" starts 260px above circle center, drops into it
-        start_y = CIRCLE_CY - 260
-        y_center = start_y + int((CIRCLE_CY - start_y) * p)
+        p = ease_out_cubic((t - PHASE1_END) / (PHASE2_END - PHASE1_END))
+        # "!" rises 20px into final position (editorial settle, not slapstick drop)
+        start_y = CIRCLE_CY + 20
+        y_center = start_y - int((start_y - CIRCLE_CY) * p)
         _draw_exclamation(img, draw, y_center)
 
     else:
-        _draw_circle(draw, CIRCLE_R)
+        # micro-pulse: circle briefly brightens to signal attention
+        circle_color = CIRCLE_COLOR
+        if PULSE_START <= t < PULSE_START + PULSE_DUR:
+            p = ease_out_quad((t - PULSE_START) / PULSE_DUR)
+            circle_color = tuple(
+                int(CIRCLE_COLOR[i] + (PULSE_COLOR[i] - CIRCLE_COLOR[i]) * p)
+                for i in range(3)
+            )
+        elif PULSE_START + PULSE_DUR <= t < PULSE_START + 2 * PULSE_DUR:
+            p = ease_out_quad((t - PULSE_START - PULSE_DUR) / PULSE_DUR)
+            circle_color = tuple(
+                int(PULSE_COLOR[i] + (CIRCLE_COLOR[i] - PULSE_COLOR[i]) * p)
+                for i in range(3)
+            )
+        _draw_circle(draw, CIRCLE_R, circle_color)
         _draw_exclamation(img, draw, CIRCLE_CY)
 
     return img

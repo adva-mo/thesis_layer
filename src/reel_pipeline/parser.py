@@ -42,6 +42,8 @@ class Scene:
     asset_type: str                # "image" | "video" | "generated" — what the assembler uses
     asset_path: Optional[Path]     # resolved asset; None when generated
     critical: bool = False         # True when VEP Critical column is "yes"
+    beat: Optional[str] = None     # [BEAT:] — narrative beat for transition logic
+    photo_type: Optional[str] = None  # [PHOTO_TYPE:] — Ken Burns parameter set override
 
 
 def _parse_timestamp(ts: str) -> tuple[float, float]:
@@ -228,6 +230,12 @@ def parse_reel_file(
             tc_match = re.search(r"\[SCREEN:\s*(.*?)\]", block)
         text_card = tc_match.group(1).strip() if tc_match else None
 
+        beat_match = re.search(r"\[BEAT:\s*(\w+)\s*\]", block)
+        beat = beat_match.group(1).strip().lower() if beat_match else None
+
+        pt_match = re.search(r"\[PHOTO_TYPE:\s*(\w+)\s*\]", block)
+        photo_type = pt_match.group(1).strip().lower() if pt_match else None
+
         # [VISUAL_TYPE:] — required in new blueprints
         vt_match = re.search(r"\[VISUAL_TYPE:\s*(\w+)\s*\]", block)
         visual_type: Optional[str] = None
@@ -294,6 +302,8 @@ def parse_reel_file(
             asset_type=asset_type,
             asset_path=asset_path,
             critical=ts_key in critical_keys,
+            beat=beat,
+            photo_type=photo_type,
         ))
 
     for s in scenes:

@@ -13,8 +13,9 @@ from .local_clip import (
     existing_clip_to_clip,
     get_audio_duration,
     get_clip_duration,
-    image_to_clip,
+    image_to_clip_kenburns,
 )
+from .motion import get_transition
 from .parser import Scene
 from .text_overlay import FONT_PATH, FONT_SIZE, add_screen_text
 
@@ -37,6 +38,76 @@ def _ffmpeg(*args: str, label: str = "ffmpeg") -> None:
         sys.exit(1)
 
 
+def _infer_beat(scene: Scene, total_scenes: int) -> str | None:
+    """Infer beat from explicit tag or scene position when [BEAT:] is absent."""
+    if scene.beat:
+        return scene.beat
+    if scene.index == 1:
+        return "hook"
+    if scene.index == total_scenes:
+        return "cta"
+    return None
+
+
+def _concat_with_transitions(
+    scene_clips: list[Path],
+    scenes: list[Scene],
+    output: Path,
+    work_dir: Path,
+    width: int,
+    height: int,
+) -> None:
+    """Assemble scene clips with xfade transitions via filter_complex (re-encode)."""
+    if len(scene_clips) == 1:
+        # Single scene — copy directly, no transition needed
+        _ffmpeg("-i", str(scene_clips[0]), "-c:v", "libx264", "-crf", "18",
+                "-preset", "fast", "-an", str(output), label="single-scene copy")
+        return
+
+    n = len(scene_clips)
+    total = len(scenes)
+    inputs: list[str] = []
+    for p in scene_clips:
+        inputs += ["-i", str(p)]
+
+    filter_parts: list[str] = []
+    cumulative_offset = 0.0
+    prev_label = "[0:v]"
+
+    for i in range(n - 1):
+        to_beat = _infer_beat(scenes[i + 1], total)
+        from_type = scenes[i].visual_type or "generated"
+        to_type   = scenes[i + 1].visual_type or "generated"
+        xf_name, xf_dur = get_transition(from_type, to_type, to_beat)
+
+        clip_dur = get_clip_duration(scene_clips[i])
+
+        offset = cumulative_offset + clip_dur - xf_dur
+        cumulative_offset += clip_dur - xf_dur
+
+        next_input = f"[{i + 1}:v]"
+        out_label  = f"[xf{i:02d}]"
+
+        filter_parts.append(
+            f"{prev_label}{next_input}xfade=transition={xf_name}"
+            f":duration={xf_dur:.3f}:offset={offset:.3f}{out_label}"
+        )
+        prev_label = out_label
+
+    final_label = prev_label.strip("[]")
+    filter_complex = ";".join(filter_parts)
+
+    _ffmpeg(
+        *inputs,
+        "-filter_complex", filter_complex,
+        "-map", f"[{final_label}]",
+        "-c:v", "libx264", "-crf", "18", "-preset", "fast",
+        "-r", str(30), "-pix_fmt", "yuv420p", "-an",
+        str(output),
+        label="concat with transitions",
+    )
+
+
 def assemble_reel(
     scenes: list[Scene],
     audio_dir: Path,
@@ -49,6 +120,7 @@ def assemble_reel(
     clip_overrides: Optional[dict[int, Path]] = None,
     leading_pad_ms: int = 0,
     trailing_pad_ms: int = 0,
+    transitions: bool = False,
 ) -> Path:
     work_dir.mkdir(parents=True, exist_ok=True)
     clip_overrides = clip_overrides or {}
@@ -83,8 +155,15 @@ def assemble_reel(
             print(f"    Visual:   video → {scene.asset_path.name} ({clip_dur:.1f}s → {duration:.1f}s, {action})")
             existing_clip_to_clip(scene.asset_path, duration, base_clip, width, height)
         elif scene.asset_type == "image":
-            print(f"    Visual:   image → {scene.asset_path.name}")
-            image_to_clip(scene.asset_path, duration, base_clip, width, height)
+            if scene.visual_type == "kling":
+                print(f"    Visual:   KLING FALLBACK (blur-fill) → {scene.asset_path.name}")
+            else:
+                print(f"    Visual:   image (Ken Burns) → {scene.asset_path.name}")
+            image_to_clip_kenburns(
+                scene.asset_path, duration, base_clip,
+                photo_type=scene.photo_type,
+                width=width, height=height,
+            )
         else:
             gtype = detect_type(scene.visual_intent)
             print(f"    Visual:   generated graphic ({gtype})")
@@ -105,20 +184,24 @@ def assemble_reel(
         print(f"    ✓ {final_clip.name}")
 
     # ── Concatenate video clips ───────────────────────────────────
-    print("\n  Concatenating video clips...")
-    concat_list = work_dir / "concat_video.txt"
-    concat_list.write_text(
-        "\n".join(f"file '{p.resolve()}'" for p in scene_clips),
-        encoding="utf-8",
-    )
     video_only = work_dir / "video_only.mp4"
-    _ffmpeg(
-        "-f", "concat", "-safe", "0",
-        "-i", str(concat_list),
-        "-c", "copy",
-        str(video_only),
-        label="concat video",
-    )
+    if transitions and len(scene_clips) > 1:
+        print("\n  Concatenating video clips (with transitions)...")
+        _concat_with_transitions(scene_clips, scenes, video_only, work_dir, width, height)
+    else:
+        print("\n  Concatenating video clips...")
+        concat_list = work_dir / "concat_video.txt"
+        concat_list.write_text(
+            "\n".join(f"file '{p.resolve()}'" for p in scene_clips),
+            encoding="utf-8",
+        )
+        _ffmpeg(
+            "-f", "concat", "-safe", "0",
+            "-i", str(concat_list),
+            "-c", "copy",
+            str(video_only),
+            label="concat video",
+        )
 
     # ── Concatenate audio segments ────────────────────────────────
     print("  Concatenating audio segments...")
