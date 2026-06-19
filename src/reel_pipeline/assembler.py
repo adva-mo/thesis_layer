@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from .graphic_generator import detect_type, generate_graphic_clip
+from .graphic_generator import detect_type, generate_graphic_clip, generate_graphic_png, validate_generated_scene
 from .local_clip import (
     color_card_to_clip,
     existing_clip_to_clip,
@@ -47,6 +47,48 @@ def _infer_beat(scene: Scene, total_scenes: int) -> str | None:
     if scene.index == total_scenes:
         return "cta"
     return None
+
+
+def _render_generated_over_real(
+    visual_intent: str,
+    real_asset: Path,
+    duration: float,
+    output: Path,
+    font_path: Path,
+    width: int,
+    height: int,
+) -> None:
+    """Composite a generated graphic over a blurred real-asset background.
+
+    Layer 1 — blurred real asset (Ken Burns, heavy blur + dark overlay).
+    Layer 2 — transparent graphic PNG overlaid via FFmpeg.
+    """
+    bg_clip = output.parent / f"{output.stem}_bg.mp4"
+    fg_png  = output.parent / f"{output.stem}_fg.png"
+
+    image_to_clip_kenburns(
+        real_asset, duration, bg_clip,
+        photo_type="photo_aerial",
+        width=width, height=height,
+        blur_overlay=True,
+    )
+
+    generate_graphic_png(visual_intent, fg_png, font_path, width, height, transparent_bg=True)
+
+    _ffmpeg(
+        "-i", str(bg_clip),
+        "-i", str(fg_png),
+        "-filter_complex",
+        f"[1:v]scale={width}:{height},format=rgba[fg];[0:v][fg]overlay=0:0[out]",
+        "-map", "[out]",
+        "-c:v", "libx264", "-crf", "18", "-preset", "fast",
+        "-r", "30", "-pix_fmt", "yuv420p", "-an",
+        str(output),
+        label="composite generated over real",
+    )
+
+    bg_clip.unlink(missing_ok=True)
+    fg_png.unlink(missing_ok=True)
 
 
 def _concat_with_transitions(
@@ -125,8 +167,27 @@ def assemble_reel(
     work_dir.mkdir(parents=True, exist_ok=True)
     clip_overrides = clip_overrides or {}
 
+    # ── Pre-flight: validate all generated scenes before any rendering ───────
+    errors: list[str] = []
+    for scene in scenes:
+        if scene.asset_type not in ("image", "video") and scene.index not in clip_overrides:
+            try:
+                validate_generated_scene(scene.visual_intent or "")
+            except ValueError as e:
+                errors.append(f"  Scene {scene.index}: {e}")
+    if errors:
+        print("✗ Generated scene validation failed — fix the reel script and re-run:\n" + "\n".join(errors))
+        sys.exit(1)
+
     scene_clips: list[Path] = []
     audio_files: list[Path] = []
+    # Pre-scan: find first real asset anywhere in the reel so generated scenes
+    # that appear before the first real scene still get a background.
+    _first_real_asset: Optional[Path] = next(
+        (s.asset_path for s in scenes if s.asset_type in ("image", "video") and s.asset_path),
+        None,
+    )
+    last_real_asset: Optional[Path] = None   # tracks nearest preceding real image
 
     for scene in scenes:
         print(f"\n  Scene {scene.index}:")
@@ -154,6 +215,7 @@ def assemble_reel(
             action = "stretch" if clip_dur < duration else "trim"
             print(f"    Visual:   video → {scene.asset_path.name} ({clip_dur:.1f}s → {duration:.1f}s, {action})")
             existing_clip_to_clip(scene.asset_path, duration, base_clip, width, height)
+            last_real_asset = scene.asset_path
         elif scene.asset_type == "image":
             if scene.visual_type == "kling":
                 print(f"    Visual:   KLING FALLBACK (blur-fill) → {scene.asset_path.name}")
@@ -164,10 +226,21 @@ def assemble_reel(
                 photo_type=scene.photo_type,
                 width=width, height=height,
             )
+            last_real_asset = scene.asset_path
         else:
             gtype = detect_type(scene.visual_intent)
-            print(f"    Visual:   generated graphic ({gtype})")
-            generate_graphic_clip(scene.visual_intent, duration, base_clip, font_path, width, height)
+            beat  = _infer_beat(scene, len(scenes))
+            bg_asset = last_real_asset or _first_real_asset
+            if bg_asset and beat != "cta":
+                print(f"    Visual:   generated ({gtype}) over real → {bg_asset.name}")
+                _render_generated_over_real(
+                    scene.visual_intent, bg_asset, duration, base_clip,
+                    font_path, width, height,
+                )
+            else:
+                reason = "cta" if beat == "cta" else "no real assets in reel"
+                print(f"    Visual:   generated graphic ({gtype}) [{reason}]")
+                generate_graphic_clip(scene.visual_intent, duration, base_clip, font_path, width, height)
 
         # ── Add text card overlay (CTA / data / risk only) ───────
         if scene.text_card:

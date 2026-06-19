@@ -499,17 +499,34 @@ python3 scripts/pipeline/align_timing.py \
 
 ---
 
-### align.py — Proportional word alignment *(fallback for vo.py runs)*
+### align.py — Proportional word alignment *(dev/test only)*
 
-Use only when audio was generated with `vo.py` (no `alignment.json` available). Distributes word timestamps proportionally across each segment's audio duration.
+Distributes word timestamps proportionally across each segment's audio duration.
+**Not for production.** Proportional timing is an approximation — subtitle sync will
+be off. For accurate subtitles, use `align_timing.py` after `vo_combined.py`.
+
+**Default behavior:** hard-fails if `alignment.json` is absent. This prevents
+accidental use of approximate timing when proper ElevenLabs alignment is available.
 
 ```bash
+# Dev/test only — requires --approximate flag when alignment.json is missing
 python3 scripts/pipeline/align.py \
   --blueprint output/[slug]/hebrew/reels/[slug]-he-reels.md \
   --audio-dir output/[slug]/[lang]/reels/reel_01/audio \
   --output output/[slug]/[lang]/reels/reel_01/audio/transcript.json \
-  --reel 1
+  --reel 1 \
+  --approximate
 ```
+
+**Flags:**
+- `--approximate` — required when `alignment.json` is absent. Prints a warning and
+  proceeds with proportional timing. Never use this flag on production renders.
+
+**Errors:**
+- `✗ Audio directory not found` — `--audio-dir` path does not exist
+- `✗ alignment.json not found` — ElevenLabs audio not generated yet; run
+  `vo_combined.py` then `align_timing.py` instead
+- `✗ No audio found for segNN` — a segment mp3 is missing; re-run `vo_combined.py`
 
 ---
 

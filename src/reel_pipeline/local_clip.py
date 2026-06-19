@@ -69,6 +69,7 @@ def image_to_clip_kenburns(
     photo_type: str | None = None,
     width: int = WIDTH,
     height: int = HEIGHT,
+    blur_overlay: bool = False,
 ) -> Path:
     """
     Animate a still image with Ken Burns using PIL frame generation (no zoompan).
@@ -78,7 +79,10 @@ def image_to_clip_kenburns(
     image letterboxed in center, blurred version of the same image fills the bars.
     This shows 100% of landscape content without re-collecting assets.
     """
-    resolved_type = photo_type or asset_type_from_filename(image_path.name)
+    if blur_overlay:
+        resolved_type = "photo_aerial"   # slowest, most neutral Ken Burns for backgrounds
+    else:
+        resolved_type = photo_type or asset_type_from_filename(image_path.name)
     params      = KEN_BURNS_PARAMS.get(resolved_type, KEN_BURNS_PARAMS["default"])
     scale_start = params["scale_start"]
     scale_end   = params["scale_end"]
@@ -103,9 +107,11 @@ def image_to_clip_kenburns(
         bg_large   = img.resize((bg_w, bg_h), PILImage.LANCZOS)
         bx         = (bg_w - width) // 2
         bg_cropped = bg_large.crop((bx, 0, bx + width, height))
-        bg_blurred = bg_cropped.filter(ImageFilter.GaussianBlur(radius=28))
+        blur_radius = 50 if blur_overlay else 28
+        dark_alpha  = 160 if blur_overlay else 80
+        bg_blurred = bg_cropped.filter(ImageFilter.GaussianBlur(radius=blur_radius))
         bg_rgba    = bg_blurred.convert("RGBA")
-        overlay    = PILImage.new("RGBA", (width, height), (0, 0, 0, 80))
+        overlay    = PILImage.new("RGBA", (width, height), (0, 0, 0, dark_alpha))
         bg_base    = PILImage.alpha_composite(bg_rgba, overlay).convert("RGB")
 
         # Foreground working canvas: scale landscape by WIDTH so the full image
@@ -128,9 +134,18 @@ def image_to_clip_kenburns(
         working = img.resize((work_w, work_h), PILImage.LANCZOS)
         cx      = work_w / 2.0
         cy      = work_h / 2.0
-        bg_base  = None
         out_w, out_h = width, height
         paste_xy     = None   # unused in portrait path
+        if blur_overlay:
+            # Pre-compute a blurred + dimmed version of the portrait for use as bg_base.
+            # The per-frame Ken Burns frame will be blurred+darkened each frame.
+            blur_radius = 50
+            dark_alpha  = 160
+            _portrait_blur_radius = blur_radius
+            _portrait_dark_alpha  = dark_alpha
+            bg_base = None   # handled per-frame below
+        else:
+            bg_base = None
 
     # ── Open FFmpeg writer ─────────────────────────────────────────────────────
     writer = subprocess.Popen(
@@ -179,6 +194,12 @@ def image_to_clip_kenburns(
             # Landscape: composite clear foreground over blurred background
             frame = bg_base.copy()
             frame.paste(kb_frame, paste_xy)
+        elif blur_overlay:
+            # Portrait blur_overlay: blur + darken the Ken Burns frame
+            blurred = kb_frame.filter(ImageFilter.GaussianBlur(radius=_portrait_blur_radius))
+            blurred_rgba = blurred.convert("RGBA")
+            dim = PILImage.new("RGBA", (width, height), (0, 0, 0, _portrait_dark_alpha))
+            frame = PILImage.alpha_composite(blurred_rgba, dim).convert("RGB")
         else:
             frame = kb_frame
 

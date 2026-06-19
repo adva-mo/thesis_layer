@@ -151,6 +151,8 @@ Prefer:
 
 ## Script Conventions
 
+> **Format lock:** Use only the tags defined in this section. `[VISUAL:]` and `[SCREEN:]` are deprecated — do not write them. Full deprecation list at the end of this section (§What NOT to write).
+
 ### Tags (current format)
 
 - `[VISUAL_TYPE:]` = **required on every scene.** Declares the scene's render path. Valid values: `kling` (collect image → Kling I2V clip), `static` (collect image → used as still, no Kling), `generated` (programmatic graphic card), `timeline` (animated sequence card). Parser errors on missing or unrecognized values — no silent fallback.
@@ -237,12 +239,48 @@ The token is expanded to its full Kling prompt description before the API call. 
 
 #### Generated graphic scenes (no Kling clip)
 
+`VISUAL_TYPE: generated` signals: no Kling clip, no asset collection. The graphic is created programmatically from the `[VISUAL_INTENT:]` description.
+
+**The VISUAL_INTENT keyword is the contract with the renderer.** The renderer reads the description and selects a graphic type based on the first matching keyword below. Use the exact keyword forms listed — the match is substring-based and case-insensitive.
+
+| Keyword in VISUAL_INTENT | Graphic type | What renders |
+|---|---|---|
+| `text card` or `bold text` or `text on screen` | text_card | Centered text extracted from `"quoted string"` in the description |
+| `split text card` | text_card | Two quoted strings joined with ` \| ` — use for contrast/comparison hooks |
+| `cta card` | cta_card | Plain dark background — VO + subtitles carry the CTA text |
+| `timeline` or `payment plan` or `breakdown` | timeline | Step sequence — labels from `→`-separated items after `—` separator (see Timeline section below) |
+| `reality check` or `overlay` or `implication` | text_card | Same as text_card — use when the beat framing matters |
+| *(anything else)* | **HARD ERROR** | Assembler stops before any rendering and prints the unrecognized keyword |
+
+**Unrecognized keywords are a hard error.** The assembler validates all generated scenes before starting any render work. A bad keyword fails fast with a clear message — no partial renders, no blank cards.
+
+**Format rules by graphic type:**
+
+*text_card / split text card:*
 ```
 [VISUAL_TYPE: generated]
-[VISUAL_INTENT: brief description of the graphic (payment plan, comparison table, etc.)]
+[VISUAL_INTENT: text card — "text to display on screen"]
 ```
+```
+[VISUAL_TYPE: generated]
+[VISUAL_INTENT: split text card: "left side text" | "right side text"]
+```
+Wrap display text in double quotes. For split cards, separate the two parts with ` | `. The renderer extracts and displays all quoted strings.
 
-`VISUAL_TYPE: generated` signals: no Kling clip, no asset collection. The graphic is created programmatically from the description.
+*cta card:*
+```
+[VISUAL_TYPE: generated]
+[VISUAL_INTENT: CTA card]
+[TEXT_CARD: exact CTA text]
+```
+The display text comes from `[TEXT_CARD:]`, not from VISUAL_INTENT.
+
+*payment plan (timeline format):*
+```
+[VISUAL_TYPE: generated]
+[VISUAL_INTENT: payment plan breakdown — 10% חתימה → 40% בנייה → 50% מסירה]
+```
+`payment plan` and `breakdown` resolve to the timeline renderer. Use `→` to separate steps, not `/`. The `—` separator before the steps is required.
 
 #### Timeline / argument sequence scenes
 

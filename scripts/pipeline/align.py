@@ -44,15 +44,15 @@ def _find_audio(audio_dir: Path, scene_index: int) -> Path | None:
 
 
 def align(blueprint: Path, audio_dir: Path, reel_number: int) -> list[dict]:
-    scenes = parse_reel_file(blueprint, reel_number=reel_number)
+    scenes = parse_reel_file(blueprint, reel_number=reel_number, skip_asset_check=True)
     chunks = []
     timeline_offset = 0.0   # running total across segments
 
     for scene in scenes:
         audio = _find_audio(audio_dir, scene.index)
         if audio is None:
-            print(f"  Warning: no audio for seg{scene.index:02d} — skipping")
-            continue
+            print(f"✗ No audio found for seg{scene.index:02d} in {audio_dir}")
+            sys.exit(1)
 
         seg_duration = get_audio_duration(audio)
 
@@ -142,15 +142,34 @@ def _read_vo_text(md_path: Path, reel_number: int, scene_index: int) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description="Proportional word alignment for subtitle preview.")
-    parser.add_argument("--blueprint", required=True)
-    parser.add_argument("--audio-dir", required=True)
-    parser.add_argument("--output",    required=True)
-    parser.add_argument("--reel",      type=int, default=1)
+    parser.add_argument("--blueprint",   required=True)
+    parser.add_argument("--audio-dir",   required=True)
+    parser.add_argument("--output",      required=True)
+    parser.add_argument("--reel",        type=int, default=1)
+    parser.add_argument("--approximate", action="store_true",
+                        help="Dev/test mode: allow proportional timing without alignment.json. "
+                             "Output is approximate — never use for production.")
     args = parser.parse_args()
 
     blueprint = Path(args.blueprint)
     audio_dir = Path(args.audio_dir)
     output    = Path(args.output)
+
+    if not audio_dir.exists():
+        print(f"✗ Audio directory not found: {audio_dir}")
+        sys.exit(1)
+
+    alignment_json = audio_dir / "alignment.json"
+    if not alignment_json.exists():
+        if not args.approximate:
+            print(
+                f"✗ alignment.json not found in {audio_dir}\n"
+                f"  Accurate subtitle timing requires ElevenLabs character-level alignment.\n"
+                f"  Run vo_combined.py first, then use align_timing.py.\n"
+                f"  For dev/test only: re-run with --approximate to use proportional timing."
+            )
+            sys.exit(1)
+        print("⚠ --approximate: no alignment.json — using proportional timing (dev/test only, not production-accurate)")
 
     chunks = align(blueprint, audio_dir, args.reel)
 

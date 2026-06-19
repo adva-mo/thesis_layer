@@ -186,6 +186,10 @@ def parse_reel_file(
     reel_number: int = 1,
     assets_dir: Optional[Path] = None,
     repo_root: Optional[Path] = None,
+    skip_asset_check: bool = False,
+    # skip_asset_check — only for non-visual pipeline steps (e.g. align.py) that
+    # need scene metadata but do not render video. render.py, kling_batch.py, and
+    # subtitle.py must never pass True — the asset check is their production gate.
 ) -> list[Scene]:
     content = md_path.read_text(encoding="utf-8")
 
@@ -320,18 +324,19 @@ def parse_reel_file(
                 stacklevel=2,
             )
 
-    missing_critical = [
-        s for s in scenes
-        if s.critical and s.visual_type in ("kling", "static") and s.asset_path is None
-    ]
-    if missing_critical:
-        lines = [
-            f"  Scene {s.index} [{s.start_s:.0f}–{s.end_s:.0f}s] ({s.visual_type}): no asset found"
-            for s in missing_critical
+    if not skip_asset_check:
+        missing_critical = [
+            s for s in scenes
+            if s.critical and s.visual_type in ("kling", "static") and s.asset_path is None
         ]
-        raise CriticalAssetMissingError(
-            f"Reel {reel_number}: {len(missing_critical)} critical asset(s) missing — "
-            f"reel cannot proceed:\n" + "\n".join(lines)
-        )
+        if missing_critical:
+            lines = [
+                f"  Scene {s.index} [{s.start_s:.0f}–{s.end_s:.0f}s] ({s.visual_type}): no asset found"
+                for s in missing_critical
+            ]
+            raise CriticalAssetMissingError(
+                f"Reel {reel_number}: {len(missing_critical)} critical asset(s) missing — "
+                f"reel cannot proceed:\n" + "\n".join(lines)
+            )
 
     return scenes

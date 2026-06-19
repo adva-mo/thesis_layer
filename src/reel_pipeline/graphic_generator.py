@@ -37,19 +37,28 @@ ARROW_GAP   = 52    # total gap between boxes (arrow lives here)
 
 # ── Type detection ────────────────────────────────────────────────
 
+_VALID_KEYWORDS = (
+    "text card", "split text card", "bold text", "text on screen",
+    "cta card",
+    "timeline", "payment plan", "breakdown",
+    "reality check", "overlay", "implication",
+)
+
 def detect_type(visual: str) -> str:
     v = visual.lower()
-    if "timeline" in v:
+    if "timeline" in v or "payment plan" in v or "breakdown" in v:
         return "timeline"
-    if "bold text" in v or "text on screen" in v:
+    if "bold text" in v or "text on screen" in v or "text card" in v:
         return "text_card"
     if "cta card" in v:
         return "cta_card"
-    if "payment plan" in v or "breakdown" in v:
-        return "data_card"
     if "reality check" in v or "overlay" in v or "implication" in v:
         return "text_card"
-    return "color_card"
+    raise ValueError(
+        f"Unrecognized VISUAL_INTENT keyword — rendering blocked.\n"
+        f"  Got: {visual!r}\n"
+        f"  Valid keywords: {', '.join(_VALID_KEYWORDS)}"
+    )
 
 
 # ── RTL helper ────────────────────────────────────────────────────
@@ -65,8 +74,9 @@ def _visual(text: str) -> str:
 # ── Renderers ─────────────────────────────────────────────────────
 
 def render_timeline(items: list[str], font_path: Path,
-                    width: int = 1080, height: int = 1920) -> Image.Image:
-    img = Image.new("RGBA", (width, height), BG_COLOR)
+                    width: int = 1080, height: int = 1920,
+                    bg: tuple = BG_COLOR) -> Image.Image:
+    img = Image.new("RGBA", (width, height), bg)
     draw = ImageDraw.Draw(img)
 
     font_text  = ImageFont.truetype(str(font_path), FONT_SIZE_LARGE)
@@ -112,13 +122,19 @@ def render_timeline(items: list[str], font_path: Path,
 
 
 def render_text_card(visual: str, font_path: Path,
-                     width: int = 1080, height: int = 1920) -> Image.Image:
-    """Dark background with centered text extracted from the visual description."""
-    # Try to extract quoted text after em dash
-    m = re.search(r'[—–-]\s*"(.+?)"', visual)
-    text = m.group(1).strip() if m else ""
+                     width: int = 1080, height: int = 1920,
+                     bg: tuple = BG_COLOR) -> Image.Image:
+    """Background with centered text extracted from the visual description."""
+    # Try em-dash prefix first: — "text". Fall back to any quoted strings (handles
+    # "split text card: "A" | "B"" and similar formats). Join multiple quotes with |.
+    m = re.search(r'[—–]\s*"(.+?)"', visual)
+    if m:
+        text = m.group(1).strip()
+    else:
+        quotes = re.findall(r'"([^"]+)"', visual)
+        text = " | ".join(q.strip() for q in quotes) if quotes else ""
 
-    img = Image.new("RGBA", (width, height), BG_COLOR)
+    img = Image.new("RGBA", (width, height), bg)
     if not text:
         return img  # plain dark card if no extractable text
 
@@ -149,13 +165,65 @@ def _parse_timeline_items(visual: str) -> list[str]:
     """Extract ['הבטחה', 'שנים', 'מציאות'] from 'Timeline graphic — הבטחה → שנים → מציאות'"""
     m = re.search(r'[—–-]\s*(.+)', visual)
     if not m:
-        return []
+        raise ValueError(
+            f"Timeline parse failed — no '—' separator found.\n"
+            f"  Got: {visual!r}\n"
+            f"  Required format: 'Timeline graphic — step A → step B → step C'"
+        )
     raw = m.group(1)
     items = [i.strip() for i in re.split(r'[→>]', raw) if i.strip()]
+    if not items:
+        raise ValueError(
+            f"Timeline parse failed — no items found after splitting on '→'.\n"
+            f"  Got: {visual!r}"
+        )
     return items
 
 
+def validate_generated_scene(visual: str) -> None:
+    """Validate a generated scene's VISUAL_INTENT without rendering anything.
+
+    Raises ValueError with a clear message if the keyword is unrecognized or
+    the timeline format is malformed. Call this for all generated scenes before
+    the render loop starts to fail fast.
+    """
+    gtype = detect_type(visual)   # raises on unknown keyword
+    if gtype == "timeline":
+        _parse_timeline_items(visual)   # raises on bad format
+
+
 # ── Public API ────────────────────────────────────────────────────
+
+def generate_graphic_png(
+    visual: str,
+    output_png: Path,
+    font_path: Path = FONT_PATH,
+    width: int = 1080,
+    height: int = 1920,
+    transparent_bg: bool = True,
+) -> Path:
+    """Render a graphic as a PNG (no video conversion).
+
+    Used by the compositing path: the PNG is overlaid on a blurred real-asset
+    background clip via FFmpeg rather than being rendered on a dark background.
+    CTA cards always use a dark background regardless of transparent_bg.
+    """
+    graphic_type = detect_type(visual)
+    bg = (0, 0, 0, 0) if transparent_bg else BG_COLOR
+
+    if graphic_type == "timeline":
+        items = _parse_timeline_items(visual)
+        img = render_timeline(items, font_path, width, height, bg=bg)
+    elif graphic_type == "text_card":
+        img = render_text_card(visual, font_path, width, height, bg=bg)
+    elif graphic_type == "cta_card":
+        img = render_cta_card(width, height)
+    else:
+        raise AssertionError(f"Unreachable: detect_type returned {graphic_type!r} for {visual!r}")
+
+    img.save(output_png, "PNG")
+    return output_png
+
 
 def generate_graphic_clip(
     visual: str,
@@ -164,26 +232,33 @@ def generate_graphic_clip(
     font_path: Path = FONT_PATH,
     width: int = 1080,
     height: int = 1920,
+    transparent_bg: bool = False,
 ) -> Path:
-    """Render a PIL graphic for a generated scene and convert to a video clip."""
+    """Render a PIL graphic for a generated scene and convert to a video clip.
+
+    When transparent_bg=True the graphic renders with a fully transparent
+    background so it can be composited over a real-asset base layer.
+    CTA cards always use a dark background regardless of this flag.
+    """
     from .local_clip import image_to_clip
 
     graphic_type = detect_type(visual)
+    bg = (0, 0, 0, 0) if transparent_bg else BG_COLOR
 
     if graphic_type == "timeline":
         items = _parse_timeline_items(visual)
-        img = render_timeline(items, font_path, width, height) if items else render_color_card(width, height)
+        img = render_timeline(items, font_path, width, height, bg=bg)
     elif graphic_type == "text_card":
-        img = render_text_card(visual, font_path, width, height)
+        img = render_text_card(visual, font_path, width, height, bg=bg)
     elif graphic_type == "cta_card":
-        img = render_cta_card(width, height)
+        img = render_cta_card(width, height)   # always dark — intentional branded outro
     else:
-        img = render_color_card(width, height)
+        raise AssertionError(f"Unreachable: detect_type returned {graphic_type!r} for {visual!r}")
 
     # Save to temp PNG, convert to video clip, clean up
     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
         tmp_path = Path(tmp.name)
-        img.convert("RGB").save(tmp_path, "PNG")
+        img.save(tmp_path, "PNG")   # keep RGBA when transparent_bg so overlay is clean
 
     try:
         image_to_clip(tmp_path, duration_s, output_path, width, height)

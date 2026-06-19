@@ -93,11 +93,10 @@ Before scripting any reel:
 
 ### Step 2 — Generate 5 Reel Scripts
 
-Reference: `templates/reels/reel-template.md`, `templates/reels/cadence-rules.md`, `templates/reels/reel-preflight.md`
-
-Before writing:
-1. Read `templates/reels/cadence-rules.md` — pick each reel's length/format against the current sprint mode (short vs long) before scripting, not after.
-2. Read `templates/reels/reel-preflight.md` — write every script to already pass this gate on the first draft, not just to satisfy it after the fact.
+**Before scripting — read in this order:**
+1. `templates/reels/reel-template.md` — **format spec, mandatory first.** §Script Conventions defines every tag the parser requires. Key rules inline: `[VISUAL_TYPE: kling|static|generated|timeline]` required on every scene; `[VISUAL_INTENT:]` keyword must match the renderer contract (see §Generated graphic scenes for the full keyword table); `[MOTION_STYLE: MV_*]` for Kling scenes only; scenes must be separated by `---`; do NOT use deprecated `[VISUAL:]` or `[SCREEN:]` tags. If reel-template.md was already loaded at session init (CLAUDE.md §1.5), skip re-read.
+2. `templates/reels/cadence-rules.md` — pick each reel's length/format against the current sprint mode (short vs long) before scripting, not after.
+3. `templates/reels/reel-preflight.md` — write every script to already pass this gate on the first draft, not just to satisfy it after the fact.
 3. Before writing each hook: identify the cadence and apply the Hook-Insight Integrity rule (reel-preflight.md). For **QUESTION cadence** — confirm the thesis contains a defensible answer (verified fact, supported inference, or clearly labeled hypothesis) that fits within the Insight segment. If no defensible answer exists, use **CONTRAST cadence** instead. For **CONTRAST cadence** — confirm the body will explain why the exception matters, not just show that it exists.
 
 Step 2.4a below is a verification pass, not the first time these criteria apply — drafting against them now should mean Step 2.4a mostly confirms rather than rewrites.
