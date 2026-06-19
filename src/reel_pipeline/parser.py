@@ -43,7 +43,8 @@ class Scene:
     asset_path: Optional[Path]     # resolved asset; None when generated
     critical: bool = False         # True when VEP Critical column is "yes"
     beat: Optional[str] = None     # [BEAT:] — narrative beat for transition logic
-    photo_type: Optional[str] = None  # [PHOTO_TYPE:] — Ken Burns parameter set override
+    photo_type: Optional[str] = None   # [PHOTO_TYPE:] — Ken Burns parameter set override
+    kling_avoid: Optional[str] = None  # [KLING_AVOID:] — sent as negative_prompt to Kling API
 
 
 def _parse_timestamp(ts: str) -> tuple[float, float]:
@@ -236,6 +237,9 @@ def parse_reel_file(
         pt_match = re.search(r"\[PHOTO_TYPE:\s*(\w+)\s*\]", block)
         photo_type = pt_match.group(1).strip().lower() if pt_match else None
 
+        ka_match = re.search(r"\[KLING_AVOID:\s*(.*?)\]", block, re.DOTALL)
+        kling_avoid = ka_match.group(1).strip() if ka_match else None
+
         # [VISUAL_TYPE:] — required in new blueprints
         vt_match = re.search(r"\[VISUAL_TYPE:\s*(\w+)\s*\]", block)
         visual_type: Optional[str] = None
@@ -304,6 +308,7 @@ def parse_reel_file(
             critical=ts_key in critical_keys,
             beat=beat,
             photo_type=photo_type,
+            kling_avoid=kling_avoid,
         ))
 
     for s in scenes:

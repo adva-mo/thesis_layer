@@ -58,6 +58,7 @@ def compute_cache_key(
     prompt: str,
     duration: int,
     model: str,
+    negative_prompt: Optional[str] = None,
 ) -> str:
     h = hashlib.sha256()
     h.update(Path(image_path).read_bytes())
@@ -65,6 +66,7 @@ def compute_cache_key(
     h.update(str(duration).encode())
     h.update(model.encode())
     h.update(config.ASPECT_RATIO.encode())  # portrait pre-crop changes the effective input
+    h.update((negative_prompt or "").encode())
     return h.hexdigest()[:16]
 
 
@@ -83,6 +85,7 @@ def run_dry(
     model: str,
     output_path: Path,
     cache_key: str,
+    negative_prompt: Optional[str] = None,
 ) -> None:
     cached = get_cached_path(cache_key)
     rel_image = _rel(image_path)
@@ -100,6 +103,8 @@ def run_dry(
     print("─" * 41)
     print(f"  Image:         {rel_image}" + (" [will crop to portrait]" if will_crop else ""))
     print(f"  Prompt:        {prompt}")
+    if negative_prompt:
+        print(f"  Avoid:         {negative_prompt}")
     print(f"  Duration:      {duration}s")
     print(f"  Aspect ratio:  {config.ASPECT_RATIO}")
     print(f"  Model:         {model}")
@@ -119,6 +124,7 @@ def generate_clip(
     duration: int,
     model: str,
     output_path: Path,
+    negative_prompt: Optional[str] = None,
 ) -> Path:
     try:
         import fal_client
@@ -132,7 +138,7 @@ def generate_clip(
 
     os.environ["FAL_KEY"] = config.FAL_KEY
 
-    cache_key = compute_cache_key(image_path, prompt, duration, model)
+    cache_key = compute_cache_key(image_path, prompt, duration, model, negative_prompt)
     cached = get_cached_path(cache_key)
 
     if cached:
@@ -157,14 +163,19 @@ def generate_clip(
         status = getattr(update, "status", type(update).__name__)
         print(f"    [{status}]")
 
+    api_args: dict = {
+        "image_url":    image_url,
+        "prompt":       prompt,
+        "duration":     str(duration),
+        "aspect_ratio": config.ASPECT_RATIO,
+    }
+    if negative_prompt:
+        api_args["negative_prompt"] = negative_prompt
+        print(f"  Avoid:         {negative_prompt}")
+
     result = fal_client.subscribe(
         model,
-        arguments={
-            "image_url":    image_url,
-            "prompt":       prompt,
-            "duration":     str(duration),
-            "aspect_ratio": config.ASPECT_RATIO,
-        },
+        arguments=api_args,
         with_logs=True,
         on_queue_update=_on_update,
     )

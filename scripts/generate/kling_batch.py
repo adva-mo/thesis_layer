@@ -207,7 +207,7 @@ def main() -> None:
         except Exception:
             will_crop = False
 
-        cache_key  = fal_kling.compute_cache_key(scene.asset_path, prompt, dur, model)
+        cache_key  = fal_kling.compute_cache_key(scene.asset_path, prompt, dur, model, scene.kling_avoid)
         cache_hit  = fal_kling.get_cached_path(cache_key) is not None
         crop_note  = " [will crop to portrait]" if will_crop else ""
         cache_note = " [cache hit — free]" if cache_hit else ""
@@ -219,6 +219,8 @@ def main() -> None:
         )
         if prompt:
             print(f"    Prompt: {prompt}")
+        if scene.kling_avoid:
+            print(f"    Avoid:  {scene.kling_avoid}")
 
     if not to_generate:
         print("\n  Nothing to generate.")
@@ -232,6 +234,7 @@ def main() -> None:
                               resolved_prompts.get(s.index, ""),
                               _clip_duration(s.end_s - s.start_s),
                               model,
+                              s.kling_avoid,
                           )
                       )]
         if non_cached:
@@ -260,8 +263,11 @@ def main() -> None:
 
         print(f"  Generating scene {scene.index} → {out_path.name}  ({dur}s) …")
         print(f"    Prompt: {prompt}")
+        if scene.kling_avoid:
+            print(f"    Avoid:  {scene.kling_avoid}")
         try:
-            fal_kling.generate_clip(scene.asset_path, prompt, dur, model, out_path)
+            fal_kling.generate_clip(scene.asset_path, prompt, dur, model, out_path,
+                                    negative_prompt=scene.kling_avoid)
             print(f"    ✓ {out_path.name}")
             _open_for_review(out_path)
             print(f"    → opening for review (re-run with --scenes {scene.index} to regenerate)")
