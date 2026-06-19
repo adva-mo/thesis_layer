@@ -117,7 +117,7 @@ def generate(bg_path: Path, output: Path, duration: float) -> None:
             str(output),
         ],
         stdin=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
     )
 
     for f in range(total_frames):
@@ -150,9 +150,10 @@ def generate(bg_path: Path, output: Path, duration: float) -> None:
         writer.stdin.write(frame.convert("RGB").tobytes())
 
     writer.stdin.close()
+    stderr_bytes = writer.stderr.read()
     rc = writer.wait()
     if rc != 0:
-        print("  ✗ ffmpeg exited with non-zero status")
+        print(f"  ✗ ffmpeg failed:\n{stderr_bytes.decode()[-800:]}")
         sys.exit(1)
 
     size_kb = output.stat().st_size // 1024

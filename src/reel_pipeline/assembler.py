@@ -38,7 +38,7 @@ def _ffmpeg(*args: str, label: str = "ffmpeg") -> None:
         sys.exit(1)
 
 
-def _infer_beat(scene: Scene, total_scenes: int) -> str | None:
+def _resolve_beat(scene: Scene, total_scenes: int) -> str | None:
     """Infer beat from explicit tag or scene position when [BEAT:] is absent."""
     if scene.beat:
         return scene.beat
@@ -68,7 +68,6 @@ def _render_generated_over_real(
 
     image_to_clip_kenburns(
         real_asset, duration, bg_clip,
-        photo_type="photo_aerial",
         width=width, height=height,
         blur_overlay=True,
     )
@@ -117,7 +116,7 @@ def _concat_with_transitions(
     prev_label = "[0:v]"
 
     for i in range(n - 1):
-        to_beat = _infer_beat(scenes[i + 1], total)
+        to_beat = _resolve_beat(scenes[i + 1], total)
         from_type = scenes[i].visual_type or "generated"
         to_type   = scenes[i + 1].visual_type or "generated"
         xf_name, xf_dur = get_transition(from_type, to_type, to_beat)
@@ -229,7 +228,7 @@ def assemble_reel(
             last_real_asset = scene.asset_path
         else:
             gtype = detect_type(scene.visual_intent)
-            beat  = _infer_beat(scene, len(scenes))
+            beat  = _resolve_beat(scene, len(scenes))
             bg_asset = last_real_asset or _first_real_asset
             if bg_asset and beat != "cta":
                 print(f"    Visual:   generated ({gtype}) over real → {bg_asset.name}")

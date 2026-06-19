@@ -219,8 +219,6 @@ def main() -> None:
         )
         if prompt:
             print(f"    Prompt: {prompt}")
-        if scene.kling_avoid:
-            print(f"    Avoid:  {scene.kling_avoid}")
 
     if not to_generate:
         print("\n  Nothing to generate.")

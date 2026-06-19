@@ -137,13 +137,20 @@ def image_to_clip_kenburns(
         out_w, out_h = width, height
         paste_xy     = None   # unused in portrait path
         if blur_overlay:
-            # Pre-compute a blurred + dimmed version of the portrait for use as bg_base.
-            # The per-frame Ken Burns frame will be blurred+darkened each frame.
-            blur_radius = 50
-            dark_alpha  = 160
-            _portrait_blur_radius = blur_radius
-            _portrait_dark_alpha  = dark_alpha
-            bg_base = None   # handled per-frame below
+            # Pre-compute one blurred reference from the first Ken Burns frame.
+            # At radius=50 all detail is gone — per-frame blur adds no visual
+            # difference and costs ~150× more; static pre-compute is correct here.
+            sf0  = 1.0 / scale_start
+            x0_0 = cx - (width  * sf0) / 2.0
+            y0_0 = cy - (height * sf0) / 2.0
+            ref  = img.resize((work_w, work_h), PILImage.LANCZOS).transform(
+                (width, height), PILImage.AFFINE,
+                (sf0, 0.0, x0_0, 0.0, sf0, y0_0),
+                resample=PILImage.BICUBIC,
+            )
+            ref_rgba = ref.filter(ImageFilter.GaussianBlur(radius=50)).convert("RGBA")
+            dim      = PILImage.new("RGBA", (width, height), (0, 0, 0, 160))
+            bg_base  = PILImage.alpha_composite(ref_rgba, dim).convert("RGB")
         else:
             bg_base = None
 
@@ -159,7 +166,7 @@ def image_to_clip_kenburns(
             str(output_path),
         ],
         stdin=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
     )
 
     # ── Per-frame render ───────────────────────────────────────────────────────
@@ -191,24 +198,22 @@ def image_to_clip_kenburns(
         )
 
         if bg_base is not None:
-            # Landscape: composite clear foreground over blurred background
             frame = bg_base.copy()
-            frame.paste(kb_frame, paste_xy)
-        elif blur_overlay:
-            # Portrait blur_overlay: blur + darken the Ken Burns frame
-            blurred = kb_frame.filter(ImageFilter.GaussianBlur(radius=_portrait_blur_radius))
-            blurred_rgba = blurred.convert("RGBA")
-            dim = PILImage.new("RGBA", (width, height), (0, 0, 0, _portrait_dark_alpha))
-            frame = PILImage.alpha_composite(blurred_rgba, dim).convert("RGB")
+            if paste_xy is not None:
+                # Landscape: composite clear foreground over blurred background.
+                # Portrait blur_overlay uses bg_base as a static blurred backdrop —
+                # no foreground paste, the generated graphic overlays via FFmpeg.
+                frame.paste(kb_frame, paste_xy)
         else:
             frame = kb_frame
 
         writer.stdin.write(frame.tobytes())
 
     writer.stdin.close()
+    stderr_bytes = writer.stderr.read()
     rc = writer.wait()
     if rc != 0:
-        print(f"  ✗ ken_burns({image_path.name}) ffmpeg failed")
+        print(f"  ✗ ken_burns({image_path.name}) ffmpeg failed:\n{stderr_bytes.decode()[-800:]}")
         sys.exit(1)
     return output_path
 
