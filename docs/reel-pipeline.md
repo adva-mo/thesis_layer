@@ -49,9 +49,21 @@ assets/[slug]/          ← collected image assets (canonical/)
 4. Build transcript            → scripts/pipeline/align_timing.py  ← from alignment.json (free)
 5. Render reel                 → scripts/pipeline/render.py
 6. Add subtitles               → scripts/pipeline/subtitle.py
+7. Publish                     → post to channel; set **Status: PUBLISHED** in blueprint; update hook-log.md row to PUBLISHED
 ```
 
 Steps 2b–3 can run in any order. Step 2a must complete (and be approved) before 2b. Step 4 requires step 2b to be complete (needs `alignment.json`). Step 4 must come before step 6.
+
+**Status progression:**
+```
+SCRIPTED → RETENTION-REVIEWED → NATURALIZER-SIGNED → APPROVED → PUBLISHED
+```
+`PUBLISHED` is the terminal state. The blueprint `**Status:**` field is the single source of truth — not the hook-log (which is an audit mirror).
+
+**What PUBLISHED locks:**
+- `kling_batch.py` and `vo_combined.py` hard-stop on PUBLISHED reels — no regeneration allowed
+- `render.py` warns but allows re-render (technical re-export is legitimate; content is unchanged)
+- The agent refuses to edit any content in a published reel section (see `CLAUDE.md §0`)
 
 ---
 

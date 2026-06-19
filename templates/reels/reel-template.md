@@ -446,7 +446,13 @@ Visual pacing:
 
 ## Per-Reel Header Block
 
-Every generated reel section must open with this metadata block immediately after the `## Reel N` heading. Set `**Status:** SCRIPTED` at generation time — do not leave it blank or omit it. The status field progresses through the pipeline: `SCRIPTED` → `RETENTION-REVIEWED` → `NATURALIZER-SIGNED` → `APPROVED`.
+Every generated reel section must open with this metadata block immediately after the `## Reel N` heading. Set `**Status:** SCRIPTED` at generation time — do not leave it blank or omit it.
+
+**Status progression (the blueprint `**Status:**` field is the single source of truth):**
+```
+SCRIPTED → RETENTION-REVIEWED → NATURALIZER-SIGNED → APPROVED → PUBLISHED
+```
+`PUBLISHED` is the terminal state. Once a reel is published, its blueprint section is permanently read-only — no edits, no regeneration of VO or Kling clips, no status changes. Update `output/history/hook-log.md` to mirror the PUBLISHED state when a reel ships.
 
 ```
 ## Reel N — [Format Name] ([duration]s) | [Hook Family] | [Cadence]

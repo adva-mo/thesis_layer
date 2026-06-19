@@ -31,7 +31,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 from reel_pipeline.assembler import _find_audio, assemble_reel
 from reel_pipeline.graphic_generator import detect_type
 from reel_pipeline.local_clip import get_audio_duration, get_clip_duration
-from reel_pipeline.parser import parse_reel_file
+from reel_pipeline.parser import parse_reel_file, read_reel_status
 from reel_pipeline.text_overlay import FONT_PATH
 
 
@@ -157,6 +157,12 @@ def main():
             else:
                 print(f"\n  ✱ {len(kling_fallbacks)} non-critical Kling scene(s) will use blur-fill fallback.")
                 print()
+
+    # ── Published content warning ─────────────────────────────────
+    _pub_status = read_reel_status(blueprint, args.reel)
+    if _pub_status and _pub_status.upper() == "PUBLISHED":
+        print(f"  ⚠  Reel {args.reel} is PUBLISHED — rendering anyway (technical re-export only, content unchanged).")
+        print()
 
     # ── Render ────────────────────────────────────────────────────
     print(f"\nThesisLayer Reel Renderer")

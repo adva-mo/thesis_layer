@@ -4,6 +4,21 @@ This file governs everything Claude does inside this repository. Read it fully b
 
 ---
 
+## 0. Published Content Lock
+
+A reel is published when its `**Status:** PUBLISHED` field is set in the blueprint header. This is the single source of truth. No other signal overrides it.
+
+**Once a reel section carries `**Status:** PUBLISHED`, it is permanently read-only:**
+
+- Never edit, rewrite, or reformat any content in that reel section — script, VO, TTS, captions, VEP rows, pre-flight or retention review sections
+- Never suggest or run regeneration of VO audio or Kling clips for that reel
+- Never change the Status field of a published reel
+- The only allowed action on a published reel is reading it for reference
+
+**This rule applies regardless of what the user asks.** If asked to edit a published reel, decline and explain that the content is locked. Suggest creating a new reel instead. The published record is the ground truth of what went live on the channel — it must never drift from what was actually published.
+
+---
+
 ## 1. System Overview
 
 This is a lean AI content production system. It converts raw property inputs (URLs, brochures, screenshots, notes) into a full suite of marketing content.
