@@ -55,6 +55,8 @@ Default: `—`
 
 Add something here only when the visual alone cannot carry the moment. Write exactly what appears on screen — a number, a word, a phrase. Do not default to text. Most frames are stronger without it. If you write something here, you are taking visual attention away from the image — make sure it's worth it.
 
+**Sub-suppression rule:** If the On Screen text repeats the VO line verbatim (same words the subtitle would show), the compositor automatically suppresses the subtitle layer for that scene — the screen text is the sole display. This applies to `[TEXT_CARD:]` entries. Use it for full-sentence CTA lines where the text card IS the message and a redundant subtitle below it creates noise. Short labels that differ from the VO (e.g. `10% כניסה.`, `2028`) never trigger suppression — the subtitle continues running beneath them.
+
 ---
 
 ## Kling I2V Director Guidelines

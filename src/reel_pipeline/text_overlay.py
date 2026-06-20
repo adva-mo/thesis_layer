@@ -6,12 +6,22 @@ Composited onto a video clip via FFmpeg.
 import subprocess
 import sys
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
 
 FONT_PATH = Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf")
+
+
+@dataclass
+class ScreenTextSpan:
+    """Pre-rendered screen text overlay with time window."""
+    image: Image.Image
+    start: float
+    end: float
+    suppress_sub: bool = False  # if True, subtitle layer is suppressed while this span is active
 
 # Bottom edge of subtitle block — block grows upward from this Y position
 TEXT_Y_RATIO = 0.75
@@ -139,6 +149,7 @@ def add_timed_screen_texts(
             "-filter_complex", ";".join(parts),
             "-map", "[out]",
             "-c:v", "libx264",
+            "-preset", "ultrafast",
             "-pix_fmt", "yuv420p",
             "-an",
             str(output_path),
@@ -152,6 +163,33 @@ def add_timed_screen_texts(
             p.unlink(missing_ok=True)
 
     return output_path
+
+
+def build_screen_text_spans(
+    entries: list[dict],
+    font_path: Path = FONT_PATH,
+    default_font_size: int = FONT_SIZE,
+    width: int = 1080,
+    height: int = 1920,
+) -> list[ScreenTextSpan]:
+    """Pre-render screen text entries as RGBA PIL images with time windows.
+
+    Each entry dict: { "text", "start", "end", "y_ratio" (opt), "font_size" (opt) }
+    Returns ScreenTextSpan list ready for compositing in subtitle.py's frame loop.
+    """
+    spans = []
+    for entry in entries:
+        img = _render_text_overlay(
+            entry["text"],
+            width,
+            height,
+            font_path,
+            entry.get("font_size", default_font_size),
+            y_ratio=entry.get("y_ratio", TEXT_Y_RATIO),
+        )
+        spans.append(ScreenTextSpan(img, entry["start"], entry["end"],
+                                    suppress_sub=entry.get("suppress_sub", False)))
+    return spans
 
 
 def add_screen_text(
@@ -178,6 +216,7 @@ def add_screen_text(
             "-i", str(overlay_path),
             "-filter_complex", "[0:v][1:v]overlay=0:0",
             "-c:v", "libx264",
+            "-preset", "ultrafast",
             "-pix_fmt", "yuv420p",
             "-an",
             str(output_path),

@@ -40,7 +40,7 @@ from reel_pipeline.subtitles import (
     FONT_SIZE_SUBTITLE,
     apply_subtitles,
 )
-from reel_pipeline.text_overlay import FONT_PATH
+from reel_pipeline.text_overlay import FONT_PATH, build_screen_text_spans
 
 
 def _parse_segment(s: str) -> tuple[float, float]:
@@ -78,8 +78,12 @@ def main():
                         help=f"Subtitle font size (default: {FONT_SIZE_SUBTITLE})")
     parser.add_argument("--font",       default=str(FONT_PATH),
                         help="Path to .ttf font file")
-    parser.add_argument("--leading-pad-ms", type=int, default=300, metavar="MS",
-                        help="Leading pad added by render.py — subtitles are shifted by this amount (default: 300)")
+    parser.add_argument("--leading-pad-ms", type=int, default=0, metavar="MS",
+                        help="Leading pad added by render.py — subtitles are shifted by this amount (default: 0)")
+    parser.add_argument("--screen-text", metavar="PATH",
+                        help="Path to screen_text.json written by render.py (timed text overlays)")
+    parser.add_argument("--layers", default="subs", choices=["subs", "screen", "both"],
+                        help="Which layers to composite: subs, screen, or both (default: subs)")
     args = parser.parse_args()
 
     video_path      = Path(args.video)
@@ -92,6 +96,21 @@ def main():
             sys.exit(1)
 
     leading_pad_ms = args.leading_pad_ms
+    layers = args.layers
+
+    # Load screen text spans if provided
+    screen_text_spans = None
+    if args.screen_text:
+        st_path = Path(args.screen_text)
+        if not st_path.exists():
+            print(f"Error: --screen-text not found — {st_path}")
+            sys.exit(1)
+        data = json.loads(st_path.read_text())
+        screen_text_spans = build_screen_text_spans(
+            data["entries"],
+            font_path=font_path,
+            default_font_size=args.font_size,
+        )
 
     preview_segment = _parse_segment(args.preview_segment) if args.preview_segment else None
     output_path = _output_path(video_path, preview_segment)
@@ -99,6 +118,9 @@ def main():
     print(f"\nSubtitle renderer")
     print(f"  Video:      {video_path.name}")
     print(f"  Transcript: {transcript_path.name}")
+    print(f"  Layers:     {layers}")
+    if args.screen_text:
+        print(f"  Screen txt: {Path(args.screen_text).name}  ({len(screen_text_spans)} entries)")
     print(f"  Mode:       {args.mode}")
     print(f"  Max words:  {args.max_words}")
     if preview_segment:
@@ -117,6 +139,8 @@ def main():
         max_chars=args.max_chars,
         preview_segment=preview_segment,
         leading_pad_s=leading_pad_ms / 1000.0,
+        screen_text_spans=screen_text_spans,
+        layers=layers,
     )
 
     size_mb = output_path.stat().st_size / (1024 * 1024)

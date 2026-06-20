@@ -573,19 +573,60 @@ The parser resolves `canonical/X` via `--assets-dir`, and any other path relativ
 
 ---
 
-### subtitle.py — Add subtitles + logo watermark
+### subtitle.py — Add subtitles + screen text + logo watermark
 
-Composites Hebrew subtitles onto the rendered video using the `transcript.json` alignment. Also automatically applies the brand logo watermark (top-right corner, 200px wide, 36px padding) from `assets/branding/logo-wide.png` on every frame. No author action required — the logo is applied if the file exists, skipped silently if not.
+Composites Hebrew subtitles and/or `[TEXT_TIMING:]` screen text onto the rendered video in a single PIL pass. Also automatically applies the brand logo watermark (top-right corner, 200px wide, 36px padding) from `assets/branding/logo-wide.png` on every frame. No author action required — the logo is applied if the file exists, skipped silently if not.
 
 ```bash
+# Subtitles only (default):
 python3 scripts/pipeline/subtitle.py \
-  --video output/[slug]/hebrew/reels/[slug]-he-reel-1-draft.mp4 \
-  --transcript output/[slug]/[lang]/reels/reel_01/transcript.json
+  --video output/[slug]/hebrew/reels/reel_01/reel01_draft.mp4 \
+  --transcript output/[slug]/[lang]/reels/reel_01/audio/transcript.json
+
+# Screen text only (no subs — useful during visual direction testing):
+python3 scripts/pipeline/subtitle.py \
+  --video output/[slug]/hebrew/reels/reel_01/reel01_draft.mp4 \
+  --transcript output/[slug]/[lang]/reels/reel_01/audio/transcript.json \
+  --screen-text output/[slug]/[lang]/reels/reel_01/audio/screen_text.json \
+  --layers screen
+
+# Both layers (production):
+python3 scripts/pipeline/subtitle.py \
+  --video output/[slug]/hebrew/reels/reel_01/reel01_draft.mp4 \
+  --transcript output/[slug]/[lang]/reels/reel_01/audio/transcript.json \
+  --screen-text output/[slug]/[lang]/reels/reel_01/audio/screen_text.json \
+  --layers both
 ```
 
 **Output:** `_subtitled.mp4`, then auto-compacts to `_final.mp4` at `video_speed` from `config/voice-settings.json`. Preview runs (`--preview-segment`) skip the compact step.
 
-**Modes:**
+**`--layers` flag:**
+- `subs` (default) — subtitles only
+- `screen` — `[TEXT_TIMING:]` / `[TEXT_CARD:]` overlays only (no subs)
+- `both` — both layers composited in a single PIL pass; screen text is composited first (lower), subtitles on top
+
+**`--screen-text PATH`** — path to `screen_text.json` written by `render.py` automatically when any scene has `[TEXT_TIMING:]` or `[TEXT_CARD:]` tags.
+
+**Subtitle zone — layout contract for visual directors:**
+
+Subtitles are **always on** and always occupy the **bottom zone** (`y_ratio 0.75`, bottom ~25% of frame, approximately y > 1440px on a 1920px canvas).
+
+`[TEXT_TIMING:]` screen text must be placed **above the subtitle zone** to avoid collision. Use the position token in the blueprint:
+
+```
+[TEXT_TIMING: text @ start-end top | text @ start-end center]
+```
+
+| Position token | `y_ratio` | Frame area |
+|---|---|---|
+| `top` | 0.30 | Upper third (~y 576px) |
+| `center` | 0.55 | Mid-frame (~y 1056px) |
+| `bottom` | 0.75 | **Subtitle zone — conflicts with subs** |
+| *(none)* | beat default | hook → center (0.55), other → bottom (0.75) |
+
+The visual director is responsible for specifying `top` or `center` on any `[TEXT_TIMING:]` entry that coexists with subtitles. `bottom` is only safe if the window is subtitle-free (e.g. a pure graphic scene with no VO).
+
+**Subtitle modes:**
 - `highlighted_phrase` (default) — active word full white (255,255,255), inactive slightly dimmed (210,210,210). Directional drop shadow (black 200α, 3px bottom-right) on all words. No glow. Top-anchored stable baseline — single-line and two-line phrases share the same vertical position; two-line expands downward.
 - `phrase` — all words in phrase equally bright
 - `single_word` — one word at a time

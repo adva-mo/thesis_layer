@@ -18,7 +18,7 @@ from typing import Literal, Optional
 from PIL import Image, ImageDraw, ImageFont
 
 
-from .text_overlay import FONT_PATH, TEXT_Y_RATIO, BAR_PADDING_X, BAR_PADDING_Y, BAR_RADIUS, SHADOW_OFFSET, _draw_halo, _draw_shadow
+from .text_overlay import FONT_PATH, TEXT_Y_RATIO, BAR_PADDING_X, BAR_PADDING_Y, BAR_RADIUS, SHADOW_OFFSET, ScreenTextSpan, _draw_halo, _draw_shadow
 
 # ── Defaults ──────────────────────────────────────────────────────
 
@@ -411,13 +411,21 @@ def _apply_timed_overlays(
     spans: list[SubtitleSpan],
     output_path: Path,
     time_offset: float = 0.0,
+    screen_text_spans: list[ScreenTextSpan] | None = None,
+    apply_subs: bool = True,
+    apply_screen: bool = False,
 ) -> Path:
     """
-    Composite subtitle spans onto video frame-by-frame using PIL alpha_composite.
-    Reads raw RGBA frames from FFmpeg, blends subtitle image where active,
-    writes result back through FFmpeg. Reliable on any platform/codec.
+    Composite subtitle and/or screen text spans onto video frame-by-frame using PIL alpha_composite.
+    Reads raw RGBA frames from FFmpeg, blends active layers, writes result back through FFmpeg.
+
+    Layer order: screen text first (lower), subtitles on top.
+    Both layers share the same time_offset (leading pad correction).
     """
-    if not spans:
+    has_subs = apply_subs and bool(spans)
+    has_screen = apply_screen and bool(screen_text_spans)
+
+    if not has_subs and not has_screen:
         subprocess.run(
             ["ffmpeg", "-y", "-i", str(video_path), "-c", "copy", str(output_path)],
             capture_output=True, check=True,
@@ -441,11 +449,12 @@ def _apply_timed_overlays(
 
     # Sort spans by start time for fast lookup
     sorted_spans = sorted(spans, key=lambda s: s.start)
+    sorted_screen = sorted(screen_text_spans or [], key=lambda s: s.start)
 
-    def active_image(t: float) -> Optional[Image.Image]:
-        for span in sorted_spans:
+    def _lookup(sorted_list, t: float):
+        for span in sorted_list:
             if span.start <= t < span.end:
-                return span.image
+                return span
             if span.start > t:
                 break
         return None
@@ -479,13 +488,23 @@ def _apply_timed_overlays(
             if len(raw) < frame_size:
                 break
             t = frame_num / fps + time_offset
-            sub_img = active_image(t)
-            if sub_img:
+
+            base: Optional[Image.Image] = None
+            screen_span = _lookup(sorted_screen, t) if has_screen else None
+            sub_suppressed = screen_span is not None and getattr(screen_span, "suppress_sub", False)
+
+            if screen_span is not None:
                 base = Image.frombytes("RGBA", (w, h), raw)
-                base = Image.alpha_composite(base, sub_img)
-                writer.stdin.write(base.tobytes())
-            else:
-                writer.stdin.write(raw)
+                base = Image.alpha_composite(base, screen_span.image)
+
+            if has_subs and not sub_suppressed:
+                sub_span = _lookup(sorted_spans, t)
+                if sub_span is not None:
+                    if base is None:
+                        base = Image.frombytes("RGBA", (w, h), raw)
+                    base = Image.alpha_composite(base, sub_span.image)
+
+            writer.stdin.write(base.tobytes() if base is not None else raw)
             frame_num += 1
     finally:
         reader.stdout.close()
@@ -527,8 +546,13 @@ def apply_subtitles(
     height: int = 1920,
     preview_segment: Optional[tuple[float, float]] = None,
     leading_pad_s: float = 0.0,
+    screen_text_spans: list[ScreenTextSpan] | None = None,
+    layers: str = "subs",
 ) -> Path:
     from .fal_wizper import load_transcript
+
+    apply_subs = layers in ("subs", "both")
+    apply_screen = layers in ("screen", "both")
 
     chunks = load_transcript(transcript_json)
     phrases = group_into_phrases(chunks, max_words=max_words, max_duration=max_duration, max_chars=max_chars)
@@ -536,18 +560,15 @@ def apply_subtitles(
 
     if preview_segment:
         seg_start, seg_end = preview_segment
-        # Filter phrases that overlap with the preview window
         phrases = [p for p in phrases if p.end > seg_start and p.start < seg_end]
-        # Trim word chunks to window too
         for p in phrases:
             p.words = [w for w in p.words if w.end > seg_start and w.start < seg_end]
         phrases = [p for p in phrases if p.words]
 
-    spans = build_spans(phrases, mode, font, width, height)
+    spans = build_spans(phrases, mode, font, width, height) if apply_subs else []
 
     if preview_segment:
         seg_start, seg_end = preview_segment
-        # Trim video to segment window first
         trimmed = Path(tempfile.mktemp(suffix="_trimmed.mp4"))
         subprocess.run(
             ["ffmpeg", "-y", "-i", str(video_path),
@@ -556,11 +577,22 @@ def apply_subtitles(
              str(trimmed)],
             capture_output=True, check=True,
         )
-        result_path = _apply_timed_overlays(trimmed, spans, output_path, time_offset=seg_start)
+        result_path = _apply_timed_overlays(
+            trimmed, spans, output_path,
+            time_offset=seg_start,
+            screen_text_spans=screen_text_spans,
+            apply_subs=apply_subs,
+            apply_screen=apply_screen,
+        )
         trimmed.unlink(missing_ok=True)
         return result_path
 
-    # Subtract the leading pad so subtitle timestamps stay locked to the VO audio.
-    # With a pad of P seconds, video frame at time T contains VO audio at time T-P.
+    # Subtract the leading pad so timestamps stay locked to the VO audio.
     # time_offset = -P makes the frame→transcript lookup: t = frame_time - P.
-    return _apply_timed_overlays(video_path, spans, output_path, time_offset=-leading_pad_s)
+    return _apply_timed_overlays(
+        video_path, spans, output_path,
+        time_offset=-leading_pad_s,
+        screen_text_spans=screen_text_spans,
+        apply_subs=apply_subs,
+        apply_screen=apply_screen,
+    )

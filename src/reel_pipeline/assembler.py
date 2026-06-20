@@ -17,7 +17,7 @@ from .local_clip import (
 )
 from .motion import get_transition
 from .parser import Scene
-from .text_overlay import FONT_PATH, FONT_SIZE, TEXT_Y_RATIO, add_screen_text, add_timed_screen_texts
+from .text_overlay import FONT_PATH, FONT_SIZE, TEXT_Y_RATIO
 
 
 def _find_audio(audio_dir: Path, scene_index: int) -> Optional[Path]:
@@ -173,7 +173,7 @@ def assemble_reel(
     leading_pad_ms: int = 0,
     trailing_pad_ms: int = 0,
     transitions: bool = False,
-) -> Path:
+) -> tuple[Path, list[dict]]:
     work_dir.mkdir(parents=True, exist_ok=True)
     clip_overrides = clip_overrides or {}
 
@@ -191,6 +191,8 @@ def assemble_reel(
 
     scene_clips: list[Path] = []
     audio_files: list[Path] = []
+    screen_text_entries: list[dict] = []
+    running_time: float = 0.0
     # Pre-scan: find first usable background asset anywhere in the reel.
     # Images are strongly preferred over video clips — blurring a still image
     # for a generated scene background is always more stable than extracting a
@@ -272,14 +274,23 @@ def assemble_reel(
                 print(f"    Visual:   generated graphic ({gtype}) [{reason}]")
                 generate_graphic_clip(scene.visual_intent, duration, base_clip, font_path, width, height)
 
-        # ── Add text overlay ──────────────────────────────────────
+        # ── Collect screen text for post-render compositing pass ─────
+        # Text overlays are deferred to subtitle.py — no ffmpeg re-encode here.
+        scene_start_s = running_time
         if scene.text_timing:
             beat = _resolve_beat(scene, len(scenes))
-            _yr = 0.55 if beat == "hook" else TEXT_Y_RATIO
-            print(f"    Text:     {len(scene.text_timing)} timed entry/entries")
-            final_clip = work_dir / f"scene_{scene.index:02d}_final.mp4"
-            add_timed_screen_texts(base_clip, scene.text_timing, final_clip, font_path, font_size, width, height, y_ratio=_yr)
-            base_clip.unlink(missing_ok=True)
+            beat_default_yr = 0.55 if beat == "hook" else TEXT_Y_RATIO
+            _pos_map = {"top": 0.30, "center": 0.55, "bottom": 0.75}
+            print(f"    Text:     {len(scene.text_timing)} timed entries → screen_text.json")
+            for text, rel_start, rel_end, position in scene.text_timing:
+                _yr = _pos_map.get(position, beat_default_yr) if position else beat_default_yr
+                screen_text_entries.append({
+                    "text": text,
+                    "start": round(scene_start_s + rel_start, 4),
+                    "end": round(scene_start_s + rel_end, 4),
+                    "y_ratio": _yr,
+                    "font_size": font_size,
+                })
         elif scene.text_card:
             beat = _resolve_beat(scene, len(scenes))
             is_hook = beat == "hook"
@@ -290,14 +301,19 @@ def assemble_reel(
                 _yr = 0.55
             else:
                 _yr = 0.55 if is_hook else 0.75
-            print(f"    Text:     {scene.text_card!r}")
-            final_clip = work_dir / f"scene_{scene.index:02d}_final.mp4"
-            add_screen_text(base_clip, scene.text_card, final_clip, font_path, _fs, width, height, y_ratio=_yr)
-            base_clip.unlink(missing_ok=True)
-        else:
-            renamed = work_dir / f"scene_{scene.index:02d}_final.mp4"
-            base_clip.rename(renamed)
-            final_clip = renamed
+            print(f"    Text:     {scene.text_card!r} → screen_text.json")
+            screen_text_entries.append({
+                "text": scene.text_card,
+                "start": round(scene_start_s, 4),
+                "end": round(scene_start_s + duration, 4),
+                "y_ratio": _yr,
+                "font_size": _fs,
+                "suppress_sub": True,
+            })
+
+        final_clip = work_dir / f"scene_{scene.index:02d}_final.mp4"
+        base_clip.rename(final_clip)
+        running_time += duration
 
         scene_clips.append(final_clip)
         print(f"    ✓ {final_clip.name}")
@@ -399,4 +415,16 @@ def assemble_reel(
 
     size_mb = output_path.stat().st_size / (1024 * 1024)
     print(f"\n  ✓ Output: {output_path}  ({size_mb:.1f} MB)")
-    return output_path
+
+    # Extend any text entry that ends at the last scene boundary through the
+    # trailing pad + a 2s buffer for compacting (subtitle.py may speed up the
+    # video after baking text in, which would otherwise expose tail frames
+    # without text).
+    if screen_text_entries and trailing_pad_ms > 0:
+        tail_s = running_time
+        pad_s = trailing_pad_ms / 1000.0
+        for entry in screen_text_entries:
+            if abs(entry["end"] - tail_s) < 0.1:
+                entry["end"] = round(tail_s + pad_s + 2.0, 4)
+
+    return output_path, screen_text_entries

@@ -46,7 +46,7 @@ class Scene:
     photo_type: Optional[str] = None    # [PHOTO_TYPE:] — Ken Burns parameter set override
     kling_avoid: Optional[str] = None   # [KLING_AVOID:] — sent as negative_prompt to Kling API
     text_position: Optional[str] = None # [TEXT_POSITION: center|bottom] — overrides beat-based y_ratio default
-    text_timing: Optional[list[tuple[str, float, float]]] = None  # [TEXT_TIMING: text @ s-e | ...]
+    text_timing: Optional[list[tuple[str, float, float, str | None]]] = None  # [TEXT_TIMING: text @ s-e [top|center|bottom] | ...]
     plain_bg: bool = False              # [PLAIN_BG: yes] — skip blur bg for generated scenes
     freeze_last_frame: bool = False     # [FREEZE_LAST_FRAME: yes] — hold last frame of prev scene
 
@@ -67,10 +67,10 @@ def _resolve_path(
     file_cell = re.sub(r"^reuse\s*[–—-]\s*", "", file_cell).strip()
     ext_pat = r"\.(?:jpg|jpeg|png|webp|mp4|mov)"
 
-    # canonical/filename → assets_dir
+    # canonical/filename → assets_dir/canonical/filename
     m = re.search(r"canonical/([\w\-]+(?:/[\w\-]+)*" + ext_pat + r")", file_cell, re.IGNORECASE)
     if m and assets_dir:
-        p = assets_dir / m.group(1)
+        p = assets_dir / "canonical" / m.group(1)
         return p if p.exists() else None
 
     # repo-relative path → repo_root
@@ -225,10 +225,11 @@ def parse_reel_file(
         vi_match = re.search(r"\[VISUAL_INTENT:\s*(.*?)\]", block, re.DOTALL)
         if not vi_match:
             vi_match = re.search(r"\[VISUAL:\s*(.*?)\]", block, re.DOTALL)
-        if not vi_match:
+        has_freeze = bool(re.search(r"\[FREEZE_LAST_FRAME:\s*yes\s*\]", block, re.IGNORECASE))
+        if not vi_match and not has_freeze:
             continue
 
-        visual_intent = vi_match.group(1).strip()
+        visual_intent = vi_match.group(1).strip() if vi_match else ""
         start_s, end_s = _parse_timestamp(ts_match.group(1))
 
         ms_match = re.search(r"\[MOTION_STYLE:\s*(.*?)\]", block, re.DOTALL)
@@ -255,14 +256,22 @@ def parse_reel_file(
         text_timing = None
         if tt_match:
             text_timing = []
+            _positions = {"top", "center", "bottom"}
             for item in tt_match.group(1).split("|"):
                 parts = item.strip().split("@")
                 if len(parts) == 2:
                     txt = parts[0].strip()
-                    times = parts[1].strip().split("-")
+                    time_part = parts[1].strip()
+                    # Optional position token: "0.5-2.0 top" or "0.5-2.0"
+                    time_tokens = time_part.split()
+                    position = None
+                    if len(time_tokens) >= 2 and time_tokens[-1].lower() in _positions:
+                        position = time_tokens[-1].lower()
+                        time_tokens = time_tokens[:-1]
+                    times = " ".join(time_tokens).split("-")
                     if len(times) == 2:
                         try:
-                            text_timing.append((txt, float(times[0].strip()), float(times[1].strip())))
+                            text_timing.append((txt, float(times[0].strip()), float(times[1].strip()), position))
                         except ValueError:
                             pass
 
