@@ -193,6 +193,62 @@ Good (same reasoning, investor arriving at a thought):
 
 ### Visual intent format
 
+#### Hook scenes (static or kling — never generated)
+
+Hook beats must be `[VISUAL_TYPE: static]` or `[VISUAL_TYPE: kling]`. **Default: `static`** — Ken Burns on a still image handles 3–4s well and the text overlay is the primary event. Use `kling` only when cinematic opening movement is warranted and the Kling spend (~$0.22/5s) is justified.
+
+Hook VISUAL_INTENT has a looser contract than prove/reinforce:
+- **Prove/reinforce:** thesis-linked evidence, subject to anti-collect rules
+- **Hook:** atmosphere and place only — no thesis-link required, no anti-collect obligation
+
+Any canonical image that is regionally plausible and visually premium qualifies. Typically the same location/community image already collected for another beat.
+
+```
+[VISUAL_TYPE: static]
+[BEAT: hook]
+[VISUAL_INTENT: <location/area> — <atmosphere and light> — no <obvious geography mismatches>]
+[TEXT_CARD: hook display text]
+```
+
+`[TEXT_CARD:]` on hook beats is required when the hook previously relied on a text card to display contrast, a number, or a question on screen. The real image is the background; the TEXT_CARD text overlays it. Subtitles still render the VO — `[TEXT_CARD:]` is for text that must appear visually on screen, not just in subtitles.
+
+For kling hooks only, add `[MOTION_STYLE:]`:
+```
+[VISUAL_TYPE: kling]
+[BEAT: hook]
+[VISUAL_INTENT: <location/area> — <atmosphere and light> — no <obvious geography mismatches>]
+[TEXT_CARD: hook display text]
+[MOTION_STYLE: MV_DRIFT_AERIAL]
+```
+
+Hook rows appear in the VEP with `Critical: no` and a Source pointing to any available canonical image.
+
+---
+
+#### CTA scenes (static + TEXT_CARD — never generated)
+
+CTA beats must be `[VISUAL_TYPE: static]` with `[TEXT_CARD:]` carrying the CTA text. The source is always the most recent real asset from the reel (reuse — no new collection).
+
+The assembler renders the image with Ken Burns and overlays the TEXT_CARD text on top. No Kling call, no `cta.py`.
+
+```
+[VISUAL_TYPE: static]
+[BEAT: cta]
+[TEXT_CARD: כתבו [KEYWORD] ואשלח את הניתוח]
+
+[VO:]
+"כתבו [KEYWORD] ואשלח את הניתוח."
+[TTS:]
+"כתבו [keyword] ואשלח את הניתוח."
+```
+
+VEP row:
+```
+| [ts] | cta | no | reuse — canonical/[last-real-image].jpg | | reuse | static | A |
+```
+
+---
+
 #### Real image scenes (Kling clip will be generated from this)
 
 ```
@@ -247,7 +303,7 @@ The token is expanded to its full Kling prompt description before the API call. 
 |---|---|---|
 | `text card` or `bold text` or `text on screen` | text_card | Centered text extracted from `"quoted string"` in the description |
 | `split text card` | text_card | Two quoted strings joined with ` \| ` — use for contrast/comparison hooks |
-| `cta card` | cta_card | Plain dark background — VO + subtitles carry the CTA text |
+| `cta card` | cta_card | **Not used in reel CTA beats.** Reel CTAs use `[VISUAL_TYPE: static]` + `[TEXT_CARD:]` — see CTA scenes above. `cta card` remains valid for non-reel content (carousels, PDFs). |
 | `timeline` or `payment plan` or `breakdown` | timeline | Step sequence — labels from `→`-separated items after `—` separator (see Timeline section below) |
 | `reality check` or `overlay` or `implication` | text_card | Same as text_card — use when the beat framing matters |
 | *(anything else)* | **HARD ERROR** | Assembler stops before any rendering and prints the unrecognized keyword |

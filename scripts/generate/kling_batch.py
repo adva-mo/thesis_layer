@@ -198,24 +198,31 @@ def main() -> None:
         out_path = _output_path(assets_dir, args.reel, scene.start_s, scene.end_s)
         prompt   = resolved_prompts.get(scene.index, "")
 
-        # Portrait crop detection
+        # Portrait crop detection + dimension check
+        crop_note  = ""
+        dim_error  = ""
         try:
             from PIL import Image as _Img
             img = _Img.open(scene.asset_path)
             w, h = img.size
-            will_crop = (w / h) > (9 / 16) * 1.05
+            cw, ch = fal_kling.portrait_crop_dimensions(w, h)
+            will_crop = (cw, ch) != (w, h)
+            if will_crop:
+                if cw < fal_kling.KLING_MIN_DIMENSION or ch < fal_kling.KLING_MIN_DIMENSION:
+                    dim_error = f" [TOO SMALL after crop: {cw}×{ch}px — min {fal_kling.KLING_MIN_DIMENSION}px]"
+                else:
+                    crop_note = f" [will crop to portrait: {cw}×{ch}px]"
         except Exception:
-            will_crop = False
+            pass
 
         cache_key  = fal_kling.compute_cache_key(scene.asset_path, prompt, dur, model, scene.kling_avoid)
         cache_hit  = fal_kling.get_cached_path(cache_key) is not None
-        crop_note  = " [will crop to portrait]" if will_crop else ""
         cache_note = " [cache hit — free]" if cache_hit else ""
 
         print(
             f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]  "
             f"image  {scene.asset_path.name}  →  {out_path.name}  ({dur}s)"
-            f"{crop_note}{cache_note}"
+            f"{crop_note}{dim_error}{cache_note}"
         )
         if prompt:
             print(f"    Prompt: {prompt}")
@@ -223,6 +230,25 @@ def main() -> None:
     if not to_generate:
         print("\n  Nothing to generate.")
         return
+
+    # Abort if any scene has a post-crop dimension error (checked during plan print)
+    dim_errors = []
+    for scene in to_generate:
+        try:
+            from PIL import Image as _Img
+            img = _Img.open(scene.asset_path)
+            w, h = img.size
+            cw, ch = fal_kling.portrait_crop_dimensions(w, h)
+            if cw < fal_kling.KLING_MIN_DIMENSION or ch < fal_kling.KLING_MIN_DIMENSION:
+                dim_errors.append(
+                    f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]: "
+                    f"{scene.asset_path.name} crops to {cw}×{ch}px — below Kling minimum"
+                )
+        except Exception:
+            pass
+    if dim_errors:
+        print("\n  ✗ Image dimension errors — fix before generating:\n" + "\n".join(dim_errors))
+        sys.exit(1)
 
     if not args.confirm_paid_api_call:
         non_cached = [s for s in to_generate

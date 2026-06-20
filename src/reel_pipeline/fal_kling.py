@@ -21,12 +21,24 @@ from . import config
 # ── Image pre-processing ──────────────────────────────────────────
 
 
+KLING_MIN_DIMENSION = 300  # Kling rejects images smaller than 300×300px
+
+
+def portrait_crop_dimensions(w: int, h: int) -> tuple[int, int]:
+    """Return (cropped_w, cropped_h) for a 9:16 portrait center-crop without doing the crop."""
+    target_ar = 9 / 16
+    if (w / h) <= target_ar * 1.05:
+        return w, h  # already portrait — no crop
+    return int(h * target_ar), h
+
+
 def _crop_to_portrait(image_path: Path) -> Path:
     """
     Center-crop a landscape image to 9:16 portrait before Kling upload.
     Kling I2V matches the input image's aspect ratio — sending a portrait
     image is the only way to get portrait video output.
     Returns a tmp path if cropped; returns image_path unchanged if already portrait.
+    Raises ValueError if the cropped result would be below KLING_MIN_DIMENSION.
     """
     try:
         from PIL import Image
@@ -40,8 +52,14 @@ def _crop_to_portrait(image_path: Path) -> Path:
     if (w / h) <= target_ar * 1.05:
         return image_path  # already portrait or square — no crop needed
 
-    # Crop width to portrait AR, keep full height
     new_w = int(h * target_ar)
+    if new_w < KLING_MIN_DIMENSION or h < KLING_MIN_DIMENSION:
+        raise ValueError(
+            f"{image_path.name}: portrait crop would produce {new_w}×{h}px — "
+            f"below Kling minimum ({KLING_MIN_DIMENSION}px). "
+            f"Source image must be at least {int(KLING_MIN_DIMENSION * 16 / 9)}×{KLING_MIN_DIMENSION}px."
+        )
+
     left = (w - new_w) // 2
     cropped = img.crop((left, 0, left + new_w, h))
 

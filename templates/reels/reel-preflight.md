@@ -30,16 +30,20 @@ Run before any other check. This is a structural gate — a scene with a missing
 **Check every scene block:**
 1. Does every scene have `[VISUAL_TYPE:]`?
 2. Is the value one of: `kling`, `static`, `generated`, `timeline`?
-3. Does every scene with `beat = hook` or `beat = cta` in the VEP have `VISUAL_TYPE: generated`? If a hook or CTA scene has any other type, flag it — these beats must never trigger asset collection or Kling.
+3. Does every scene with `beat = hook` have `VISUAL_TYPE: static` or `VISUAL_TYPE: kling`? Hook beats must never be `generated` — they are the first frame the viewer sees.
+4. Does every scene with `beat = cta` have `VISUAL_TYPE: static` AND a `[TEXT_CARD:]` tag? CTA beats must never be `generated` — they reuse the last real asset with the CTA text overlaid.
 
 **FAIL if:**
 - Any scene is missing `[VISUAL_TYPE:]`
 - Any value is not in the valid vocabulary
-- A hook or CTA beat has `VISUAL_TYPE` other than `generated`
+- A hook beat has `VISUAL_TYPE: generated`
+- A CTA beat has `VISUAL_TYPE: generated`
+- A CTA beat has `VISUAL_TYPE: static` but no `[TEXT_CARD:]`
 
 **PASS if:**
 - Every scene has a valid `[VISUAL_TYPE:]`
-- All hook and CTA beats are `generated`
+- All hook beats are `static` or `kling`
+- All CTA beats are `static` with `[TEXT_CARD:]` present
 
 A scene type failure is a hard stop — do not proceed to cadence or content checks until it is resolved.
 
