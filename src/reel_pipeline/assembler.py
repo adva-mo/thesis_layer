@@ -17,7 +17,7 @@ from .local_clip import (
 )
 from .motion import get_transition
 from .parser import Scene
-from .text_overlay import FONT_PATH, FONT_SIZE, add_screen_text
+from .text_overlay import FONT_PATH, FONT_SIZE, TEXT_Y_RATIO, add_screen_text, add_timed_screen_texts
 
 
 def _find_audio(audio_dir: Path, scene_index: int) -> Optional[Path]:
@@ -62,15 +62,26 @@ def _render_generated_over_real(
 
     Layer 1 — blurred real asset (Ken Burns, heavy blur + dark overlay).
     Layer 2 — transparent graphic PNG overlaid via FFmpeg.
+    Accepts both image and video paths for real_asset.
     """
     bg_clip = output.parent / f"{output.stem}_bg.mp4"
     fg_png  = output.parent / f"{output.stem}_fg.png"
 
-    image_to_clip_kenburns(
-        real_asset, duration, bg_clip,
-        width=width, height=height,
-        blur_overlay=True,
-    )
+    if real_asset.suffix.lower() in (".mp4", ".mov"):
+        # Extract first frame so Ken Burns blur can be applied normally
+        frame_path = output.parent / f"{output.stem}_frame.jpg"
+        _ffmpeg(
+            "-i", str(real_asset), "-vframes", "1", "-q:v", "2", str(frame_path),
+            label="extract frame for background",
+        )
+        image_to_clip_kenburns(frame_path, duration, bg_clip, width=width, height=height, blur_overlay=True)
+        frame_path.unlink(missing_ok=True)
+    else:
+        image_to_clip_kenburns(
+            real_asset, duration, bg_clip,
+            width=width, height=height,
+            blur_overlay=True,
+        )
 
     generate_graphic_png(visual_intent, fg_png, font_path, width, height, transparent_bg=True)
 
@@ -169,7 +180,7 @@ def assemble_reel(
     # ── Pre-flight: validate all generated scenes before any rendering ───────
     errors: list[str] = []
     for scene in scenes:
-        if scene.asset_type not in ("image", "video") and scene.index not in clip_overrides:
+        if scene.asset_type not in ("image", "video") and scene.index not in clip_overrides and not scene.freeze_last_frame:
             try:
                 validate_generated_scene(scene.visual_intent or "")
             except ValueError as e:
@@ -180,13 +191,20 @@ def assemble_reel(
 
     scene_clips: list[Path] = []
     audio_files: list[Path] = []
-    # Pre-scan: find first real asset anywhere in the reel so generated scenes
-    # that appear before the first real scene still get a background.
-    _first_real_asset: Optional[Path] = next(
-        (s.asset_path for s in scenes if s.asset_type in ("image", "video") and s.asset_path),
+    # Pre-scan: find first usable background asset anywhere in the reel.
+    # Images are strongly preferred over video clips — blurring a still image
+    # for a generated scene background is always more stable than extracting a
+    # frame from a video that the viewer just watched move.
+    _first_real_image: Optional[Path] = next(
+        (s.asset_path for s in scenes if s.asset_type == "image" and s.asset_path),
         None,
     )
-    last_real_asset: Optional[Path] = None   # tracks nearest preceding real image
+    _first_real_asset: Optional[Path] = _first_real_image or next(
+        (s.asset_path for s in scenes if s.asset_type == "video" and s.asset_path),
+        None,
+    )
+    last_real_image: Optional[Path] = None   # nearest preceding still image
+    last_real_asset: Optional[Path] = None   # nearest preceding real asset (image or video)
 
     for scene in scenes:
         print(f"\n  Scene {scene.index}:")
@@ -203,7 +221,18 @@ def assemble_reel(
         # ── Generate base video clip ──────────────────────────────
         base_clip = work_dir / f"scene_{scene.index:02d}_base.mp4"
 
-        if scene.index in clip_overrides:
+        if scene.freeze_last_frame and scene_clips:
+            freeze_jpg = work_dir / f"scene_{scene.index:02d}_freeze.jpg"
+            _ffmpeg("-sseof", "-0.1", "-i", str(scene_clips[-1]),
+                    "-vframes", "1", "-q:v", "2", str(freeze_jpg), label="freeze extract")
+            _ffmpeg("-loop", "1", "-i", str(freeze_jpg), "-t", str(duration),
+                    "-vf", f"scale={width}:{height},setsar=1",
+                    "-c:v", "libx264", "-crf", "18", "-preset", "fast",
+                    "-r", "30", "-pix_fmt", "yuv420p", "-an",
+                    str(base_clip), label="freeze clip")
+            freeze_jpg.unlink(missing_ok=True)
+            print(f"    Visual:   freeze last frame (from scene {scene.index - 1})")
+        elif scene.index in clip_overrides:
             override = clip_overrides[scene.index]
             clip_dur = get_clip_duration(override)
             action = "stretch" if clip_dur < duration else "trim"
@@ -226,26 +255,44 @@ def assemble_reel(
                 width=width, height=height,
             )
             last_real_asset = scene.asset_path
+            last_real_image = scene.asset_path
         else:
             gtype = detect_type(scene.visual_intent)
-            beat  = _resolve_beat(scene, len(scenes))
-            bg_asset = last_real_asset or _first_real_asset
-            if bg_asset and beat != "cta":
+            # Prefer still image over video clip for blur background — blurring a
+            # frame from a clip the viewer just watched moving creates a jarring echo.
+            bg_asset = last_real_image or _first_real_image or last_real_asset or _first_real_asset
+            if bg_asset and not scene.plain_bg:
                 print(f"    Visual:   generated ({gtype}) over real → {bg_asset.name}")
                 _render_generated_over_real(
                     scene.visual_intent, bg_asset, duration, base_clip,
                     font_path, width, height,
                 )
             else:
-                reason = "cta" if beat == "cta" else "no real assets in reel"
+                reason = "plain_bg" if scene.plain_bg else "no real assets in reel"
                 print(f"    Visual:   generated graphic ({gtype}) [{reason}]")
                 generate_graphic_clip(scene.visual_intent, duration, base_clip, font_path, width, height)
 
-        # ── Add text card overlay (CTA / data / risk only) ───────
-        if scene.text_card:
+        # ── Add text overlay ──────────────────────────────────────
+        if scene.text_timing:
+            beat = _resolve_beat(scene, len(scenes))
+            _yr = 0.55 if beat == "hook" else TEXT_Y_RATIO
+            print(f"    Text:     {len(scene.text_timing)} timed entry/entries")
+            final_clip = work_dir / f"scene_{scene.index:02d}_final.mp4"
+            add_timed_screen_texts(base_clip, scene.text_timing, final_clip, font_path, font_size, width, height, y_ratio=_yr)
+            base_clip.unlink(missing_ok=True)
+        elif scene.text_card:
+            beat = _resolve_beat(scene, len(scenes))
+            is_hook = beat == "hook"
+            _fs = 96 if is_hook else font_size
+            if scene.text_position == "bottom":
+                _yr = 0.75
+            elif scene.text_position == "center":
+                _yr = 0.55
+            else:
+                _yr = 0.55 if is_hook else 0.75
             print(f"    Text:     {scene.text_card!r}")
             final_clip = work_dir / f"scene_{scene.index:02d}_final.mp4"
-            add_screen_text(base_clip, scene.text_card, final_clip, font_path, font_size, width, height)
+            add_screen_text(base_clip, scene.text_card, final_clip, font_path, _fs, width, height, y_ratio=_yr)
             base_clip.unlink(missing_ok=True)
         else:
             renamed = work_dir / f"scene_{scene.index:02d}_final.mp4"

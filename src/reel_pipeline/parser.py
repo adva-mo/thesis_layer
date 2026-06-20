@@ -42,9 +42,13 @@ class Scene:
     asset_type: str                # "image" | "video" | "generated" — what the assembler uses
     asset_path: Optional[Path]     # resolved asset; None when generated
     critical: bool = False         # True when VEP Critical column is "yes"
-    beat: Optional[str] = None     # [BEAT:] — narrative beat for transition logic
-    photo_type: Optional[str] = None   # [PHOTO_TYPE:] — Ken Burns parameter set override
-    kling_avoid: Optional[str] = None  # [KLING_AVOID:] — sent as negative_prompt to Kling API
+    beat: Optional[str] = None          # [BEAT:] — narrative beat for transition logic
+    photo_type: Optional[str] = None    # [PHOTO_TYPE:] — Ken Burns parameter set override
+    kling_avoid: Optional[str] = None   # [KLING_AVOID:] — sent as negative_prompt to Kling API
+    text_position: Optional[str] = None # [TEXT_POSITION: center|bottom] — overrides beat-based y_ratio default
+    text_timing: Optional[list[tuple[str, float, float]]] = None  # [TEXT_TIMING: text @ s-e | ...]
+    plain_bg: bool = False              # [PLAIN_BG: yes] — skip blur bg for generated scenes
+    freeze_last_frame: bool = False     # [FREEZE_LAST_FRAME: yes] — hold last frame of prev scene
 
 
 def _parse_timestamp(ts: str) -> tuple[float, float]:
@@ -244,6 +248,27 @@ def parse_reel_file(
         ka_match = re.search(r"\[KLING_AVOID:\s*(.*?)\]", block, re.DOTALL)
         kling_avoid = ka_match.group(1).strip() if ka_match else None
 
+        tp_match = re.search(r"\[TEXT_POSITION:\s*(\w+)\s*\]", block)
+        text_position = tp_match.group(1).strip().lower() if tp_match else None
+
+        tt_match = re.search(r"\[TEXT_TIMING:\s*(.*?)\]", block, re.DOTALL)
+        text_timing = None
+        if tt_match:
+            text_timing = []
+            for item in tt_match.group(1).split("|"):
+                parts = item.strip().split("@")
+                if len(parts) == 2:
+                    txt = parts[0].strip()
+                    times = parts[1].strip().split("-")
+                    if len(times) == 2:
+                        try:
+                            text_timing.append((txt, float(times[0].strip()), float(times[1].strip())))
+                        except ValueError:
+                            pass
+
+        plain_bg = bool(re.search(r"\[PLAIN_BG:\s*yes\s*\]", block, re.IGNORECASE))
+        freeze_last_frame = bool(re.search(r"\[FREEZE_LAST_FRAME:\s*yes\s*\]", block, re.IGNORECASE))
+
         # [VISUAL_TYPE:] — required in new blueprints
         vt_match = re.search(r"\[VISUAL_TYPE:\s*(\w+)\s*\]", block)
         visual_type: Optional[str] = None
@@ -313,6 +338,10 @@ def parse_reel_file(
             beat=beat,
             photo_type=photo_type,
             kling_avoid=kling_avoid,
+            text_position=text_position,
+            text_timing=text_timing or None,
+            plain_bg=plain_bg,
+            freeze_last_frame=freeze_last_frame,
         ))
 
     for s in scenes:

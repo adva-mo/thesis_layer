@@ -55,34 +55,103 @@ def _visual_hebrew(text: str) -> str:
         return text
 
 
-def _render_text_overlay(text: str, width: int, height: int, font_path: Path, font_size: int) -> Image.Image:
-    """Return a transparent RGBA image with the text rendered."""
-    visual = _visual_hebrew(text)
+def _render_text_overlay(
+    text: str,
+    width: int,
+    height: int,
+    font_path: Path,
+    font_size: int,
+    y_ratio: float = TEXT_Y_RATIO,
+) -> Image.Image:
+    """Return a transparent RGBA image with the text rendered.
+
+    Use literal \\n in text to produce multiple lines (e.g. "line 1\\nline 2").
+    Each line is centered independently. y_ratio controls the bottom edge of the block.
+    """
+    lines = text.split(r"\n")
+    visuals = [_visual_hebrew(line) for line in lines]
     font = ImageFont.truetype(str(font_path), font_size)
 
-    # Measure text
     tmp = Image.new("RGBA", (1, 1))
     draw = ImageDraw.Draw(tmp)
-    bbox = draw.textbbox((0, 0), visual, font=font)
-    text_w = bbox[2] - bbox[0]
     ascent, descent = font.getmetrics()
     line_h = ascent + descent
+    line_gap = int(line_h * 0.15)
 
-    bar_w = text_w + BAR_PADDING_X * 2
-    bar_h = line_h + BAR_PADDING_Y * 2
+    widths = [
+        draw.textbbox((0, 0), v, font=font)[2] - draw.textbbox((0, 0), v, font=font)[0]
+        for v in visuals
+    ]
+    total_h = line_h * len(visuals) + line_gap * (len(visuals) - 1) + BAR_PADDING_Y * 2
 
     overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
 
-    bar_x = (width - bar_w) // 2
-    bar_y = int(height * TEXT_Y_RATIO) - bar_h
-
-    text_x = bar_x + BAR_PADDING_X
-    text_y = bar_y + BAR_PADDING_Y
-    _draw_halo(draw, (text_x, text_y), visual, font, SHADOW_COLOR, SHADOW_OFFSET)
-    draw.text((text_x, text_y), visual, font=font, fill=TEXT_COLOR)
+    block_top = int(height * y_ratio) - total_h
+    for i, (visual, tw) in enumerate(zip(visuals, widths)):
+        text_x = (width - tw) // 2
+        text_y = block_top + BAR_PADDING_Y + i * (line_h + line_gap)
+        _draw_halo(draw, (text_x, text_y), visual, font, SHADOW_COLOR, SHADOW_OFFSET)
+        draw.text((text_x, text_y), visual, font=font, fill=TEXT_COLOR)
 
     return overlay
+
+
+def add_timed_screen_texts(
+    clip_path: Path,
+    timings: list[tuple[str, float, float]],
+    output_path: Path,
+    font_path: Path = FONT_PATH,
+    font_size: int = FONT_SIZE,
+    width: int = 1080,
+    height: int = 1920,
+    y_ratio: float = TEXT_Y_RATIO,
+) -> Path:
+    """Composite text overlays at specific time windows onto a clip.
+
+    Each entry in timings is (text, start_s, end_s). Hebrew BiDi is handled by
+    PIL; ffmpeg drawtext is not used.
+    """
+    temp_pngs: list[Path] = []
+    try:
+        for i, (text, _, _) in enumerate(timings):
+            overlay_img = _render_text_overlay(text, width, height, font_path, font_size, y_ratio)
+            with tempfile.NamedTemporaryFile(suffix=f"_text_{i}.png", delete=False) as tmp:
+                png_path = Path(tmp.name)
+                overlay_img.save(png_path, format="PNG")
+                temp_pngs.append(png_path)
+
+        inputs: list[str] = ["-i", str(clip_path)]
+        for png in temp_pngs:
+            inputs += ["-loop", "1", "-i", str(png)]
+
+        parts: list[str] = []
+        prev = "[0:v]"
+        for i, (_, start_s, end_s) in enumerate(timings):
+            inp = f"[{i + 1}:v]"
+            out = "[out]" if i == len(timings) - 1 else f"[t{i}]"
+            parts.append(f"{prev}{inp}overlay=0:0:enable='between(t,{start_s},{end_s})'{out}")
+            prev = out
+
+        cmd = [
+            "ffmpeg", "-y",
+            *inputs,
+            "-filter_complex", ";".join(parts),
+            "-map", "[out]",
+            "-c:v", "libx264",
+            "-pix_fmt", "yuv420p",
+            "-an",
+            str(output_path),
+        ]
+        result = subprocess.run(cmd, capture_output=True)
+        if result.returncode != 0:
+            print(f"  ✗ timed text overlay failed:\n{result.stderr.decode()[-600:]}")
+            sys.exit(1)
+    finally:
+        for p in temp_pngs:
+            p.unlink(missing_ok=True)
+
+    return output_path
 
 
 def add_screen_text(
@@ -93,9 +162,10 @@ def add_screen_text(
     font_size: int = FONT_SIZE,
     width: int = 1080,
     height: int = 1920,
+    y_ratio: float = TEXT_Y_RATIO,
 ) -> Path:
     """Composite Hebrew screen text onto every frame of clip_path → output_path."""
-    overlay_img = _render_text_overlay(text, width, height, font_path, font_size)
+    overlay_img = _render_text_overlay(text, width, height, font_path, font_size, y_ratio)
 
     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
         overlay_path = Path(tmp.name)
