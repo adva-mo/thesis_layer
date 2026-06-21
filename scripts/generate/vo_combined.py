@@ -203,8 +203,8 @@ def main():
     if status.upper() == "PUBLISHED":
         print(f"Error: reel {args.reel} is PUBLISHED — content is locked. No regeneration allowed.")
         sys.exit(1)
-    if status.upper() != "APPROVED":
-        print(f"Error: reel {args.reel} status is '{status}' — must be APPROVED before paid generation.")
+    if status.upper() not in {"APPROVED", "VISUALS-DIRECTED"}:
+        print(f"Error: reel {args.reel} status is '{status}' — must be APPROVED or VISUALS-DIRECTED before paid generation.")
         sys.exit(1)
 
     if not API_KEY or not VOICE_ID:

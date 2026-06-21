@@ -44,7 +44,8 @@ class Scene:
     critical: bool = False         # True when VEP Critical column is "yes"
     beat: Optional[str] = None          # [BEAT:] — narrative beat for transition logic
     photo_type: Optional[str] = None    # [PHOTO_TYPE:] — Ken Burns parameter set override
-    kling_avoid: Optional[str] = None   # [KLING_AVOID:] — sent as negative_prompt to Kling API
+    kling_avoid: Optional[str] = None   # [KLING_AVOID:] — sent as negative_prompt to Kling API (scene-specific; base is in fal_kling.BASE_NEGATIVE_PROMPT)
+    reuse_source: Optional[str] = None  # [REUSE_SOURCE: HH-HHs] — reuse the Kling clip from this timestamp instead of generating a new one
     text_position: Optional[str] = None # [TEXT_POSITION: center|bottom] — overrides beat-based y_ratio default
     text_timing: Optional[list[tuple[str, float, float, str | None]]] = None  # [TEXT_TIMING: text @ s-e [top|center|bottom] | ...]
     plain_bg: bool = False              # [PLAIN_BG: yes] — skip blur bg for generated scenes
@@ -226,7 +227,8 @@ def parse_reel_file(
         if not vi_match:
             vi_match = re.search(r"\[VISUAL:\s*(.*?)\]", block, re.DOTALL)
         has_freeze = bool(re.search(r"\[FREEZE_LAST_FRAME:\s*yes\s*\]", block, re.IGNORECASE))
-        if not vi_match and not has_freeze:
+        has_reuse = bool(re.search(r"\[REUSE_SOURCE:\s*[\d:–—\-]+s\s*\]", block))
+        if not vi_match and not has_freeze and not has_reuse:
             continue
 
         visual_intent = vi_match.group(1).strip() if vi_match else ""
@@ -248,6 +250,9 @@ def parse_reel_file(
 
         ka_match = re.search(r"\[KLING_AVOID:\s*(.*?)\]", block, re.DOTALL)
         kling_avoid = ka_match.group(1).strip() if ka_match else None
+
+        rs_match = re.search(r"\[REUSE_SOURCE:\s*([\d:–—\-]+s)\s*\]", block)
+        reuse_source = rs_match.group(1).strip() if rs_match else None
 
         tp_match = re.search(r"\[TEXT_POSITION:\s*(\w+)\s*\]", block)
         text_position = tp_match.group(1).strip().lower() if tp_match else None
@@ -312,8 +317,19 @@ def parse_reel_file(
             asset_path = p
 
         elif visual_type == "kling":
-            # Render clip first (post-kling_batch), fall back to source image (pre-kling_batch)
-            if ts_key in render_mapping:
+            if reuse_source and assets_dir:
+                # REUSE_SOURCE: resolve the source scene's expected clip path
+                try:
+                    _rs = re.sub(r"[–—]", "-", reuse_source).replace("s", "")
+                    _rs_parts = _rs.split("-")
+                    _rs_start, _rs_end = int(float(_rs_parts[0])), int(float(_rs_parts[1]))
+                    reuse_clip = assets_dir / f"kling_r{reel_number}_{_rs_start:02d}-{_rs_end:02d}s.mp4"
+                    asset_type = "video" if reuse_clip.exists() else "generated"
+                    asset_path = reuse_clip if reuse_clip.exists() else None
+                except (ValueError, IndexError):
+                    asset_type, asset_path = "generated", None
+            elif ts_key in render_mapping:
+                # Render clip first (post-kling_batch), fall back to source image (pre-kling_batch)
                 asset_type, asset_path = "video", render_mapping[ts_key]
             elif ts_key in source_mapping:
                 asset_type, asset_path = "image", source_mapping[ts_key]
@@ -347,6 +363,7 @@ def parse_reel_file(
             beat=beat,
             photo_type=photo_type,
             kling_avoid=kling_avoid,
+            reuse_source=reuse_source,
             text_position=text_position,
             text_timing=text_timing or None,
             plain_bg=plain_bg,
@@ -354,7 +371,13 @@ def parse_reel_file(
         ))
 
     for s in scenes:
-        if not s.critical and s.visual_type in ("kling", "static") and s.asset_path is None:
+        if (
+            not s.critical
+            and s.visual_type in ("kling", "static")
+            and s.asset_path is None
+            and not s.reuse_source   # reuse clip may not exist yet — not a warning
+            and not s.freeze_last_frame  # freeze scenes have no asset by design
+        ):
             warnings.warn(
                 f"Reel {reel_number}, scene {s.index} [{s.start_s:.0f}–{s.end_s:.0f}s] "
                 f"({s.visual_type}): asset not found — falling back to generated graphic. "

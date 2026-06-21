@@ -27,6 +27,7 @@ Usage:
 
 import argparse
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -40,19 +41,28 @@ from reel_pipeline.parser import parse_reel_file, read_reel_status
 
 
 def _is_kling_scene(scene) -> bool:
-    """True if this scene should be processed by kling_batch."""
+    """True if this scene needs a new Kling API call."""
     if scene.visual_type is not None:
-        return scene.visual_type == "kling"
+        return scene.visual_type == "kling" and not scene.reuse_source
     # Legacy blueprint without [VISUAL_TYPE:] — fall back to asset_type
     return scene.asset_type == "image"
 
 
 def _skip_label(scene) -> str:
+    if scene.visual_type == "kling" and scene.reuse_source:
+        return f"reuse — copy from {scene.reuse_source}"
     if scene.visual_type in ("generated", "timeline"):
         return "generated — skip"
     if scene.visual_type == "static":
         return "static — skip"
     return "generated — skip"
+
+
+def _parse_source_ts(ts: str) -> tuple[float, float]:
+    """'00-03s' or '00–03s' → (0.0, 3.0)"""
+    ts = re.sub(r"[–—]", "-", ts).replace("s", "")
+    parts = ts.split("-")
+    return float(parts[0]), float(parts[1])
 
 
 def _update_vep_render_column(blueprint: Path, start_s: float, end_s: float, render_filename: str) -> bool:
@@ -250,6 +260,31 @@ def main() -> None:
         print("\n  ✗ Image dimension errors — fix before generating:\n" + "\n".join(dim_errors))
         sys.exit(1)
 
+    # ── Reuse-copy pass (free — no API call) ─────────────────────────
+    # Runs always, regardless of --confirm-paid-api-call.
+    for scene in scenes:
+        if not (scene.visual_type == "kling" and scene.reuse_source):
+            continue
+        try:
+            rs_start, rs_end = _parse_source_ts(scene.reuse_source)
+        except (ValueError, IndexError):
+            print(f"  ⚠  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]: "
+                  f"could not parse REUSE_SOURCE '{scene.reuse_source}' — skip")
+            continue
+        src = _output_path(assets_dir, args.reel, rs_start, rs_end)
+        dst = _output_path(assets_dir, args.reel, scene.start_s, scene.end_s)
+        if dst.exists():
+            print(f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]  "
+                  f"reuse — already exists ({dst.name})")
+        elif src.exists():
+            shutil.copy2(src, dst)
+            print(f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]  "
+                  f"reuse — copied {src.name} → {dst.name}")
+            _update_vep_render_column(blueprint, scene.start_s, scene.end_s, f"canonical/{dst.name}")
+        else:
+            print(f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]  "
+                  f"reuse — source clip not yet generated ({src.name}) — run after source scene")
+
     if not args.confirm_paid_api_call:
         non_cached = [s for s in to_generate
                       if not fal_kling.get_cached_path(
@@ -276,8 +311,8 @@ def main() -> None:
     if status.upper() == "PUBLISHED":
         print(f"Error: reel {args.reel} is PUBLISHED — content is locked. No regeneration allowed.")
         sys.exit(1)
-    if status.upper() != "APPROVED":
-        print(f"Error: reel {args.reel} status is '{status}' — must be APPROVED before paid generation.")
+    if status.upper() not in {"APPROVED", "VISUALS-DIRECTED"}:
+        print(f"Error: reel {args.reel} status is '{status}' — must be APPROVED or VISUALS-DIRECTED before paid generation.")
         sys.exit(1)
 
     # ── Paid run ──────────────────────────────────────────────────────

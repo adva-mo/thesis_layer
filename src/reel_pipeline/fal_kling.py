@@ -23,6 +23,26 @@ from . import config
 
 KLING_MIN_DIMENSION = 300  # Kling rejects images smaller than 300×300px
 
+# Applied to every Kling call regardless of scene-specific KLING_AVOID.
+# Enforces the Realism Principle: animate reality, don't invent it.
+# Slow motion preference is the positive counterpart — stated in VISUAL_INTENT prompts.
+BASE_NEGATIVE_PROMPT = (
+    "camera shake, handheld camera motion, unstable footage, "
+    "fast camera movement, abrupt motion, jerky motion, rapid pan, zoom burst, "
+    "cars, vehicles, trucks, buses, motorcycles, "
+    "people, pedestrians, human figures, crowd, "
+    "new buildings, new structures, new foreground subjects not in source image, "
+    "lens flare, chromatic aberration, "
+    "distorted architecture, morphing buildings, warping surfaces, flickering"
+)
+
+
+def _build_negative_prompt(scene_avoid: Optional[str]) -> str:
+    """Merge BASE_NEGATIVE_PROMPT with any scene-specific KLING_AVOID."""
+    if scene_avoid and scene_avoid.strip():
+        return f"{BASE_NEGATIVE_PROMPT}, {scene_avoid.strip()}"
+    return BASE_NEGATIVE_PROMPT
+
 
 def portrait_crop_dimensions(w: int, h: int) -> tuple[int, int]:
     """Return (cropped_w, cropped_h) for a 9:16 portrait center-crop without doing the crop."""
@@ -84,7 +104,7 @@ def compute_cache_key(
     h.update(str(duration).encode())
     h.update(model.encode())
     h.update(config.ASPECT_RATIO.encode())  # portrait pre-crop changes the effective input
-    h.update((negative_prompt or "").encode())
+    h.update(_build_negative_prompt(negative_prompt).encode())
     return h.hexdigest()[:16]
 
 
@@ -117,12 +137,12 @@ def run_dry(
     except Exception:
         will_crop = False
 
+    full_negative = _build_negative_prompt(negative_prompt)
     print("\nDRY RUN — no API call will be made")
     print("─" * 41)
     print(f"  Image:         {rel_image}" + (" [will crop to portrait]" if will_crop else ""))
     print(f"  Prompt:        {prompt}")
-    if negative_prompt:
-        print(f"  Avoid:         {negative_prompt}")
+    print(f"  Avoid:         {full_negative}")
     print(f"  Duration:      {duration}s")
     print(f"  Aspect ratio:  {config.ASPECT_RATIO}")
     print(f"  Model:         {model}")
@@ -156,6 +176,7 @@ def generate_clip(
 
     os.environ["FAL_KEY"] = config.FAL_KEY
 
+    full_negative = _build_negative_prompt(negative_prompt)
     cache_key = compute_cache_key(image_path, prompt, duration, model, negative_prompt)
     cached = get_cached_path(cache_key)
 
@@ -182,13 +203,12 @@ def generate_clip(
         print(f"    [{status}]")
 
     api_args: dict = {
-        "image_url":    image_url,
-        "prompt":       prompt,
-        "duration":     str(duration),
-        "aspect_ratio": config.ASPECT_RATIO,
+        "image_url":      image_url,
+        "prompt":         prompt,
+        "duration":       str(duration),
+        "aspect_ratio":   config.ASPECT_RATIO,
+        "negative_prompt": full_negative,
     }
-    if negative_prompt:
-        api_args["negative_prompt"] = negative_prompt
 
     result = fal_client.subscribe(
         model,

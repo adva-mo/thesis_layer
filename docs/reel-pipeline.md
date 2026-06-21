@@ -29,14 +29,21 @@ assets/[slug]/          ← collected image assets (canonical/)
 ## Full Workflow
 
 ```
-1. Write reel script (.md blueprint)
+1. Write reel script (.md blueprint) — VO + beats only; visual fields left blank
 1.5. Pre-flight gate & refine   → templates/reels/reel-preflight.md (see content-generation-workflow.md Step 2.4 — refine in place, loop until approved)
-       ↳ reel's Status field is set to SCRIPTED. STOP — present the script to the user.
+       ↳ Retention layer + Naturalizer run here (Steps 2.4b–2.4c)
+       ↳ Status: SCRIPTED → RETENTION-REVIEWED → NATURALIZER-SIGNED
+       ↳ STOP — present the script to the user for approval
 
-       ⚠ Spend gate: every reel's metadata block carries a Status field (SCRIPTED → APPROVED).
+       ⚠ Spend gate: every reel's metadata block carries a Status field.
        Do not run step 2a/2b/3 with --confirm-paid-api-call until the user explicitly approves
        the script in conversation and Status is flipped to APPROVED. Preflight "Recommendation:
        approved" is a content-quality verdict, not user sign-off — see reel-preflight.md.
+
+1.7. Visuals Layer              → templates/reels/visuals-layer.md
+       ↳ director fills all visual fields + VEP rows directly in the blueprint (no API spend)
+       ↳ Status: VISUALS-DIRECTED. STOP — present visual plan to user for approval.
+       ↳ Do not proceed to step 2a/2b/3 until user approves the visual plan.
 
 2a. Generate TTS review        → scripts/generate/vo_combined.py --prepare-tts-review
     ↳ edit tts_review.md, set APPROVED: true
@@ -56,7 +63,7 @@ Steps 2b–3 can run in any order. Step 2a must complete (and be approved) befor
 
 **Status progression:**
 ```
-SCRIPTED → RETENTION-REVIEWED → NATURALIZER-SIGNED → APPROVED → PUBLISHED
+SCRIPTED → RETENTION-REVIEWED → NATURALIZER-SIGNED → APPROVED → VISUALS-DIRECTED → PUBLISHED
 ```
 `PUBLISHED` is the terminal state. The blueprint `**Status:**` field is the single source of truth — not the hook-log (which is an audit mirror).
 
