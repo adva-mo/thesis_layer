@@ -94,7 +94,7 @@ Before scripting any reel:
 ### Step 2 — Generate 5 Reel Scripts
 
 **Before scripting — read in this order:**
-1. `templates/reels/reel-template.md` — **format spec, mandatory first.** §Script Conventions defines every tag the parser requires. Key rules inline: `[VISUAL_TYPE: kling|static|generated|timeline]` required on every scene; `[VISUAL_INTENT:]` keyword must match the renderer contract (see §Generated graphic scenes for the full keyword table); `[MOTION_STYLE: MV_*]` for Kling scenes only; scenes must be separated by `---`; do NOT use deprecated `[VISUAL:]` or `[SCREEN:]` tags. If reel-template.md was already loaded at session init (CLAUDE.md §1.5), skip re-read.
+1. `templates/reels/reel-template.md` — **format spec, mandatory first.** §Script Conventions defines every tag the parser requires. Key rule: scenes must be separated by `---`; do NOT use deprecated `[VISUAL:]` or `[SCREEN:]` tags. **Visual fields (`[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`) are NOT written at script time — they are filled by the Visuals Layer (Step 2.5). Script provides `[BEAT:]`, `[VO:]`, `[TTS:]`, and `[TEXT_CARD:]` only when text on screen IS the content.** If reel-template.md was already loaded at session init (CLAUDE.md §1.5), skip re-read.
 2. `templates/reels/cadence-rules.md` — pick each reel's length/format against the current sprint mode (short vs long) before scripting, not after.
 3. `templates/reels/reel-preflight.md` — write every script to already pass this gate on the first draft, not just to satisfy it after the fact.
 3. Before writing each hook: identify the cadence and apply the Hook-Insight Integrity rule (reel-preflight.md). For **QUESTION cadence** — confirm the thesis contains a defensible answer (verified fact, supported inference, or clearly labeled hypothesis) that fits within the Insight segment. If no defensible answer exists, use **CONTRAST cadence** instead. For **CONTRAST cadence** — confirm the body will explain why the exception matters, not just show that it exists.
@@ -107,7 +107,7 @@ Each script includes:
 - Format name + duration
 - Hook line (first 3 seconds)
 - Insight segment `[4–15s]`: use thesis.md Thesis Statement as the source — do not re-derive the investment logic, adapt the language for spoken delivery
-- Body (timestamp segments with `[VISUAL:]` tags, VO lines)
+- Body (timestamp segments with `[BEAT:]` labels and `[VO:]` lines — no visual tags; those are filled by the Visuals Layer at Step 2.5)
 - Reality check segment `[28–38s]`: draw from thesis.md Risk Register — do not independently re-derive risks
 - Voice style: use thesis.md Voice Style — do not select per-reel
 - Closing CTA (Tier 2): use thesis.md CTA Keyword
@@ -174,32 +174,67 @@ Write the naturalizer sign-off in the reel file:
 - `_Naturalizer applied: [date] — No meaningful language issues._`
 - `_Naturalizer applied: [date] — [list of changes made]_`
 
-After naturalizer sign-off: set reel's `**Status:**` field to `NATURALIZER-SIGNED`. **Present the script to the user now.**
+After naturalizer sign-off: set reel's `**Status:**` field to `NATURALIZER-SIGNED`. **Present the script to the user now, together with the timing confirmation table below.**
 
-**Do not proceed to Step 2.5 (asset collection) or any paid API call until the user explicitly approves the script.** Naturalizer sign-off is a language-quality verdict, not spend authorization. Once the user approves, update `**Status:**` to `APPROVED` before continuing.
+### VO Timing Confirmation (present at Gate 1, alongside the script)
+
+Retention guarantees timing fit before this point. This table is a sanity check — in normal flow it shows all ✓. A ⚠ here means an escalation case that retention surfaced and the user already resolved, or a bug.
+
+| Scene | Slot | Est. duration | Status |
+|---|---|---|---|
+| [timestamp] | Ns | ~Xs | ✓ |
+
+**Formula:** `estimated_seconds = len(vo_text_stripped) / (chars_per_second_he × video_speed)`
+= `len(vo_text_stripped) / 9.72`
+(Source: `config/voice-settings.json` → `chars_per_second_he` × `video_speed`. Strip punctuation, quote marks, bracketed tags before counting.)
+
+**If any scene shows ⚠ here:** retention did not complete timing compression — re-run retention before proceeding.
+
+**Do not proceed to Step 2.5 (Visuals Layer) or any paid API call until the user explicitly approves the script.** Once the user approves, update `**Status:**` to `APPROVED` before continuing.
 
 Status progression: `SCRIPTED` → `RETENTION-REVIEWED` → `NATURALIZER-SIGNED` → `APPROVED`
 
 ---
 
-### Step 2.5 — Asset Collection
+### Step 2.5 — Visuals Layer
+
+Reference: `templates/reels/visuals-layer.md`
+
+Prerequisites: Status = `APPROVED` (user has approved the VO in conversation). No paid API calls have run yet.
+
+For each approved reel:
+
+1. Read `templates/reels/visuals-layer.md`
+2. Inventory canonical assets from `assets/[project-slug]/manifest.md`
+3. Direct the full visual execution — fill `[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`, and `[KLING_AVOID:]` directly in the reel blueprint for every scene
+4. Append the Visual Evidence Plan (VEP) section to the reel file, with one row per scene
+5. Write Vision Flags for any segments requiring new asset collection
+6. Set the reel's `**Status:**` to `VISUALS-DIRECTED`
+7. **Present the visual plan to the user now.** Show the execution table, arc summary, and VEP rows.
+
+**Do not proceed to Step 2.6 (asset collection) or any paid API call until the user explicitly approves the visual plan.** `VISUALS-DIRECTED` means the plan is ready for review — it is not spend authorization.
+
+Status progression: `APPROVED` → `VISUALS-DIRECTED` (awaiting user sign-off on visuals)
+
+---
+
+### Step 2.6 — Asset Collection
 
 Reference: `templates/asset-collection.md`
 
-Prerequisites: Step 2 complete. API keys present in `.env`: `UNSPLASH_ACCESS_KEY`, `GOOGLE_MAPS_KEY`.
+Prerequisites: Step 2.5 complete (Visuals Layer has filled all visual fields and produced VEP rows). API keys present in `.env`: `UNSPLASH_ACCESS_KEY`, `GOOGLE_MAPS_KEY`.
 
-For each reel generated in Step 2:
-1. Append a Visual Evidence Plan section to the reel file (see format in `templates/reels/reel-template.md` — Visual Evidence Plan)
-   - Anti-collect list: copy from `output/[project-slug]/thesis.md` — Anti-Collect Guidance. Do not write per-reel from scratch.
-2. Execute `templates/asset-collection.md` against that plan
-3. Save validated assets to `assets/[project-slug]/canonical/`
-4. Move vision-rejected assets to `assets/[project-slug]/raw/rejected/`
-5. Update `assets/[project-slug]/manifest.md`
-6. Append the Collection Status Report to the reel file
+For each reel directed in Step 2.5:
+1. Execute `templates/asset-collection.md` against the VEP already in the reel file
+   - Anti-collect list: copy from `output/[project-slug]/thesis.md` — Anti-Collect Guidance. Do not re-derive per reel.
+2. Save validated assets to `assets/[project-slug]/canonical/`
+3. Move vision-rejected assets to `assets/[project-slug]/raw/rejected/`
+4. Update `assets/[project-slug]/manifest.md`
+5. Append the Collection Status Report to the reel file
 
-If API keys are absent: generate Visual Evidence Plans and search terms only. Mark each reel `PARTIAL — AWAITING API KEYS`. Execute collection when keys are available.
+If API keys are absent: generate search terms from Vision Flags only. Mark each reel `PARTIAL — AWAITING API KEYS`. Execute collection when keys are available.
 
-Step 2.5 is skipped for: PDF-only projects, LinkedIn-only outputs, or any project with no reel scripts.
+Step 2.6 is skipped for: PDF-only projects, LinkedIn-only outputs, or any project with no reel scripts.
 
 ---
 
