@@ -96,7 +96,7 @@ def _clip_duration(segment_s: float) -> int:
 
 
 def _output_path(assets_dir: Path, reel_number: int, start_s: float, end_s: float) -> Path:
-    return assets_dir / f"kling_r{reel_number}_{int(start_s):02d}-{int(end_s):02d}s.mp4"
+    return assets_dir / "canonical" / f"kling_r{reel_number}_{int(start_s):02d}-{int(end_s):02d}s.mp4"
 
 
 def _estimate_cost(scenes_to_generate: list, model: str) -> str:

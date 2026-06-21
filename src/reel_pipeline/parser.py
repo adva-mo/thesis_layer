@@ -323,7 +323,7 @@ def parse_reel_file(
                     _rs = re.sub(r"[–—]", "-", reuse_source).replace("s", "")
                     _rs_parts = _rs.split("-")
                     _rs_start, _rs_end = int(float(_rs_parts[0])), int(float(_rs_parts[1]))
-                    reuse_clip = assets_dir / f"kling_r{reel_number}_{_rs_start:02d}-{_rs_end:02d}s.mp4"
+                    reuse_clip = assets_dir / "canonical" / f"kling_r{reel_number}_{_rs_start:02d}-{_rs_end:02d}s.mp4"
                     asset_type = "video" if reuse_clip.exists() else "generated"
                     asset_path = reuse_clip if reuse_clip.exists() else None
                 except (ValueError, IndexError):

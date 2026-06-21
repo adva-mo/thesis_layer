@@ -325,6 +325,17 @@ def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, heigh
         word_metrics.append((word, advance_w, bbox))
 
     total_w = sum(m[1] for m in word_metrics) + space_w * max(0, n_visual - 1)
+
+    # Overflow check: if a pure-script phrase is too wide, split at midpoint into two lines.
+    max_text_w = width - BAR_PADDING_X * 2
+    if total_w > max_text_w and len(word_texts) >= 2:
+        mid = len(word_texts) // 2
+        script = 'hebrew' if is_rtl else 'latin'
+        al, awdx = (0, active_idx) if active_idx < mid else (1, active_idx - mid)
+        return _render_two_lines(
+            word_texts[:mid], word_texts[mid:], script, script, al, awdx, font, width, height,
+        )
+
     ascent, descent = font.getmetrics()
     line_h = ascent + descent
 
@@ -385,7 +396,8 @@ def build_spans(
         elif mode == "highlighted_phrase":
             for i, word in enumerate(phrase.words):
                 img = _render_highlighted(phrase, i, font, width, height)
-                spans.append(SubtitleSpan(img, word.start, word.end))
+                span_end = phrase.words[i + 1].start if i + 1 < len(phrase.words) else word.end
+                spans.append(SubtitleSpan(img, word.start, span_end))
 
         elif mode == "single_word":
             for word in phrase.words:
