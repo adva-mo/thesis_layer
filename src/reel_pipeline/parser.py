@@ -47,7 +47,8 @@ class Scene:
     kling_avoid: Optional[str] = None   # [KLING_AVOID:] — sent as negative_prompt to Kling API (scene-specific; base is in fal_kling.BASE_NEGATIVE_PROMPT)
     reuse_source: Optional[str] = None  # [REUSE_SOURCE: HH-HHs] — reuse the Kling clip from this timestamp instead of generating a new one
     text_position: Optional[str] = None # [TEXT_POSITION: center|bottom] — overrides beat-based y_ratio default
-    text_timing: Optional[list[tuple[str, float, float, str | None]]] = None  # [TEXT_TIMING: text @ s-e [top|center|bottom] | ...]
+    text_font_size: Optional[int] = None  # [FONT_SIZE: N] — overrides default font size for TEXT_CARD
+    text_timing: Optional[list[tuple[str, float, float, str | None, int | None]]] = None  # [TEXT_TIMING: text @ s-e [top|center|bottom] [size:N] | ...]
     plain_bg: bool = False              # [PLAIN_BG: yes] — skip blur bg for generated scenes
     freeze_last_frame: bool = False     # [FREEZE_LAST_FRAME: yes] — hold last frame of prev scene
 
@@ -257,6 +258,9 @@ def parse_reel_file(
         tp_match = re.search(r"\[TEXT_POSITION:\s*(\w+)\s*\]", block)
         text_position = tp_match.group(1).strip().lower() if tp_match else None
 
+        fs_match = re.search(r"\[FONT_SIZE:\s*(\d+)\s*\]", block)
+        text_font_size = int(fs_match.group(1)) if fs_match else None
+
         tt_match = re.search(r"\[TEXT_TIMING:\s*(.*?)\]", block, re.DOTALL)
         text_timing = None
         if tt_match:
@@ -267,16 +271,24 @@ def parse_reel_file(
                 if len(parts) == 2:
                     txt = parts[0].strip()
                     time_part = parts[1].strip()
-                    # Optional position token: "0.5-2.0 top" or "0.5-2.0"
                     time_tokens = time_part.split()
                     position = None
+                    entry_font_size = None
+                    # Extract size:N token
+                    size_tokens = [t for t in time_tokens if t.lower().startswith("size:")]
+                    if size_tokens:
+                        try:
+                            entry_font_size = int(size_tokens[0].split(":")[1])
+                        except (ValueError, IndexError):
+                            pass
+                        time_tokens = [t for t in time_tokens if not t.lower().startswith("size:")]
                     if len(time_tokens) >= 2 and time_tokens[-1].lower() in _positions:
                         position = time_tokens[-1].lower()
                         time_tokens = time_tokens[:-1]
                     times = " ".join(time_tokens).split("-")
                     if len(times) == 2:
                         try:
-                            text_timing.append((txt, float(times[0].strip()), float(times[1].strip()), position))
+                            text_timing.append((txt, float(times[0].strip()), float(times[1].strip()), position, entry_font_size))
                         except ValueError:
                             pass
 
@@ -365,6 +377,7 @@ def parse_reel_file(
             kling_avoid=kling_avoid,
             reuse_source=reuse_source,
             text_position=text_position,
+            text_font_size=text_font_size,
             text_timing=text_timing or None,
             plain_bg=plain_bg,
             freeze_last_frame=freeze_last_frame,

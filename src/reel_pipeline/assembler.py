@@ -282,19 +282,21 @@ def assemble_reel(
             beat_default_yr = 0.55 if beat == "hook" else TEXT_Y_RATIO
             _pos_map = {"top": 0.30, "center": 0.55, "bottom": 0.75}
             print(f"    Text:     {len(scene.text_timing)} timed entries → screen_text.json")
-            for text, rel_start, rel_end, position in scene.text_timing:
+            for entry in scene.text_timing:
+                text, rel_start, rel_end, position = entry[0], entry[1], entry[2], entry[3]
+                entry_fs = entry[4] if len(entry) > 4 and entry[4] is not None else font_size
                 _yr = _pos_map.get(position, beat_default_yr) if position else beat_default_yr
                 screen_text_entries.append({
                     "text": text,
                     "start": round(scene_start_s + rel_start, 4),
                     "end": round(scene_start_s + rel_end, 4),
                     "y_ratio": _yr,
-                    "font_size": font_size,
+                    "font_size": entry_fs,
                 })
         elif scene.text_card:
             beat = _resolve_beat(scene, len(scenes))
             is_hook = beat == "hook"
-            _fs = 96 if is_hook else font_size
+            _fs = scene.text_font_size if scene.text_font_size is not None else (96 if is_hook else font_size)
             if scene.text_position == "bottom":
                 _yr = 0.75
             elif scene.text_position == "center":

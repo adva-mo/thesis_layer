@@ -216,7 +216,10 @@ Standard kling scene:
 [VISUAL_INTENT: ...]
 [MOTION_STYLE: MV_*]
 [KLING_AVOID: ...]      ← only when hallucination risk is high for this scene
-[TEXT_CARD: ...]        ← only when On Screen column has content
+[TEXT_CARD: ...]        ← single text block; omit if using TEXT_TIMING
+[TEXT_POSITION: center|bottom|top]  ← optional; omit to use beat default
+[FONT_SIZE: N]          ← optional; overrides default font size for TEXT_CARD (default: 72)
+[TEXT_TIMING: word1 @ 0.0-1.2 center size:96 | word2 @ 1.2-2.5 bottom size:72 | ...]  ← timed per-word or per-phrase overlays; each entry supports optional position and size:N tokens; use instead of TEXT_CARD when timing, position, or size varies within the scene
 
 [VO:]
 "..."
