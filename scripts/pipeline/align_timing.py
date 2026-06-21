@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """
+DEPRECATED — transcript.json is now generated automatically by vo_combined.py
+at the end of each VO generation run. No separate invocation needed.
+
 Build transcript.json from ElevenLabs /with-timestamps alignment data.
 
 Use this after vo_combined.py — it converts the character-level alignment.json

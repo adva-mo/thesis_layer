@@ -116,6 +116,64 @@ def parse_reel(md_path, reel_num):
 
 # ── ffmpeg helpers ────────────────────────────────────────────────
 
+def _probe_duration(path: Path) -> float:
+    r = subprocess.run(
+        ["ffprobe", "-v", "quiet", "-show_entries", "format=duration", "-of", "csv=p=0", str(path)],
+        capture_output=True, text=True,
+    )
+    return float(r.stdout.strip())
+
+
+def _write_transcript(alignment, segments_info, out_paths, atempo, output_dir):
+    """Convert character-level alignment.json → word-level transcript.json using actual MP3 durations."""
+    chars  = alignment["characters"]
+    starts = alignment["character_start_times_seconds"]
+    ends   = alignment["character_end_times_seconds"]
+
+    # Scene video start times from actual (not theoretical) MP3 durations
+    scene_video_starts = []
+    t = 0.0
+    for p in out_paths:
+        scene_video_starts.append(t)
+        t += _probe_duration(p)
+
+    # Raw TTS cut boundaries per segment (last segment ends at final char)
+    seg_cuts = [(info["cut_start"], info["cut_end"] if info["cut_end"] is not None else ends[-1])
+                for info in segments_info]
+
+    def raw_to_video(raw_t):
+        seg = 0
+        for i in range(len(seg_cuts) - 1, -1, -1):
+            if raw_t >= seg_cuts[i][0]:
+                seg = i
+                break
+        return round(scene_video_starts[seg] + (raw_t - seg_cuts[seg][0]) / atempo, 3)
+
+    # Group characters into words, preserving punctuation
+    words, cur, cur_s, cur_e = [], [], None, None
+    for c, s, e in zip(chars, starts, ends):
+        if c in (" ", "\n"):
+            if cur:
+                words.append(("".join(cur), cur_s, cur_e))
+                cur, cur_s, cur_e = [], None, None
+        else:
+            if cur_s is None:
+                cur_s = s
+            cur_e = e
+            cur.append(c)
+    if cur:
+        words.append(("".join(cur), cur_s, cur_e))
+
+    chunks = [
+        {"text": text, "timestamp": [raw_to_video(ws), raw_to_video(we)]}
+        for text, ws, we in words if text.strip()
+    ]
+    (output_dir / "transcript.json").write_text(
+        json.dumps({"chunks": chunks}, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    print(f"  ✓ transcript.json — {len(chunks)} words, scene starts: {[round(s,3) for s in scene_video_starts]}")
+
+
 def _cut(combined_tmp, start, end, out_path, atempo):
     """Cut a slice from combined_tmp, apply atempo, save to out_path."""
     with tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as t:
@@ -287,6 +345,7 @@ def main():
     finally:
         os.unlink(combined_tmp)
 
+    _write_transcript(alignment, segments_info, out_paths, atempo, output_dir)
 
     print(f"\n  Done.  {len(segments)} segments  |  1 API call")
     print(f"  Folder: {output_dir}\n")
