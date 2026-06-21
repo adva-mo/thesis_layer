@@ -336,8 +336,17 @@ def parse_reel_file(
                     _rs_parts = _rs.split("-")
                     _rs_start, _rs_end = int(float(_rs_parts[0])), int(float(_rs_parts[1]))
                     reuse_clip = assets_dir / "canonical" / f"kling_r{reel_number}_{_rs_start:02d}-{_rs_end:02d}s.mp4"
-                    asset_type = "video" if reuse_clip.exists() else "generated"
-                    asset_path = reuse_clip if reuse_clip.exists() else None
+                    if reuse_clip.exists():
+                        asset_type = "video"
+                        asset_path = reuse_clip
+                    else:
+                        warnings.warn(
+                            f"Reel {reel_number}, scene at {ts_match.group(1)}: "
+                            f"REUSE_SOURCE clip not found ({reuse_clip.name}) — "
+                            f"run kling_batch.py first so the source clip exists before rendering.",
+                            stacklevel=2,
+                        )
+                        asset_type, asset_path = "generated", None
                 except (ValueError, IndexError):
                     asset_type, asset_path = "generated", None
             elif ts_key in render_mapping:

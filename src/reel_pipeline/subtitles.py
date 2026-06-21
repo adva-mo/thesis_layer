@@ -26,7 +26,7 @@ DEFAULT_MODE        = "highlighted_phrase"
 DEFAULT_MAX_WORDS   = 9
 DEFAULT_MAX_DUR     = 4.5
 DEFAULT_PAUSE_THR   = 0.40   # seconds between words to trigger phrase split
-DEFAULT_MAX_CHARS   = 22     # total chars (incl. spaces) per phrase — prevents wide overflow
+DEFAULT_MAX_CHARS   = 35     # total chars (incl. spaces) per phrase — prevents wide overflow
 
 FONT_SIZE_SUBTITLE  = 86
 

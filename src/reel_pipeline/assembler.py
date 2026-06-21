@@ -108,13 +108,13 @@ def _concat_with_transitions(
     work_dir: Path,
     width: int,
     height: int,
-) -> None:
+) -> list[float]:
     """Assemble scene clips with xfade transitions via filter_complex (re-encode)."""
     if len(scene_clips) == 1:
         # Single scene — copy directly, no transition needed
         _ffmpeg("-i", str(scene_clips[0]), "-c:v", "libx264", "-crf", "18",
                 "-preset", "fast", "-an", str(output), label="single-scene copy")
-        return
+        return [0.0]
 
     n = len(scene_clips)
     total = len(scenes)
@@ -125,6 +125,7 @@ def _concat_with_transitions(
     filter_parts: list[str] = []
     cumulative_offset = 0.0
     prev_label = "[0:v]"
+    scene_video_starts = [0.0]   # actual video start time per scene after xfade overlap
 
     for i in range(n - 1):
         to_beat = _resolve_beat(scenes[i + 1], total)
@@ -136,6 +137,7 @@ def _concat_with_transitions(
 
         offset = cumulative_offset + clip_dur - xf_dur
         cumulative_offset += clip_dur - xf_dur
+        scene_video_starts.append(cumulative_offset)
 
         next_input = f"[{i + 1}:v]"
         out_label  = f"[xf{i:02d}]"
@@ -158,6 +160,7 @@ def _concat_with_transitions(
         str(output),
         label="concat with transitions",
     )
+    return scene_video_starts
 
 
 def assemble_reel(
@@ -193,6 +196,7 @@ def assemble_reel(
     audio_files: list[Path] = []
     screen_text_entries: list[dict] = []
     running_time: float = 0.0
+    scene_running_starts: list[float] = []   # running_time at start of each scene (pre-xfade)
     # Pre-scan: find first usable background asset anywhere in the reel.
     # Images are strongly preferred over video clips — blurring a still image
     # for a generated scene background is always more stable than extracting a
@@ -301,6 +305,8 @@ def assemble_reel(
                 _yr = 0.75
             elif scene.text_position == "center":
                 _yr = 0.55
+            elif scene.text_position == "top":
+                _yr = 0.30
             else:
                 _yr = 0.55 if is_hook else 0.75
             print(f"    Text:     {scene.text_card!r} → screen_text.json")
@@ -315,6 +321,7 @@ def assemble_reel(
 
         final_clip = work_dir / f"scene_{scene.index:02d}_final.mp4"
         base_clip.rename(final_clip)
+        scene_running_starts.append(running_time)
         running_time += duration
 
         scene_clips.append(final_clip)
@@ -324,7 +331,17 @@ def assemble_reel(
     video_only = work_dir / "video_only.mp4"
     if transitions and len(scene_clips) > 1:
         print("\n  Concatenating video clips (with transitions)...")
-        _concat_with_transitions(scene_clips, scenes, video_only, work_dir, width, height)
+        scene_video_starts = _concat_with_transitions(scene_clips, scenes, video_only, work_dir, width, height)
+        # Re-anchor screen_text_entries: xfade overlap shifts each scene's actual start
+        # relative to the running_time that was used when the entries were built.
+        if screen_text_entries and scene_running_starts:
+            for entry in screen_text_entries:
+                for k in range(len(scene_running_starts) - 1, -1, -1):
+                    if entry["start"] >= scene_running_starts[k] - 0.001:
+                        correction = scene_video_starts[k] - scene_running_starts[k]
+                        entry["start"] = round(entry["start"] + correction, 4)
+                        entry["end"]   = round(entry["end"]   + correction, 4)
+                        break
     else:
         print("\n  Concatenating video clips...")
         concat_list = work_dir / "concat_video.txt"
