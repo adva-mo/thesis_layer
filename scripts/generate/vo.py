@@ -215,18 +215,11 @@ def parse_reel_file(md_path):
 
 def infer_output_dir(md_path):
     """
-    Given output/club-place/hebrew/reels/club-place-he-reels.md
-    return output/club-place/audio/
+    Given output/[slug]/hebrew/reels/[slug]-he-reels.md
+    return output/[slug]/hebrew/reels/
+    Caller appends reel_{N:02d}/audio/ to get the final segment dir.
     """
-    p = Path(md_path).resolve()
-    # Walk up to find output/<slug>/
-    parts = p.parts
-    try:
-        out_idx = parts.index('output')
-        slug    = parts[out_idx + 1]
-        return REPO_ROOT / 'output' / slug / 'audio'
-    except (ValueError, IndexError):
-        return p.parent / 'audio'
+    return Path(md_path).resolve().parent
 
 # ── Main ──────────────────────────────────────────────────────────
 
@@ -284,7 +277,7 @@ def main():
 
         has_warnings = False
         for reel in reels:
-            reel_dir = audio_root / f"reel{reel['number']}"
+            reel_dir = audio_root / f"reel_{reel['number']:02d}" / "audio"
             for i, seg in enumerate(reel['segments'], 1):
                 if args.segment is not None and i != args.segment:
                     continue

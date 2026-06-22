@@ -261,7 +261,11 @@ def main():
     if status.upper() == "PUBLISHED":
         print(f"Error: reel {args.reel} is PUBLISHED — content is locked. No regeneration allowed.")
         sys.exit(1)
-    if status.upper() != "APPROVED":
+    _post_approval = {"VISUAL-DIRECTED", "VISUAL-APPROVED"}
+    if status.upper() in _post_approval:
+        print(f"  ⚠  Reel {args.reel} status is '{status}' — VO was previously approved.")
+        print("     Proceeding with manual VO re-generation. Update the blueprint after regenerating.\n")
+    elif status.upper() != "APPROVED":
         print(f"Error: reel {args.reel} status is '{status}' — must be APPROVED before generating VO.")
         sys.exit(1)
 

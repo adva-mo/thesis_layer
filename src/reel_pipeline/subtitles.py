@@ -307,9 +307,10 @@ def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, heigh
     visual_words = visual_phrase.split()
 
     n_visual = len(visual_words)
-    # BiDi reverses RTL word order; only mirror the logical index for Hebrew phrases.
-    # Pure Latin phrases are unchanged by get_display, so logical == visual order.
-    is_rtl = any(_word_script(w) == 'hebrew' for w in word_texts)
+    # BiDi reverses RTL word order; mirror the logical index whenever any Hebrew
+    # character is present — even a single prefix like "ב-Business" causes get_display
+    # to reorder words in an RTL paragraph, so word-script classification is insufficient.
+    is_rtl = any('֐' <= c <= '׿' for c in full_text)
     visual_active_idx = max(0, min(n_visual - 1, (n_visual - 1 - active_idx) if is_rtl else active_idx))
 
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))

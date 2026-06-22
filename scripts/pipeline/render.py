@@ -10,7 +10,7 @@ Usage:
     python3 scripts/render_reel.py \\
         --blueprint output/club-place-dubai-hills/hebrew/reels/club-place-dubai-hills-he-reels.md \\
         --audio-dir output/club-place-dubai-hills/experiments/ \\
-        --assets-dir assets/club-place-dubai-hills/canonical/ \\
+        --assets-dir assets/club-place-dubai-hills \\
         --output output/club-place-dubai-hills/hebrew/reels/club-place-dubai-hills-he-reel-1-draft.mp4 \\
         --reel 1 --max-scenes 2
 
@@ -119,6 +119,9 @@ def main():
     blueprint      = Path(args.blueprint)
     audio_dir      = Path(args.audio_dir)
     assets_dir     = Path(args.assets_dir)
+    # parser.py appends canonical/ internally — strip it if the caller already included it
+    if assets_dir.name == "canonical":
+        assets_dir = assets_dir.parent
     output         = Path(args.output)
     font_path      = Path(args.font)
     clip_overrides = _parse_clip_overrides(args.clip_override)
