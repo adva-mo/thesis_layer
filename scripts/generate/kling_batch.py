@@ -300,8 +300,8 @@ def main() -> None:
     if status.upper() == "PUBLISHED":
         print(f"Error: reel {args.reel} is PUBLISHED — content is locked. No regeneration allowed.")
         sys.exit(1)
-    if status.upper() not in {"APPROVED", "VISUALS-DIRECTED"}:
-        print(f"Error: reel {args.reel} status is '{status}' — must be APPROVED or VISUALS-DIRECTED before paid generation.")
+    if status.upper() != "VISUAL-APPROVED":
+        print(f"Error: reel {args.reel} status is '{status}' — must be VISUAL-APPROVED before generating Kling clips.")
         sys.exit(1)
 
     # ── Paid run ──────────────────────────────────────────────────────

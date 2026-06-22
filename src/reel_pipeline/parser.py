@@ -176,7 +176,7 @@ def _extract_status(body: str) -> Optional[str]:
 def read_reel_status(md_path: Path, reel_number: int) -> Optional[str]:
     """
     Read the **Status:** value from the reel metadata block.
-    Returns the raw status string (e.g. 'APPROVED', 'SCRIPTED') or None if not found.
+    Returns the raw status string (e.g. 'APPROVED', 'VISUAL-APPROVED', 'PUBLISHED') or None if not found.
     """
     content = md_path.read_text(encoding="utf-8")
     reel_splits = re.split(r"^## (Reel \d+ — .+?)$", content, flags=re.MULTILINE)

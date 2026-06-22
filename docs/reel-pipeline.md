@@ -32,18 +32,18 @@ assets/[slug]/          ← collected image assets (canonical/)
 1. Write reel script (.md blueprint) — VO + beats only; visual fields left blank
 1.5. Pre-flight gate & refine   → templates/reels/reel-preflight.md (see content-generation-workflow.md Step 2.4 — refine in place, loop until approved)
        ↳ Retention layer + Naturalizer run here (Steps 2.4b–2.4c)
-       ↳ Status: SCRIPTED → RETENTION-REVIEWED → NATURALIZER-SIGNED
+       ↳ Status: SCRIPTED → RETENTION → NATURALIZER
        ↳ STOP — present the script to the user for approval
 
-       ⚠ Spend gate: every reel's metadata block carries a Status field.
-       Do not run step 2a/2b/3 with --confirm-paid-api-call until the user explicitly approves
-       the script in conversation and Status is flipped to APPROVED. Preflight "Recommendation:
-       approved" is a content-quality verdict, not user sign-off — see reel-preflight.md.
+       ⚠ VO spend gate: user flips Status to APPROVED to authorise paid VO generation.
+       Preflight "Recommendation: approved" is a content-quality verdict, not user sign-off
+       — see reel-preflight.md. vo_combined.py hard-stops on any status other than APPROVED.
 
 1.7. Visuals Layer              → templates/reels/visuals-layer.md
        ↳ director fills all visual fields + VEP rows directly in the blueprint (no API spend)
-       ↳ Status: VISUALS-DIRECTED. STOP — present visual plan to user for approval.
-       ↳ Do not proceed to step 2a/2b/3 until user approves the visual plan.
+       ↳ Status: VISUAL-DIRECTED. STOP — present visual plan to user for approval.
+       ↳ User flips Status to VISUAL-APPROVED to authorise Kling spend.
+       ↳ kling_batch.py hard-stops on any status other than VISUAL-APPROVED.
 
 2a. Generate TTS review        → scripts/generate/vo_combined.py --prepare-tts-review
     ↳ edit tts_review.md, set APPROVED: true
@@ -63,9 +63,14 @@ Steps 2b–3 can run in any order. Step 2a must complete (and be approved) befor
 
 **Status progression:**
 ```
-SCRIPTED → RETENTION-REVIEWED → NATURALIZER-SIGNED → APPROVED → VISUALS-DIRECTED → PUBLISHED
+SCRIPTED → RETENTION → NATURALIZER → APPROVED → VISUAL-DIRECTED → VISUAL-APPROVED → PUBLISHED
 ```
 `PUBLISHED` is the terminal state. The blueprint `**Status:**` field is the single source of truth — not the hook-log (which is an audit mirror).
+
+**Who sets each status:**
+- `SCRIPTED` / `RETENTION` / `NATURALIZER` — agent, after each review step completes
+- `APPROVED` / `VISUAL-DIRECTED` / `VISUAL-APPROVED` — user only (spend authorisation)
+- `PUBLISHED` — user only (terminal; cannot be unset)
 
 **What PUBLISHED locks:**
 - `kling_batch.py` and `vo_combined.py` hard-stop on PUBLISHED reels — no regeneration allowed
@@ -229,7 +234,7 @@ The avoid string is included in the cache key — changing it invalidates the ex
 
 ### vo_combined.py — ElevenLabs TTS via `/with-timestamps` *(standard)*
 
-**Spend gate:** do not run with `--confirm-paid-api-call` unless the reel's `Status` field is `APPROVED`. Dry-run (no flag) is always fine.
+**Spend gate:** requires `Status: APPROVED`. Script must be approved by the user before paid VO generation. Dry-run (no flag) is always fine.
 
 Sends all segments as one combined string to the ElevenLabs `/with-timestamps` endpoint. Returns audio + character-level alignment in a single API call, then splits the audio by alignment offsets.
 
@@ -296,7 +301,7 @@ python3 scripts/generate/vo.py output/[slug]/hebrew/reels/[slug]-he-reels.md \
 
 ### kling_batch.py — Batch Kling I2V *(recommended)*
 
-**Spend gate:** do not run with `--confirm-paid-api-call` unless the reel's `Status` field is `APPROVED`. Dry-run (no flag) is always fine.
+**Spend gate:** do not run with `--confirm-paid-api-call` unless the reel's `Status` field is `VISUAL-APPROVED`. Dry-run (no flag) is always fine.
 
 Reads a reel blueprint, finds all image-type scenes, and generates one Kling clip per scene. Output filenames are derived from `scene.index` — no manual counting, no naming mistakes.
 

@@ -144,6 +144,14 @@ def main():
         print_dry_run(scenes, audio_dir, output, clip_overrides)
         return
 
+    # ── Audio pre-flight ─────────────────────────────────────────
+    missing_audio = [s for s in scenes if _find_audio(audio_dir, s.index) is None]
+    if missing_audio:
+        print("\n  ✗ Missing VO audio — run vo_combined.py first:")
+        for s in missing_audio:
+            print(f"    Scene {s.index} [{s.start_s:.0f}–{s.end_s:.0f}s]: seg{s.index:02d}_*.mp3 not found in {audio_dir}")
+        sys.exit(1)
+
     # ── Kling fallback gate ───────────────────────────────────────
     if not args.draft:
         kling_fallbacks = [
