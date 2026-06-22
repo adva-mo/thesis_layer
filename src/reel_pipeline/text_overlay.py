@@ -89,7 +89,7 @@ def _render_text_overlay(
     line_gap = int(line_h * 0.15)
 
     widths = [
-        draw.textbbox((0, 0), v, font=font)[2] - draw.textbbox((0, 0), v, font=font)[0]
+        (bb := draw.textbbox((0, 0), v, font=font))[2] - bb[0]
         for v in visuals
     ]
     total_h = line_h * len(visuals) + line_gap * (len(visuals) - 1) + BAR_PADDING_Y * 2

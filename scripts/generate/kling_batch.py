@@ -197,6 +197,7 @@ def main() -> None:
     print(f"  Model:     {model}")
     print()
 
+    dim_errors: list[str] = []   # populated during plan print; reused for abort gate
     for scene in scenes:
         in_filter = not scene_filter or scene.index in scene_filter
         if not _is_kling_scene(scene) or not in_filter:
@@ -208,7 +209,7 @@ def main() -> None:
         out_path = _output_path(assets_dir, args.reel, scene.start_s, scene.end_s)
         prompt   = resolved_prompts.get(scene.index, "")
 
-        # Portrait crop detection + dimension check
+        # Portrait crop detection + dimension check (results reused for abort gate below)
         crop_note  = ""
         dim_error  = ""
         try:
@@ -216,10 +217,13 @@ def main() -> None:
             img = _Img.open(scene.asset_path)
             w, h = img.size
             cw, ch = fal_kling.portrait_crop_dimensions(w, h)
-            will_crop = (cw, ch) != (w, h)
-            if will_crop:
+            if (cw, ch) != (w, h):
                 if cw < fal_kling.KLING_MIN_DIMENSION or ch < fal_kling.KLING_MIN_DIMENSION:
                     dim_error = f" [TOO SMALL after crop: {cw}×{ch}px — min {fal_kling.KLING_MIN_DIMENSION}px]"
+                    dim_errors.append(
+                        f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]: "
+                        f"{scene.asset_path.name} crops to {cw}×{ch}px — below Kling minimum"
+                    )
                 else:
                     crop_note = f" [will crop to portrait: {cw}×{ch}px]"
         except Exception:
@@ -241,21 +245,6 @@ def main() -> None:
         print("\n  Nothing to generate.")
         return
 
-    # Abort if any scene has a post-crop dimension error (checked during plan print)
-    dim_errors = []
-    for scene in to_generate:
-        try:
-            from PIL import Image as _Img
-            img = _Img.open(scene.asset_path)
-            w, h = img.size
-            cw, ch = fal_kling.portrait_crop_dimensions(w, h)
-            if cw < fal_kling.KLING_MIN_DIMENSION or ch < fal_kling.KLING_MIN_DIMENSION:
-                dim_errors.append(
-                    f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]: "
-                    f"{scene.asset_path.name} crops to {cw}×{ch}px — below Kling minimum"
-                )
-        except Exception:
-            pass
     if dim_errors:
         print("\n  ✗ Image dimension errors — fix before generating:\n" + "\n".join(dim_errors))
         sys.exit(1)
