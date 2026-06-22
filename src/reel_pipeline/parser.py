@@ -227,9 +227,10 @@ def parse_reel_file(
         vi_match = re.search(r"\[VISUAL_INTENT:\s*(.*?)\]", block, re.DOTALL)
         if not vi_match:
             vi_match = re.search(r"\[VISUAL:\s*(.*?)\]", block, re.DOTALL)
-        has_freeze = bool(re.search(r"\[FREEZE_LAST_FRAME:\s*yes\s*\]", block, re.IGNORECASE))
-        has_reuse = bool(re.search(r"\[REUSE_SOURCE:\s*[\d:–—\-]+s\s*\]", block))
-        if not vi_match and not has_freeze and not has_reuse:
+        has_freeze      = bool(re.search(r"\[FREEZE_LAST_FRAME:\s*yes\s*\]", block, re.IGNORECASE))
+        has_reuse       = bool(re.search(r"\[REUSE_SOURCE:\s*[\d:–—\-]+s\s*\]", block))
+        has_visual_type = bool(re.search(r"\[VISUAL_TYPE:\s*\w+\s*\]", block, re.IGNORECASE))
+        if not has_visual_type and not vi_match and not has_freeze and not has_reuse:
             continue
 
         visual_intent = vi_match.group(1).strip() if vi_match else ""
