@@ -149,27 +149,39 @@ def _write_transcript(alignment, segments_info, out_paths, atempo, output_dir):
                 break
         return round(scene_video_starts[seg] + (raw_t - seg_cuts[seg][0]) / atempo, 3)
 
-    # Group characters into words, preserving punctuation
-    words, cur, cur_s, cur_e = [], [], None, None
-    for c, s, e in zip(chars, starts, ends):
-        if c in (" ", "\n"):
-            if cur:
-                words.append(("".join(cur), cur_s, cur_e))
-                cur, cur_s, cur_e = [], None, None
-        else:
-            if cur_s is None:
-                cur_s = s
-            cur_e = e
-            cur.append(c)
-    if cur:
-        words.append(("".join(cur), cur_s, cur_e))
+    chunks = []
+    for i, seg_info in enumerate(segments_info):
+        v_start = scene_video_starts[i]
+        v_end   = scene_video_starts[i + 1] if i + 1 < len(scene_video_starts) else v_start + _probe_duration(out_paths[i])
 
-    chunks = [
-        {"text": text, "timestamp": [raw_to_video(ws), raw_to_video(we)]}
-        for text, ws, we in words if text.strip()
-    ]
+        if seg_info.get("tts_override"):
+            # VO text is already in the blueprint — use it directly, proportional timing
+            vo_words = [w for w in seg_info["vo_text"].split() if w.strip()]
+            if vo_words:
+                d = (v_end - v_start) / len(vo_words)
+                for j, word in enumerate(vo_words):
+                    chunks.append({"text": word, "timestamp": [round(v_start + j*d, 3), round(v_start + (j+1)*d, 3)]})
+        else:
+            # Use character-level alignment for accurate per-word timing
+            cut_s, cut_e = seg_cuts[i]
+            cur, cur_s, cur_e = [], None, None
+            for c, s, e in zip(chars, starts, ends):
+                if s < cut_s or (cut_e is not None and s >= cut_e):
+                    continue
+                if c in (" ", "\n"):
+                    if cur:
+                        chunks.append({"text": "".join(cur), "timestamp": [raw_to_video(cur_s), raw_to_video(cur_e)]})
+                        cur, cur_s, cur_e = [], None, None
+                else:
+                    if cur_s is None: cur_s = s
+                    cur_e = e
+                    cur.append(c)
+            if cur:
+                chunks.append({"text": "".join(cur), "timestamp": [raw_to_video(cur_s), raw_to_video(cur_e)]})
+
     (output_dir / "transcript.json").write_text(
-        json.dumps({"chunks": chunks}, ensure_ascii=False, indent=2), encoding="utf-8"
+        json.dumps({"chunks": chunks, "scene_starts": [round(s, 3) for s in scene_video_starts]},
+                   ensure_ascii=False, indent=2), encoding="utf-8"
     )
     print(f"  ✓ transcript.json — {len(chunks)} words, scene starts: {[round(s,3) for s in scene_video_starts]}")
 
