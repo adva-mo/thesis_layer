@@ -29,14 +29,21 @@ assets/[slug]/          ← collected image assets (canonical/)
 ## Full Workflow
 
 ```
-1. Write reel script (.md blueprint)
+1. Write reel script (.md blueprint) — VO + beats only; visual fields left blank
 1.5. Pre-flight gate & refine   → templates/reels/reel-preflight.md (see content-generation-workflow.md Step 2.4 — refine in place, loop until approved)
-       ↳ reel's Status field is set to SCRIPTED. STOP — present the script to the user.
+       ↳ Retention layer + Naturalizer run here (Steps 2.4b–2.4c)
+       ↳ Status: SCRIPTED → RETENTION → NATURALIZER
+       ↳ STOP — present the script to the user for approval
 
-       ⚠ Spend gate: every reel's metadata block carries a Status field (SCRIPTED → APPROVED).
-       Do not run step 2a/2b/3 with --confirm-paid-api-call until the user explicitly approves
-       the script in conversation and Status is flipped to APPROVED. Preflight "Recommendation:
-       approved" is a content-quality verdict, not user sign-off — see reel-preflight.md.
+       ⚠ VO spend gate: user flips Status to APPROVED to authorise paid VO generation.
+       Preflight "Recommendation: approved" is a content-quality verdict, not user sign-off
+       — see reel-preflight.md. vo_combined.py hard-stops on any status other than APPROVED.
+
+1.7. Visuals Layer              → templates/reels/visuals-layer.md
+       ↳ director fills all visual fields + VEP rows directly in the blueprint (no API spend)
+       ↳ Status: VISUAL-DIRECTED. STOP — present visual plan to user for approval.
+       ↳ User flips Status to VISUAL-APPROVED to authorise Kling spend.
+       ↳ kling_batch.py hard-stops on any status other than VISUAL-APPROVED.
 
 2a. Generate TTS review        → scripts/generate/vo_combined.py --prepare-tts-review
     ↳ edit tts_review.md, set APPROVED: true
@@ -56,9 +63,14 @@ Steps 2b–3 can run in any order. Step 2a must complete (and be approved) befor
 
 **Status progression:**
 ```
-SCRIPTED → RETENTION-REVIEWED → NATURALIZER-SIGNED → APPROVED → PUBLISHED
+SCRIPTED → RETENTION → NATURALIZER → APPROVED → VISUAL-DIRECTED → VISUAL-APPROVED → PUBLISHED
 ```
 `PUBLISHED` is the terminal state. The blueprint `**Status:**` field is the single source of truth — not the hook-log (which is an audit mirror).
+
+**Who sets each status:**
+- `SCRIPTED` / `RETENTION` / `NATURALIZER` — agent, after each review step completes
+- `APPROVED` / `VISUAL-DIRECTED` / `VISUAL-APPROVED` — user only (spend authorisation)
+- `PUBLISHED` — user only (terminal; cannot be unset)
 
 **What PUBLISHED locks:**
 - `kling_batch.py` and `vo_combined.py` hard-stop on PUBLISHED reels — no regeneration allowed
@@ -222,7 +234,7 @@ The avoid string is included in the cache key — changing it invalidates the ex
 
 ### vo_combined.py — ElevenLabs TTS via `/with-timestamps` *(standard)*
 
-**Spend gate:** do not run with `--confirm-paid-api-call` unless the reel's `Status` field is `APPROVED`. Dry-run (no flag) is always fine.
+**Spend gate:** requires `Status: APPROVED`. Script must be approved by the user before paid VO generation. Dry-run (no flag) is always fine.
 
 Sends all segments as one combined string to the ElevenLabs `/with-timestamps` endpoint. Returns audio + character-level alignment in a single API call, then splits the audio by alignment offsets.
 
@@ -289,7 +301,7 @@ python3 scripts/generate/vo.py output/[slug]/hebrew/reels/[slug]-he-reels.md \
 
 ### kling_batch.py — Batch Kling I2V *(recommended)*
 
-**Spend gate:** do not run with `--confirm-paid-api-call` unless the reel's `Status` field is `APPROVED`. Dry-run (no flag) is always fine.
+**Spend gate:** do not run with `--confirm-paid-api-call` unless the reel's `Status` field is `VISUAL-APPROVED`. Dry-run (no flag) is always fine.
 
 Reads a reel blueprint, finds all image-type scenes, and generates one Kling clip per scene. Output filenames are derived from `scene.index` — no manual counting, no naming mistakes.
 
@@ -573,19 +585,60 @@ The parser resolves `canonical/X` via `--assets-dir`, and any other path relativ
 
 ---
 
-### subtitle.py — Add subtitles + logo watermark
+### subtitle.py — Add subtitles + screen text + logo watermark
 
-Composites Hebrew subtitles onto the rendered video using the `transcript.json` alignment. Also automatically applies the brand logo watermark (top-right corner, 200px wide, 36px padding) from `assets/branding/logo-wide.png` on every frame. No author action required — the logo is applied if the file exists, skipped silently if not.
+Composites Hebrew subtitles and/or `[TEXT_TIMING:]` screen text onto the rendered video in a single PIL pass. Also automatically applies the brand logo watermark (top-right corner, 200px wide, 36px padding) from `assets/branding/logo-wide.png` on every frame. No author action required — the logo is applied if the file exists, skipped silently if not.
 
 ```bash
+# Subtitles only (default):
 python3 scripts/pipeline/subtitle.py \
-  --video output/[slug]/hebrew/reels/[slug]-he-reel-1-draft.mp4 \
-  --transcript output/[slug]/[lang]/reels/reel_01/transcript.json
+  --video output/[slug]/hebrew/reels/reel_01/reel01_draft.mp4 \
+  --transcript output/[slug]/[lang]/reels/reel_01/audio/transcript.json
+
+# Screen text only (no subs — useful during visual direction testing):
+python3 scripts/pipeline/subtitle.py \
+  --video output/[slug]/hebrew/reels/reel_01/reel01_draft.mp4 \
+  --transcript output/[slug]/[lang]/reels/reel_01/audio/transcript.json \
+  --screen-text output/[slug]/[lang]/reels/reel_01/audio/screen_text.json \
+  --layers screen
+
+# Both layers (production):
+python3 scripts/pipeline/subtitle.py \
+  --video output/[slug]/hebrew/reels/reel_01/reel01_draft.mp4 \
+  --transcript output/[slug]/[lang]/reels/reel_01/audio/transcript.json \
+  --screen-text output/[slug]/[lang]/reels/reel_01/audio/screen_text.json \
+  --layers both
 ```
 
 **Output:** `_subtitled.mp4`, then auto-compacts to `_final.mp4` at `video_speed` from `config/voice-settings.json`. Preview runs (`--preview-segment`) skip the compact step.
 
-**Modes:**
+**`--layers` flag:**
+- `subs` (default) — subtitles only
+- `screen` — `[TEXT_TIMING:]` / `[TEXT_CARD:]` overlays only (no subs)
+- `both` — both layers composited in a single PIL pass; screen text is composited first (lower), subtitles on top
+
+**`--screen-text PATH`** — path to `screen_text.json` written by `render.py` automatically when any scene has `[TEXT_TIMING:]` or `[TEXT_CARD:]` tags.
+
+**Subtitle zone — layout contract for visual directors:**
+
+Subtitles are **always on** and always occupy the **bottom zone** (`y_ratio 0.75`, bottom ~25% of frame, approximately y > 1440px on a 1920px canvas).
+
+`[TEXT_TIMING:]` screen text must be placed **above the subtitle zone** to avoid collision. Use the position token in the blueprint:
+
+```
+[TEXT_TIMING: text @ start-end top | text @ start-end center]
+```
+
+| Position token | `y_ratio` | Frame area |
+|---|---|---|
+| `top` | 0.30 | Upper third (~y 576px) |
+| `center` | 0.55 | Mid-frame (~y 1056px) |
+| `bottom` | 0.75 | **Subtitle zone — conflicts with subs** |
+| *(none)* | beat default | hook → center (0.55), other → bottom (0.75) |
+
+The visual director is responsible for specifying `top` or `center` on any `[TEXT_TIMING:]` entry that coexists with subtitles. `bottom` is only safe if the window is subtitle-free (e.g. a pure graphic scene with no VO).
+
+**Subtitle modes:**
 - `highlighted_phrase` (default) — active word full white (255,255,255), inactive slightly dimmed (210,210,210). Directional drop shadow (black 200α, 3px bottom-right) on all words. No glow. Top-anchored stable baseline — single-line and two-line phrases share the same vertical position; two-line expands downward.
 - `phrase` — all words in phrase equally bright
 - `single_word` — one word at a time

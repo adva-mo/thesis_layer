@@ -155,12 +155,16 @@ Prefer:
 
 ### Tags (current format)
 
-- `[VISUAL_TYPE:]` = **required on every scene.** Declares the scene's render path. Valid values: `kling` (collect image → Kling I2V clip), `static` (collect image → used as still, no Kling), `generated` (programmatic graphic card), `timeline` (animated sequence card). Parser errors on missing or unrecognized values — no silent fallback.
-- `[VISUAL_INTENT:]` = what the scene should visually show — written at script time, abstract intent only. No asset paths here. Asset paths are assigned later via Visual Evidence Plan (Step 2.5). For `kling` scenes, this becomes part of the Kling prompt.
-- `[MOTION_STYLE:]` = camera movement token for Kling generation. Required for `kling` scenes. Must be one of the `MV_*` tokens from the Motion Language System (see Motion vocabulary below). The token is expanded to a full Kling prompt description before the API call — do not write free-form text here. If omitted, motion is inferred from `[BEAT:]` with a warning. Unknown tokens block generation before any API spend. Omit entirely for `generated`, `static`, and `timeline` scenes.
+> **Script writer vs Visuals Layer:** `[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`, and `[KLING_AVOID:]` are filled by the **Visuals Layer** (Step 2.5) — not the script writer. Leave these blank when scripting in Step 2. The parser requires them before pipeline execution; the Visuals Layer fills them before any paid API call runs.
+> **Script writer provides:** `[BEAT:]`, `[VO:]`, `[TTS:]`, and `[TEXT_CARD:]` when the text on screen IS the content decision (data breakdowns, explicit CTA keyword).
+
+- `[VISUAL_TYPE:]` = **required on every scene** (before pipeline execution). Declares the scene's render path. Valid values: `kling` (generate a Kling I2V clip — source image can be an existing canonical asset OR a newly sourced image proposed by the director; use whenever cinematic motion is the right treatment, not limited to what is already in canonical), `static` (image → Ken Burns still, no Kling — for beats ≤ 4s only; see portrait constraint below), `generated` (programmatic graphic card), `timeline` (animated sequence card). Parser errors on missing or unrecognized values — no silent fallback.
+- `[VISUAL_INTENT:]` = what the scene should visually show. Filled by the Visuals Layer, not at script time. No asset paths here — asset paths come from the Visual Evidence Plan. For `kling` scenes, this becomes part of the Kling prompt.
+- `[MOTION_STYLE:]` = camera movement token for Kling generation. Required for `kling` scenes (unless `[REUSE_SOURCE:]` is set — reuse scenes inherit motion from the source clip). Must be one of the `MV_*` tokens from the Motion Language System (see Motion vocabulary below). The token is expanded to a full Kling prompt description before the API call — do not write free-form text here. If omitted, motion is inferred from `[BEAT:]` with a warning. Unknown tokens block generation before any API spend. Omit entirely for `generated`, `static`, and `timeline` scenes.
+- `[REUSE_SOURCE: HH-HHs]` = optional companion to `[VISUAL_TYPE: kling]`. When set, kling_batch copies the already-generated clip from the source scene (identified by its timestamp, e.g. `00-03s`) instead of calling the Kling API. Use for bookend patterns or when the same canonical asset appears in two scenes with compatible emotional register. Clip duration rule still applies to the source scene: ≤5s scene → 5s clip; 6–10s scene → 10s clip.
 - `[BEAT:]` = narrative beat label for this scene. Optional but recommended on every scene. Used for: (a) motion inference when `[MOTION_STYLE:]` is absent, (b) cross-dissolve transition style between scenes. Valid values: `hook`, `establish`, `insight`, `prove`, `reinforce`, `reality_check`, `cta`.
 - `[PHOTO_TYPE:]` = Ken Burns parameter override for `static` scenes and Kling fallback images. Optional. Valid values: `photo_aerial`, `photo_street`, `photo_community`, `satellite_map`, `listing_screenshot`, `developer_render`. If omitted, type is inferred from the asset filename. See `docs/reel-pipeline.md` → Ken Burns section.
-- `[TEXT_CARD:]` = explicit text on screen. Use sparingly — CTA, number breakdowns, risk disclaimers only. Subtitles handle everything else. No default text overlays.
+- `[TEXT_CARD:]` = explicit text on screen. Use sparingly — CTA, number breakdowns, risk disclaimers only. Subtitles handle everything else. No default text overlays. **Sub-suppression rule:** if `[TEXT_CARD:]` text repeats the VO verbatim (same words the subtitle would show), the subtitle layer is automatically suppressed for that scene — the screen text is the sole display. Do not write `[TEXT_CARD:]` that duplicates the VO unless you intend to replace the subtitle. If you want both visible simultaneously (e.g. a label above while VO narrates something different below), use `[TEXT_TIMING:]` instead — timing entries never suppress subs.
 - `[VO:]` = spoken voiceover (ElevenLabs). Write as natural spoken Hebrew. Use the Investment Signals table and Decision Anchor as internal reasoning — they inform what thought to express, not what to list. Write the conclusion of the reasoning, not the structure of it. One clean insight per segment. High reasoning density, low explanation density.
 
 **`[VO:]` and `[TTS:]` are two-line tags — the one exception to the inline pattern above.** `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`, and `[TEXT_CARD:]` are all single-line inline tags (`[TAG: content]`). `[VO:]` and `[TTS:]` are NOT — the tag sits alone on its own line, and the quoted text follows on the line(s) below:
@@ -192,6 +196,70 @@ Good (same reasoning, investor arriving at a thought):
 - `[PAUSE]` = short dramatic beat between lines.
 
 ### Visual intent format
+
+#### Hook scenes (static or kling — never generated)
+
+Hook beats must be `[VISUAL_TYPE: static]` or `[VISUAL_TYPE: kling]`. For short hooks (≤ 4s), `static` is acceptable when the text overlay is the primary event. For hooks longer than 4s, prefer `kling`.
+
+**Portrait constraint — read before assigning any static scene:** `static` Ken Burns renders landscape source images (aspect ratio wider than ~2:1) with blurred top/bottom bars to fill the portrait frame. This is a hard pipeline behavior, not a stylistic option. Never assign a landscape image to a `static` scene in a portrait reel — the result will look like a pillarboxed social media thumbnail, not a premium reel. If the available asset is landscape, use `[VISUAL_TYPE: kling]` instead (Kling handles the landscape→portrait crop internally and produces cinematic output).
+
+**`static` duration rule:** `static` is for beats ≤ 4s only. For beats longer than 5s, Ken Burns on a still image rarely provides enough visual weight for a premium reel — use `kling`.
+
+**New Kling clip (no existing asset):** If no canonical asset fits the beat, the director proposes a new source image. In `[VISUAL_INTENT:]`, write the full scene description — atmosphere, camera angle, thesis link, negative cues — as for a fresh Kling generation. In the VEP, set Source to `[NEW: describe image to source]` and leave Render blank. The image will be collected and Kling will be run against it.
+
+Hook VISUAL_INTENT has a looser contract than prove/reinforce:
+- **Prove/reinforce:** thesis-linked evidence, subject to anti-collect rules
+- **Hook:** atmosphere and place only — no thesis-link required, no anti-collect obligation
+
+Any canonical image that is regionally plausible and visually premium qualifies. Typically the same location/community image already collected for another beat.
+
+```
+[VISUAL_TYPE: static]
+[BEAT: hook]
+[VISUAL_INTENT: <location/area> — <atmosphere and light> — no <obvious geography mismatches>]
+[TEXT_CARD: hook display text]
+```
+
+`[TEXT_CARD:]` on hook beats is required when the hook previously relied on a text card to display contrast, a number, or a question on screen. The real image is the background; the TEXT_CARD text overlays it. Subtitles still render the VO — `[TEXT_CARD:]` is for text that must appear visually on screen, not just in subtitles.
+
+For kling hooks only, add `[MOTION_STYLE:]`:
+```
+[VISUAL_TYPE: kling]
+[BEAT: hook]
+[VISUAL_INTENT: <location/area> — <atmosphere and light> — no <obvious geography mismatches>]
+[TEXT_CARD: hook display text]
+[MOTION_STYLE: MV_DRIFT_AERIAL]
+```
+
+Hook rows appear in the VEP with `Critical: no` and a Source pointing to any available canonical image.
+
+---
+
+#### CTA scenes (freeze or static + TEXT_CARD — never generated)
+
+**Preferred path when a Kling clip precedes the CTA:** use `[FREEZE_LAST_FRAME: yes]` with `[TEXT_CARD:]`. The assembler holds the last frame of the previous Kling clip — no new collection, no Ken Burns, visual continuity maintained.
+
+**Fallback (no prior Kling clip in reel):** use `[VISUAL_TYPE: static]` with `[TEXT_CARD:]` and the most recent real asset as source. Apply the portrait constraint — do not use a landscape image.
+
+The CTA TEXT_CARD text overlays the visual. Subtitles still render the VO. No Kling call, no `cta.py`.
+
+```
+[VISUAL_TYPE: static]
+[BEAT: cta]
+[TEXT_CARD: כתבו [KEYWORD] ואשלח את הניתוח]
+
+[VO:]
+"כתבו [KEYWORD] ואשלח את הניתוח."
+[TTS:]
+"כתבו [keyword] ואשלח את הניתוח."
+```
+
+VEP row:
+```
+| [ts] | cta | no | reuse — canonical/[last-real-image].jpg | | reuse | static | A |
+```
+
+---
 
 #### Real image scenes (Kling clip will be generated from this)
 
@@ -247,7 +315,7 @@ The token is expanded to its full Kling prompt description before the API call. 
 |---|---|---|
 | `text card` or `bold text` or `text on screen` | text_card | Centered text extracted from `"quoted string"` in the description |
 | `split text card` | text_card | Two quoted strings joined with ` \| ` — use for contrast/comparison hooks |
-| `cta card` | cta_card | Plain dark background — VO + subtitles carry the CTA text |
+| `cta card` | cta_card | **Not used in reel CTA beats.** Reel CTAs use `[VISUAL_TYPE: static]` + `[TEXT_CARD:]` — see CTA scenes above. `cta card` remains valid for non-reel content (carousels, PDFs). |
 | `timeline` or `payment plan` or `breakdown` | timeline | Step sequence — labels from `→`-separated items after `—` separator (see Timeline section below) |
 | `reality check` or `overlay` or `implication` | text_card | Same as text_card — use when the beat framing matters |
 | *(anything else)* | **HARD ERROR** | Assembler stops before any rendering and prints the unrecognized keyword |
@@ -319,7 +387,9 @@ For CTA / text card scenes only:
 
 ### What NOT to write
 
-- Do not omit `[VISUAL_TYPE:]` — it is required on every scene block. A missing type is a parser error, not a silent fallback to Kling.
+> These rules apply to the **completed blueprint** (after the Visuals Layer runs). The script writer leaves visual fields blank; the Visuals Layer fills them before any pipeline step.
+
+- Do not omit `[VISUAL_TYPE:]` — it is required on every scene block before pipeline execution. A missing type is a parser error, not a silent fallback to Kling.
 - Do not write free-form text in `[MOTION_STYLE:]` — use `MV_*` tokens only. Free-form text triggers a deprecation warning and is outside the controlled vocabulary. Unknown `MV_*` tokens block generation before any API spend.
 - Do not write `[SCREEN:]` — deprecated. Use `[TEXT_CARD:]` only for explicit cards.
 - Do not write `[VISUAL:]` — deprecated. Use `[VISUAL_TYPE:]` + `[VISUAL_INTENT:]`.
@@ -488,7 +558,7 @@ Every generated reel section must open with this metadata block immediately afte
 
 **Status progression (the blueprint `**Status:**` field is the single source of truth):**
 ```
-SCRIPTED → RETENTION-REVIEWED → NATURALIZER-SIGNED → APPROVED → PUBLISHED
+SCRIPTED → RETENTION → NATURALIZER → APPROVED → VISUAL-DIRECTED → VISUAL-APPROVED → PUBLISHED
 ```
 `PUBLISHED` is the terminal state. Once a reel is published, its blueprint section is permanently read-only — no edits, no regeneration of VO or Kling clips, no status changes. Update `output/history/hook-log.md` to mirror the PUBLISHED state when a reel ships.
 

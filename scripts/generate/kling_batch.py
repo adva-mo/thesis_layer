@@ -27,6 +27,7 @@ Usage:
 
 import argparse
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -40,19 +41,28 @@ from reel_pipeline.parser import parse_reel_file, read_reel_status
 
 
 def _is_kling_scene(scene) -> bool:
-    """True if this scene should be processed by kling_batch."""
+    """True if this scene needs a new Kling API call."""
     if scene.visual_type is not None:
-        return scene.visual_type == "kling"
+        return scene.visual_type == "kling" and not scene.reuse_source
     # Legacy blueprint without [VISUAL_TYPE:] — fall back to asset_type
     return scene.asset_type == "image"
 
 
 def _skip_label(scene) -> str:
+    if scene.visual_type == "kling" and scene.reuse_source:
+        return f"reuse — copy from {scene.reuse_source}"
     if scene.visual_type in ("generated", "timeline"):
         return "generated — skip"
     if scene.visual_type == "static":
         return "static — skip"
     return "generated — skip"
+
+
+def _parse_source_ts(ts: str) -> tuple[float, float]:
+    """'00-03s' or '00–03s' → (0.0, 3.0)"""
+    ts = re.sub(r"[–—]", "-", ts).replace("s", "")
+    parts = ts.split("-")
+    return float(parts[0]), float(parts[1])
 
 
 def _update_vep_render_column(blueprint: Path, start_s: float, end_s: float, render_filename: str) -> bool:
@@ -86,7 +96,7 @@ def _clip_duration(segment_s: float) -> int:
 
 
 def _output_path(assets_dir: Path, reel_number: int, start_s: float, end_s: float) -> Path:
-    return assets_dir / f"kling_r{reel_number}_{int(start_s):02d}-{int(end_s):02d}s.mp4"
+    return assets_dir / "canonical" / f"kling_r{reel_number}_{int(start_s):02d}-{int(end_s):02d}s.mp4"
 
 
 def _estimate_cost(scenes_to_generate: list, model: str) -> str:
@@ -187,6 +197,7 @@ def main() -> None:
     print(f"  Model:     {model}")
     print()
 
+    dim_errors: list[str] = []   # populated during plan print; reused for abort gate
     for scene in scenes:
         in_filter = not scene_filter or scene.index in scene_filter
         if not _is_kling_scene(scene) or not in_filter:
@@ -198,24 +209,34 @@ def main() -> None:
         out_path = _output_path(assets_dir, args.reel, scene.start_s, scene.end_s)
         prompt   = resolved_prompts.get(scene.index, "")
 
-        # Portrait crop detection
+        # Portrait crop detection + dimension check (results reused for abort gate below)
+        crop_note  = ""
+        dim_error  = ""
         try:
             from PIL import Image as _Img
             img = _Img.open(scene.asset_path)
             w, h = img.size
-            will_crop = (w / h) > (9 / 16) * 1.05
+            cw, ch = fal_kling.portrait_crop_dimensions(w, h)
+            if (cw, ch) != (w, h):
+                if cw < fal_kling.KLING_MIN_DIMENSION or ch < fal_kling.KLING_MIN_DIMENSION:
+                    dim_error = f" [TOO SMALL after crop: {cw}×{ch}px — min {fal_kling.KLING_MIN_DIMENSION}px]"
+                    dim_errors.append(
+                        f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]: "
+                        f"{scene.asset_path.name} crops to {cw}×{ch}px — below Kling minimum"
+                    )
+                else:
+                    crop_note = f" [will crop to portrait: {cw}×{ch}px]"
         except Exception:
-            will_crop = False
+            pass
 
         cache_key  = fal_kling.compute_cache_key(scene.asset_path, prompt, dur, model, scene.kling_avoid)
         cache_hit  = fal_kling.get_cached_path(cache_key) is not None
-        crop_note  = " [will crop to portrait]" if will_crop else ""
         cache_note = " [cache hit — free]" if cache_hit else ""
 
         print(
             f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]  "
             f"image  {scene.asset_path.name}  →  {out_path.name}  ({dur}s)"
-            f"{crop_note}{cache_note}"
+            f"{crop_note}{dim_error}{cache_note}"
         )
         if prompt:
             print(f"    Prompt: {prompt}")
@@ -223,6 +244,35 @@ def main() -> None:
     if not to_generate:
         print("\n  Nothing to generate.")
         return
+
+    if dim_errors:
+        print("\n  ✗ Image dimension errors — fix before generating:\n" + "\n".join(dim_errors))
+        sys.exit(1)
+
+    # ── Reuse-copy pass (free — no API call) ─────────────────────────
+    # Runs always, regardless of --confirm-paid-api-call.
+    for scene in scenes:
+        if not (scene.visual_type == "kling" and scene.reuse_source):
+            continue
+        try:
+            rs_start, rs_end = _parse_source_ts(scene.reuse_source)
+        except (ValueError, IndexError):
+            print(f"  ⚠  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]: "
+                  f"could not parse REUSE_SOURCE '{scene.reuse_source}' — skip")
+            continue
+        src = _output_path(assets_dir, args.reel, rs_start, rs_end)
+        dst = _output_path(assets_dir, args.reel, scene.start_s, scene.end_s)
+        if dst.exists():
+            print(f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]  "
+                  f"reuse — already exists ({dst.name})")
+        elif src.exists():
+            shutil.copy2(src, dst)
+            print(f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]  "
+                  f"reuse — copied {src.name} → {dst.name}")
+            _update_vep_render_column(blueprint, scene.start_s, scene.end_s, f"canonical/{dst.name}")
+        else:
+            print(f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]  "
+                  f"reuse — source clip not yet generated ({src.name}) — run after source scene")
 
     if not args.confirm_paid_api_call:
         non_cached = [s for s in to_generate
@@ -250,8 +300,8 @@ def main() -> None:
     if status.upper() == "PUBLISHED":
         print(f"Error: reel {args.reel} is PUBLISHED — content is locked. No regeneration allowed.")
         sys.exit(1)
-    if status.upper() != "APPROVED":
-        print(f"Error: reel {args.reel} status is '{status}' — must be APPROVED before paid generation.")
+    if status.upper() != "VISUAL-APPROVED":
+        print(f"Error: reel {args.reel} status is '{status}' — must be VISUAL-APPROVED before generating Kling clips.")
         sys.exit(1)
 
     # ── Paid run ──────────────────────────────────────────────────────

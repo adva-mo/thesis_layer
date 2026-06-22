@@ -86,6 +86,9 @@ def transcribe(
     return result
 
 
+_TTS_SKIP = {"[TTS:]", '"[TTS:]"', '"[TTS:]"'}
+
+
 def load_transcript(json_path: Path) -> list[dict]:
     """Load Wizper result and return flat list of word chunks with start/end times."""
     data = json.loads(Path(json_path).read_text(encoding="utf-8"))
@@ -93,9 +96,16 @@ def load_transcript(json_path: Path) -> list[dict]:
     chunks = data.get("chunks", [])
     result = []
     for chunk in chunks:
+        raw = chunk["text"]
+        # Skip TTS pipeline markers and quote-only artifacts transcribed by Whisper
+        if raw.strip() in _TTS_SKIP:
+            continue
+        text = raw.strip('"').strip()
+        if not text:
+            continue
         ts = chunk.get("timestamp", [0, 0])
         result.append({
-            "text":  chunk["text"],
+            "text":  text,
             "start": float(ts[0]) if ts[0] is not None else 0.0,
             "end":   float(ts[1]) if ts[1] is not None else 0.0,
         })

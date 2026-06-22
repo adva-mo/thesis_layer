@@ -8,5 +8,7 @@
     "speed":            1.2
   },
   "ffmpeg_atempo": 1.1,
-  "video_speed": 1.08
+  "video_speed": 1.08,
+  "chars_per_second_he": 9,
+  "_chars_per_second_he_note": "Base calibration (EL speed=1.2, atempo=1.1). Effective rate = chars_per_second_he × video_speed = 9 × 1.08 = 9.72 chars/sec. Calibrated 2026-06-21 from binghatti-skyhall reel_01 actuals. Update if either voice or video_speed settings change."
 }

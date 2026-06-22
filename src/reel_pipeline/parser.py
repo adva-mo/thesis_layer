@@ -42,9 +42,15 @@ class Scene:
     asset_type: str                # "image" | "video" | "generated" — what the assembler uses
     asset_path: Optional[Path]     # resolved asset; None when generated
     critical: bool = False         # True when VEP Critical column is "yes"
-    beat: Optional[str] = None     # [BEAT:] — narrative beat for transition logic
-    photo_type: Optional[str] = None   # [PHOTO_TYPE:] — Ken Burns parameter set override
-    kling_avoid: Optional[str] = None  # [KLING_AVOID:] — sent as negative_prompt to Kling API
+    beat: Optional[str] = None          # [BEAT:] — narrative beat for transition logic
+    photo_type: Optional[str] = None    # [PHOTO_TYPE:] — Ken Burns parameter set override
+    kling_avoid: Optional[str] = None   # [KLING_AVOID:] — sent as negative_prompt to Kling API (scene-specific; base is in fal_kling.BASE_NEGATIVE_PROMPT)
+    reuse_source: Optional[str] = None  # [REUSE_SOURCE: HH-HHs] — reuse the Kling clip from this timestamp instead of generating a new one
+    text_position: Optional[str] = None # [TEXT_POSITION: center|bottom] — overrides beat-based y_ratio default
+    text_font_size: Optional[int] = None  # [FONT_SIZE: N] — overrides default font size for TEXT_CARD
+    text_timing: Optional[list[tuple[str, float, float, str | None, int | None]]] = None  # [TEXT_TIMING: text @ s-e [top|center|bottom] [size:N] | ...]
+    plain_bg: bool = False              # [PLAIN_BG: yes] — skip blur bg for generated scenes
+    freeze_last_frame: bool = False     # [FREEZE_LAST_FRAME: yes] — hold last frame of prev scene
 
 
 def _parse_timestamp(ts: str) -> tuple[float, float]:
@@ -63,10 +69,10 @@ def _resolve_path(
     file_cell = re.sub(r"^reuse\s*[–—-]\s*", "", file_cell).strip()
     ext_pat = r"\.(?:jpg|jpeg|png|webp|mp4|mov)"
 
-    # canonical/filename → assets_dir
+    # canonical/filename → assets_dir/canonical/filename
     m = re.search(r"canonical/([\w\-]+(?:/[\w\-]+)*" + ext_pat + r")", file_cell, re.IGNORECASE)
     if m and assets_dir:
-        p = assets_dir / m.group(1)
+        p = assets_dir / "canonical" / m.group(1)
         return p if p.exists() else None
 
     # repo-relative path → repo_root
@@ -170,7 +176,7 @@ def _extract_status(body: str) -> Optional[str]:
 def read_reel_status(md_path: Path, reel_number: int) -> Optional[str]:
     """
     Read the **Status:** value from the reel metadata block.
-    Returns the raw status string (e.g. 'APPROVED', 'SCRIPTED') or None if not found.
+    Returns the raw status string (e.g. 'APPROVED', 'VISUAL-APPROVED', 'PUBLISHED') or None if not found.
     """
     content = md_path.read_text(encoding="utf-8")
     reel_splits = re.split(r"^## (Reel \d+ — .+?)$", content, flags=re.MULTILINE)
@@ -221,10 +227,12 @@ def parse_reel_file(
         vi_match = re.search(r"\[VISUAL_INTENT:\s*(.*?)\]", block, re.DOTALL)
         if not vi_match:
             vi_match = re.search(r"\[VISUAL:\s*(.*?)\]", block, re.DOTALL)
-        if not vi_match:
+        has_freeze = bool(re.search(r"\[FREEZE_LAST_FRAME:\s*yes\s*\]", block, re.IGNORECASE))
+        has_reuse = bool(re.search(r"\[REUSE_SOURCE:\s*[\d:–—\-]+s\s*\]", block))
+        if not vi_match and not has_freeze and not has_reuse:
             continue
 
-        visual_intent = vi_match.group(1).strip()
+        visual_intent = vi_match.group(1).strip() if vi_match else ""
         start_s, end_s = _parse_timestamp(ts_match.group(1))
 
         ms_match = re.search(r"\[MOTION_STYLE:\s*(.*?)\]", block, re.DOTALL)
@@ -243,6 +251,49 @@ def parse_reel_file(
 
         ka_match = re.search(r"\[KLING_AVOID:\s*(.*?)\]", block, re.DOTALL)
         kling_avoid = ka_match.group(1).strip() if ka_match else None
+
+        rs_match = re.search(r"\[REUSE_SOURCE:\s*([\d:–—\-]+s)\s*\]", block)
+        reuse_source = rs_match.group(1).strip() if rs_match else None
+
+        tp_match = re.search(r"\[TEXT_POSITION:\s*(\w+)\s*\]", block)
+        text_position = tp_match.group(1).strip().lower() if tp_match else None
+
+        fs_match = re.search(r"\[FONT_SIZE:\s*(\d+)\s*\]", block)
+        text_font_size = int(fs_match.group(1)) if fs_match else None
+
+        tt_match = re.search(r"\[TEXT_TIMING:\s*(.*?)\]", block, re.DOTALL)
+        text_timing = None
+        if tt_match:
+            text_timing = []
+            _positions = {"top", "center", "bottom"}
+            for item in tt_match.group(1).split("|"):
+                parts = item.strip().split("@")
+                if len(parts) == 2:
+                    txt = parts[0].strip()
+                    time_part = parts[1].strip()
+                    time_tokens = time_part.split()
+                    position = None
+                    entry_font_size = None
+                    # Extract size:N token
+                    size_tokens = [t for t in time_tokens if t.lower().startswith("size:")]
+                    if size_tokens:
+                        try:
+                            entry_font_size = int(size_tokens[0].split(":")[1])
+                        except (ValueError, IndexError):
+                            pass
+                        time_tokens = [t for t in time_tokens if not t.lower().startswith("size:")]
+                    if len(time_tokens) >= 2 and time_tokens[-1].lower() in _positions:
+                        position = time_tokens[-1].lower()
+                        time_tokens = time_tokens[:-1]
+                    times = re.sub(r"[–—]", "-", " ".join(time_tokens)).split("-")
+                    if len(times) == 2:
+                        try:
+                            text_timing.append((txt, float(times[0].strip()), float(times[1].strip()), position, entry_font_size))
+                        except ValueError:
+                            pass
+
+        plain_bg = bool(re.search(r"\[PLAIN_BG:\s*yes\s*\]", block, re.IGNORECASE))
+        freeze_last_frame = bool(re.search(r"\[FREEZE_LAST_FRAME:\s*yes\s*\]", block, re.IGNORECASE))
 
         # [VISUAL_TYPE:] — required in new blueprints
         vt_match = re.search(r"\[VISUAL_TYPE:\s*(\w+)\s*\]", block)
@@ -278,8 +329,35 @@ def parse_reel_file(
             asset_path = p
 
         elif visual_type == "kling":
-            # Render clip first (post-kling_batch), fall back to source image (pre-kling_batch)
-            if ts_key in render_mapping:
+            if reuse_source and not assets_dir:
+                warnings.warn(
+                    f"Reel {reel_number}, scene at {ts_match.group(1)}: "
+                    f"REUSE_SOURCE set but assets_dir is None — reuse clip cannot be resolved.",
+                    stacklevel=2,
+                )
+                asset_type, asset_path = "generated", None
+            elif reuse_source and assets_dir:
+                # REUSE_SOURCE: resolve the source scene's expected clip path
+                try:
+                    _rs = re.sub(r"[–—]", "-", reuse_source).replace("s", "")
+                    _rs_parts = _rs.split("-")
+                    _rs_start, _rs_end = int(float(_rs_parts[0])), int(float(_rs_parts[1]))
+                    reuse_clip = assets_dir / "canonical" / f"kling_r{reel_number}_{_rs_start:02d}-{_rs_end:02d}s.mp4"
+                    if reuse_clip.exists():
+                        asset_type = "video"
+                        asset_path = reuse_clip
+                    else:
+                        warnings.warn(
+                            f"Reel {reel_number}, scene at {ts_match.group(1)}: "
+                            f"REUSE_SOURCE clip not found ({reuse_clip.name}) — "
+                            f"run kling_batch.py first so the source clip exists before rendering.",
+                            stacklevel=2,
+                        )
+                        asset_type, asset_path = "generated", None
+                except (ValueError, IndexError):
+                    asset_type, asset_path = "generated", None
+            elif ts_key in render_mapping:
+                # Render clip first (post-kling_batch), fall back to source image (pre-kling_batch)
                 asset_type, asset_path = "video", render_mapping[ts_key]
             elif ts_key in source_mapping:
                 asset_type, asset_path = "image", source_mapping[ts_key]
@@ -313,10 +391,22 @@ def parse_reel_file(
             beat=beat,
             photo_type=photo_type,
             kling_avoid=kling_avoid,
+            reuse_source=reuse_source,
+            text_position=text_position,
+            text_font_size=text_font_size,
+            text_timing=text_timing or None,
+            plain_bg=plain_bg,
+            freeze_last_frame=freeze_last_frame,
         ))
 
     for s in scenes:
-        if not s.critical and s.visual_type in ("kling", "static") and s.asset_path is None:
+        if (
+            not s.critical
+            and s.visual_type in ("kling", "static")
+            and s.asset_path is None
+            and not s.reuse_source   # reuse clip may not exist yet — not a warning
+            and not s.freeze_last_frame  # freeze scenes have no asset by design
+        ):
             warnings.warn(
                 f"Reel {reel_number}, scene {s.index} [{s.start_s:.0f}–{s.end_s:.0f}s] "
                 f"({s.visual_type}): asset not found — falling back to generated graphic. "

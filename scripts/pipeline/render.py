@@ -77,10 +77,17 @@ def print_dry_run(scenes, audio_dir, output_path, clip_overrides):
                 vsource = f"KLING FALLBACK (no clip) — {scene.asset_path.name}"
             else:
                 vsource = f"image (Ken Burns): {scene.asset_path.name}"
+        elif scene.freeze_last_frame:
+            vsource = "freeze last frame"
         else:
             vsource = f"generated ({detect_type(scene.visual_intent)})"
 
-        screen = f"  [{scene.text_card}]" if scene.text_card else ""
+        if scene.text_card:
+            screen = f"  [{scene.text_card}]"
+        elif scene.text_timing:
+            screen = f"  [TEXT_TIMING: {len(scene.text_timing)} entries]"
+        else:
+            screen = ""
         print(f"{scene.index:<6} {ts:<10} {audio_name:<35} {dur:>4.1f}s  {vsource}{screen}")
 
     print("─" * 76)
@@ -103,7 +110,7 @@ def main():
     parser.add_argument("--font",          default=str(FONT_PATH), help="Path to .ttf font for Hebrew text")
     parser.add_argument("--clip-override", action="append", default=[], metavar="SCENE:PATH",
                         help="Override visual for scene N with a pre-rendered clip, e.g. 2:reels/reel_01/scene02_timeline.mp4")
-    parser.add_argument("--leading-pad-ms", type=int, default=300, metavar="MS",
+    parser.add_argument("--leading-pad-ms", type=int, default=0, metavar="MS",
                         help="Freeze first frame + pad audio by N ms at start of video")
     parser.add_argument("--trailing-pad-ms", type=int, default=300, metavar="MS",
                         help="Freeze last frame + pad audio by N ms at end of video (fixes VO cutoff)")
@@ -136,6 +143,14 @@ def main():
     if not args.render:
         print_dry_run(scenes, audio_dir, output, clip_overrides)
         return
+
+    # ── Audio pre-flight ─────────────────────────────────────────
+    missing_audio = [s for s in scenes if _find_audio(audio_dir, s.index) is None]
+    if missing_audio:
+        print("\n  ✗ Missing VO audio — run vo_combined.py first:")
+        for s in missing_audio:
+            print(f"    Scene {s.index} [{s.start_s:.0f}–{s.end_s:.0f}s]: seg{s.index:02d}_*.mp3 not found in {audio_dir}")
+        sys.exit(1)
 
     # ── Kling fallback gate ───────────────────────────────────────
     if not args.draft:
@@ -176,7 +191,7 @@ def main():
     print(f"  Work dir:  {work_dir}\n")
 
     try:
-        assemble_reel(
+        _, screen_text_entries = assemble_reel(
             scenes=scenes,
             audio_dir=audio_dir,
             output_path=output,
@@ -187,6 +202,13 @@ def main():
             trailing_pad_ms=args.trailing_pad_ms,
             transitions=args.transitions,
         )
+        if screen_text_entries:
+            st_path = audio_dir / "screen_text.json"
+            st_path.write_text(
+                json.dumps({"entries": screen_text_entries}, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+            print(f"  ✓ screen_text.json → {st_path}  ({len(screen_text_entries)} entries)")
     finally:
         if not args.keep_tmp:
             shutil.rmtree(work_dir, ignore_errors=True)

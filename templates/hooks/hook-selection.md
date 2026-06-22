@@ -137,7 +137,7 @@ Single file. Append one row per reel, across all projects. Project-level history
 
 Add one "Next reel recommendation" section per active project. Recompute after each reel is logged.
 
-**Status values:** `SCRIPTED` (default at log time) → `NATURALIZER-SIGNED` (after retention + naturalizer pass) → `APPROVED` (user approved, paid APIs unlocked) → `PUBLISHED` (flip when the reel goes live) → `SKIPPED` (scripted but not published).
+**Status values:** `SCRIPTED` (default at log time) → `NATURALIZER` (after retention + naturalizer pass) → `APPROVED` (user approved, paid APIs unlocked) → `PUBLISHED` (flip when the reel goes live) → `SKIPPED` (scripted but not published).
 
 **Brand Frames column:** Leave `—` at log time. Fill in after the retention layer pass (Step 2.4b) using the "Framework terms named" field from the post-retention integrity block. Values are comma-separated framework terms explicitly named in the script (e.g., `Thesis`, `Thesis, Risk`). Diversity lookback (Step E, Step 3) uses PUBLISHED rows only.
 
