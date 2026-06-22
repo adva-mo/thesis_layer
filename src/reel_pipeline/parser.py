@@ -285,7 +285,7 @@ def parse_reel_file(
                     if len(time_tokens) >= 2 and time_tokens[-1].lower() in _positions:
                         position = time_tokens[-1].lower()
                         time_tokens = time_tokens[:-1]
-                    times = " ".join(time_tokens).split("-")
+                    times = re.sub(r"[–—]", "-", " ".join(time_tokens)).split("-")
                     if len(times) == 2:
                         try:
                             text_timing.append((txt, float(times[0].strip()), float(times[1].strip()), position, entry_font_size))
@@ -329,7 +329,14 @@ def parse_reel_file(
             asset_path = p
 
         elif visual_type == "kling":
-            if reuse_source and assets_dir:
+            if reuse_source and not assets_dir:
+                warnings.warn(
+                    f"Reel {reel_number}, scene at {ts_match.group(1)}: "
+                    f"REUSE_SOURCE set but assets_dir is None — reuse clip cannot be resolved.",
+                    stacklevel=2,
+                )
+                asset_type, asset_path = "generated", None
+            elif reuse_source and assets_dir:
                 # REUSE_SOURCE: resolve the source scene's expected clip path
                 try:
                     _rs = re.sub(r"[–—]", "-", reuse_source).replace("s", "")

@@ -107,62 +107,6 @@ def _render_text_overlay(
     return overlay
 
 
-def add_timed_screen_texts(
-    clip_path: Path,
-    timings: list[tuple[str, float, float]],
-    output_path: Path,
-    font_path: Path = FONT_PATH,
-    font_size: int = FONT_SIZE,
-    width: int = 1080,
-    height: int = 1920,
-    y_ratio: float = TEXT_Y_RATIO,
-) -> Path:
-    """Composite text overlays at specific time windows onto a clip.
-
-    Each entry in timings is (text, start_s, end_s). Hebrew BiDi is handled by
-    PIL; ffmpeg drawtext is not used.
-    """
-    temp_pngs: list[Path] = []
-    try:
-        for i, (text, _, _) in enumerate(timings):
-            overlay_img = _render_text_overlay(text, width, height, font_path, font_size, y_ratio)
-            with tempfile.NamedTemporaryFile(suffix=f"_text_{i}.png", delete=False) as tmp:
-                png_path = Path(tmp.name)
-                overlay_img.save(png_path, format="PNG")
-                temp_pngs.append(png_path)
-
-        inputs: list[str] = ["-i", str(clip_path)]
-        for png in temp_pngs:
-            inputs += ["-loop", "1", "-i", str(png)]
-
-        parts: list[str] = []
-        prev = "[0:v]"
-        for i, (_, start_s, end_s) in enumerate(timings):
-            inp = f"[{i + 1}:v]"
-            out = "[out]" if i == len(timings) - 1 else f"[t{i}]"
-            parts.append(f"{prev}{inp}overlay=0:0:enable='between(t,{start_s},{end_s})'{out}")
-            prev = out
-
-        cmd = [
-            "ffmpeg", "-y",
-            *inputs,
-            "-filter_complex", ";".join(parts),
-            "-map", "[out]",
-            "-c:v", "libx264",
-            "-preset", "ultrafast",
-            "-pix_fmt", "yuv420p",
-            "-an",
-            str(output_path),
-        ]
-        result = subprocess.run(cmd, capture_output=True)
-        if result.returncode != 0:
-            print(f"  ✗ timed text overlay failed:\n{result.stderr.decode()[-600:]}")
-            sys.exit(1)
-    finally:
-        for p in temp_pngs:
-            p.unlink(missing_ok=True)
-
-    return output_path
 
 
 def build_screen_text_spans(
