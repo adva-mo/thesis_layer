@@ -169,8 +169,8 @@ Step 2.4a in the content generation workflow. After scripting, before the Retent
 
 `Recommendation: approved` above is a **content-quality** verdict — it means the script itself is epistemologically sound. It is not the user's sign-off to spend money, and it is not the end of the scripting pipeline.
 
-Every reel's metadata block carries a separate `**Status:**` field with this progression: `SCRIPTED` → `RETENTION-REVIEWED` → `NATURALIZER-SIGNED` → `APPROVED`.
+Every reel's metadata block carries a separate `**Status:**` field with this progression: `SCRIPTED` → `RETENTION` → `NATURALIZER` → `APPROVED`.
 
-Set it to `SCRIPTED` once preflight returns `Recommendation: approved`. Then proceed to Step 2.4b (Retention Optimization Layer) and Step 2.4c (Naturalizer for Reel VO). The user reviews and approves the `NATURALIZER-SIGNED` script — not the pre-retention version.
+Set it to `SCRIPTED` once preflight returns `Recommendation: approved`. Then proceed to Step 2.4b (Retention Optimization Layer) and Step 2.4c (Naturalizer for Reel VO). The user reviews and approves the `NATURALIZER` script — not the pre-retention version.
 
 **Do not flip status to `APPROVED`, and do not run any paid API call (`vo_combined.py --confirm-paid-api-call`, `kling_batch.py`/`kling.py --confirm-paid-api-call`) until the user explicitly approves the naturalizer-signed script in conversation.** Once they do, update the field to `**Status:** APPROVED` before proceeding to VO/Kling generation.

@@ -558,7 +558,7 @@ Every generated reel section must open with this metadata block immediately afte
 
 **Status progression (the blueprint `**Status:**` field is the single source of truth):**
 ```
-SCRIPTED → RETENTION-REVIEWED → NATURALIZER-SIGNED → APPROVED → PUBLISHED
+SCRIPTED → RETENTION → NATURALIZER → APPROVED → VISUAL-DIRECTED → VISUAL-APPROVED → PUBLISHED
 ```
 `PUBLISHED` is the terminal state. Once a reel is published, its blueprint section is permanently read-only — no edits, no regeneration of VO or Kling clips, no status changes. Update `output/history/hook-log.md` to mirror the PUBLISHED state when a reel ships.
 

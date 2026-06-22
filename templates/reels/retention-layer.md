@@ -137,9 +137,9 @@ Framework terms named (for channel log): [Thesis / Risk / Assumption / Signal �
 Verdict: [accepted / revert-beat:[beat-name] — reason]
 ```
 
-**If verdict is `accepted`:** set reel status to `RETENTION-REVIEWED` and proceed to Step 2.4c (naturalizer).
+**If verdict is `accepted`:** set reel status to `RETENTION` and proceed to Step 2.4c (naturalizer).
 
-**If verdict is `revert-beat`:** restore the flagged beat to the original pre-retention VO text. Re-run post-retention integrity on the reverted version only. If it passes, set `RETENTION-REVIEWED` and proceed.
+**If verdict is `revert-beat`:** restore the flagged beat to the original pre-retention VO text. Re-run post-retention integrity on the reverted version only. If it passes, set `RETENTION` and proceed.
 
 ---
 
@@ -149,7 +149,7 @@ After Step 2.4a pre-flight returns `Recommendation: approved` (Status: SCRIPTED)
 Before Step 2.4c (naturalizer).
 Before any paid API call or user approval for spend.
 
-Status progression for reel VO: `SCRIPTED` → `RETENTION-REVIEWED` → `NATURALIZER-SIGNED` → `APPROVED`
+Status progression for reel VO: `SCRIPTED` → `RETENTION` → `NATURALIZER` → `APPROVED`
 
 ---
 

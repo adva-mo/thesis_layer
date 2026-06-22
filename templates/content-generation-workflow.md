@@ -157,7 +157,7 @@ Runs on the pre-flight-approved script (Status: SCRIPTED). Compresses scaffoldin
 1. Run `templates/reels/retention-layer.md` against the full script. Produce a per-beat diff output.
 2. Run the post-retention integrity check (5 checks: new claims, hook promise, risk placement, ending momentum, brand frames).
 3. If verdict is `revert-beat`: restore the flagged beat and re-run integrity on that beat only.
-4. Set the reel's `**Status:**` field to `RETENTION-REVIEWED`. Proceed to Step 2.4c.
+4. Set the reel's `**Status:**` field to `RETENTION`. Proceed to Step 2.4c.
 5. Copy the `Framework terms named` field from the post-retention integrity block — you'll add this to hook-log.md when you log the reel.
 
 ---
@@ -174,7 +174,7 @@ Write the naturalizer sign-off in the reel file:
 - `_Naturalizer applied: [date] — No meaningful language issues._`
 - `_Naturalizer applied: [date] — [list of changes made]_`
 
-After naturalizer sign-off: set reel's `**Status:**` field to `NATURALIZER-SIGNED`. **Present the script to the user now, together with the timing confirmation table below.**
+After naturalizer sign-off: set reel's `**Status:**` field to `NATURALIZER`. **Present the script to the user now, together with the timing confirmation table below.**
 
 ### VO Timing Confirmation (present at Gate 1, alongside the script)
 
@@ -192,7 +192,7 @@ Retention guarantees timing fit before this point. This table is a sanity check 
 
 **Do not proceed to Step 2.5 (Visuals Layer) or any paid API call until the user explicitly approves the script.** Once the user approves, update `**Status:**` to `APPROVED` before continuing.
 
-Status progression: `SCRIPTED` → `RETENTION-REVIEWED` → `NATURALIZER-SIGNED` → `APPROVED`
+Status progression: `SCRIPTED` → `RETENTION` → `NATURALIZER` → `APPROVED`
 
 ---
 
@@ -209,12 +209,12 @@ For each approved reel:
 3. Direct the full visual execution — fill `[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`, and `[KLING_AVOID:]` directly in the reel blueprint for every scene
 4. Append the Visual Evidence Plan (VEP) section to the reel file, with one row per scene
 5. Write Vision Flags for any segments requiring new asset collection
-6. Set the reel's `**Status:**` to `VISUALS-DIRECTED`
+6. Set the reel's `**Status:**` to `VISUAL-DIRECTED`
 7. **Present the visual plan to the user now.** Show the execution table, arc summary, and VEP rows.
 
-**Do not proceed to Step 2.6 (asset collection) or any paid API call until the user explicitly approves the visual plan.** `VISUALS-DIRECTED` means the plan is ready for review — it is not spend authorization.
+**Do not proceed to Step 2.6 (asset collection) or any paid API call until the user explicitly approves the visual plan.** `VISUAL-DIRECTED` means the plan is ready for review — it is not spend authorization.
 
-Status progression: `APPROVED` → `VISUALS-DIRECTED` (awaiting user sign-off on visuals)
+Status progression: `APPROVED` → `VISUAL-DIRECTED` (awaiting user sign-off on visuals)
 
 ---
 
