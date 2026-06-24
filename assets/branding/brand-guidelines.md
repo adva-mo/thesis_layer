@@ -16,6 +16,12 @@ Reference document for visual and verbal identity. Keep this consistent across a
 
 ---
 
+## Narrator Voice
+
+The narrator is a **woman**. All first-person VO copy must use feminine verb forms in Hebrew (e.g., "בוחנת" not "בוחן", "משקיעה" not "משקיע"). This applies to reel scripts, hooks, and any spoken content. The ElevenLabs voice is female — masculine verb forms will be a mismatch between text and audio.
+
+---
+
 ## Voice Positioning
 
 | Dimension | Where we sit |

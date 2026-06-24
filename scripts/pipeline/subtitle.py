@@ -82,8 +82,8 @@ def main():
                         help="Leading pad added by render.py — subtitles are shifted by this amount (default: 0)")
     parser.add_argument("--screen-text", metavar="PATH",
                         help="Path to screen_text.json written by render.py (timed text overlays)")
-    parser.add_argument("--layers", default="subs", choices=["subs", "screen", "both"],
-                        help="Which layers to composite: subs, screen, or both (default: subs)")
+    parser.add_argument("--layers", default="both", choices=["subs", "screen", "both"],
+                        help="Which layers to composite: subs, screen, or both (default: both)")
     args = parser.parse_args()
 
     video_path      = Path(args.video)

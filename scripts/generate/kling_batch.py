@@ -68,15 +68,43 @@ def _parse_source_ts(ts: str) -> tuple[float, float]:
 def _update_vep_render_column(blueprint: Path, start_s: float, end_s: float, render_filename: str) -> bool:
     """
     Write the Render column for the VEP row matching this scene's timestamp.
+    Finds the column position from the header row — robust to column reorders and schema changes.
     Returns True if the row was found and updated, False if not found.
     """
     content = blueprint.read_text(encoding="utf-8")
-    ts_pat = rf"{int(start_s)}[–—\-]{int(end_s)}s"
-    row_pat = rf"(^\|[ \t]*{ts_pat}[ \t]*\|[^|]*\|[^|]*\|[^|]*\|)[^|]*(\|)"
-    new_content, n = re.subn(row_pat, rf"\g<1> {render_filename} \2", content, flags=re.MULTILINE)
-    if n:
-        blueprint.write_text(new_content, encoding="utf-8")
-    return bool(n)
+    lines = content.splitlines(keepends=True)
+
+    # Locate the Render column index by reading the header row
+    render_col = None
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("|") and "Render" in stripped:
+            cells = [c.strip() for c in stripped.split("|")]
+            for i, cell in enumerate(cells):
+                if cell.lower() == "render":
+                    render_col = i
+                    break
+            if render_col is not None:
+                break
+
+    if render_col is None:
+        return False
+
+    ts_pat = re.compile(rf"^\|\s*{int(start_s)}[–—\-]{int(end_s)}s\s*\|")
+    updated = False
+    result = []
+    for line in lines:
+        if not updated and ts_pat.match(line):
+            cells = line.split("|")
+            if len(cells) > render_col:
+                cells[render_col] = f" {render_filename} "
+                line = "|".join(cells)
+                updated = True
+        result.append(line)
+
+    if updated:
+        blueprint.write_text("".join(result), encoding="utf-8")
+    return updated
 
 
 def _open_for_review(path: Path) -> None:

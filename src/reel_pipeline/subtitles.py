@@ -37,7 +37,9 @@ SHADOW_DROP_OFFSET  = 3                      # directional drop shadow — all w
 
 PUNCTUATION_SPLIT   = set(".?!,—;:")
 
-LINE_GAP = 26   # px between lines in a two-line subtitle
+LINE_GAP           = 26  # px between lines
+MAX_LINES          = 3   # hard cap on split lines
+MIN_RESERVED_LINES = 2   # always reserve this many lines so bar_y never jumps
 
 SubtitleMode = Literal["phrase", "highlighted_phrase", "single_word"]
 
@@ -105,11 +107,9 @@ def _split_lines(words: list[str]) -> tuple[list[str], list[str]] | None:
     return words[:split_at], words[split_at:]
 
 
-def _render_two_lines(
-    line1_words: list[str],
-    line2_words: list[str],
-    line1_script: str,
-    line2_script: str,
+def _render_lines(
+    line_words: list[list[str]],
+    line_scripts: list[str],
     active_line: int,
     active_word_idx: int,
     font,
@@ -118,9 +118,9 @@ def _render_two_lines(
     highlight_all: bool = False,
 ) -> 'Image.Image':
     """
-    Render a two-line subtitle pill. Each line is rendered in its own script direction.
-    Hebrew lines use full-phrase BiDi; Latin lines render LTR directly.
-    active_line / active_word_idx select the highlighted word (ignored when highlight_all=True).
+    Render 1–MAX_LINES subtitle lines. Each line uses its own script direction.
+    active_line / active_word_idx select the highlighted word (-1 = none highlighted).
+    Bar height is always reserved for MAX_LINES so the block never jumps between phrases.
     """
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
@@ -132,10 +132,6 @@ def _render_two_lines(
         joined = " ".join(words)
         if script == 'hebrew':
             return _visual_hebrew(joined).split()
-        # Single mixed-script tokens like "ה-Thesis:" are classified 'latin' because
-        # Latin chars outnumber Hebrew chars, but the trailing punctuation (":") is a
-        # BiDi-neutral char that resolves to RTL (left side) when the word is run through
-        # the BiDi algorithm with base_dir='R'.
         if len(words) == 1 and any('֐' <= c <= '׿' for c in joined):
             return _visual_hebrew(joined).split()
         return list(words)
@@ -143,12 +139,7 @@ def _render_two_lines(
     def _vis_active_idx(n: int, logical: int, script: str) -> int:
         return max(0, min(n - 1, n - 1 - logical)) if script == 'hebrew' else logical
 
-    vis1 = _visual(line1_words, line1_script)
-    vis2 = _visual(line2_words, line2_script)
-
-    n1, n2 = len(vis1), len(vis2)
-    va1 = _vis_active_idx(n1, active_word_idx, line1_script) if active_line == 0 else -1
-    va2 = _vis_active_idx(n2, active_word_idx, line2_script) if active_line == 1 else -1
+    vis_lines = [_visual(words, script) for words, script in zip(line_words, line_scripts)]
 
     def measure(words):
         result = []
@@ -157,35 +148,77 @@ def _render_two_lines(
             result.append((w, bbox[2] - bbox[0], bbox))
         return result
 
-    met1 = measure(vis1)
-    met2 = measure(vis2)
-
-    total_w1 = sum(m[1] for m in met1) + space_w * max(0, n1 - 1) if met1 else 0
-    total_w2 = sum(m[1] for m in met2) + space_w * max(0, n2 - 1) if met2 else 0
+    metrics  = [measure(vis) for vis in vis_lines]
+    total_ws = [sum(m[1] for m in met) + space_w * max(0, len(met) - 1) for met in metrics]
 
     ascent, descent = font.getmetrics()
     line_h = ascent + descent
 
-    bar_w = max(total_w1, total_w2) + BAR_PADDING_X * 2
-    bar_h = line_h * 2 + LINE_GAP + BAR_PADDING_Y * 2
+    n_lines  = len(line_words)
+    reserved = max(n_lines, MIN_RESERVED_LINES)
+    bar_w = max(total_ws, default=0) + BAR_PADDING_X * 2
+    bar_h = line_h * reserved + LINE_GAP * (reserved - 1) + BAR_PADDING_Y * 2
     bar_x = (width - bar_w) // 2
     bar_y = int(height * TEXT_Y_RATIO) - bar_h
+    top_offset = reserved - n_lines  # push lines into the bottom slots
 
-    def draw_line(metrics, total_w, base_y, vis_active):
+    for li, (met, total_w, vis, script) in enumerate(zip(metrics, total_ws, vis_lines, line_scripts)):
+        n = len(vis)
+        if active_line == li:
+            va = _vis_active_idx(n, active_word_idx, script)
+        else:
+            va = -1
+        base_y = bar_y + BAR_PADDING_Y + (top_offset + li) * (line_h + LINE_GAP)
         x = bar_x + (bar_w - total_w) // 2
-        for i, (word, adv, bbox) in enumerate(metrics):
-            is_active = highlight_all or i == vis_active
+        for i, (word, adv, bbox) in enumerate(met):
+            is_active = highlight_all or i == va
             color = HIGHLIGHT_COLOR if is_active else DIM_COLOR
             draw_x = x - bbox[0]
             _draw_shadow(draw, (draw_x, base_y), word, font, SHADOW_COLOR, SHADOW_DROP_OFFSET)
             draw.text((draw_x, base_y), word, font=font, fill=color)
             x += adv + space_w
 
-    # Fixed positions — no per-phrase top correction so all phrases share the same baseline.
-    draw_line(met1, total_w1, bar_y + BAR_PADDING_Y, va1)
-    draw_line(met2, total_w2, bar_y + BAR_PADDING_Y + line_h + LINE_GAP, va2)
-
     return img
+
+
+def _split_words_to_lines(
+    words: list[str],
+    draw,
+    font,
+    space_w: float,
+    max_text_w: float,
+) -> list[list[str]]:
+    """
+    Split words into the fewest lines (2–MAX_LINES) such that each line fits max_text_w.
+    Uses equal-size groups. Falls back to MAX_LINES even if a line still overflows.
+    """
+    def _line_w(group: list[str]) -> float:
+        return (
+            sum(draw.textbbox((0, 0), w, font=font)[2] - draw.textbbox((0, 0), w, font=font)[0] for w in group)
+            + space_w * max(0, len(group) - 1)
+        )
+
+    n = len(words)
+    for k in range(2, min(MAX_LINES, n) + 1):
+        boundaries = [i * n // k for i in range(k)] + [n]
+        groups = [words[boundaries[i]:boundaries[i + 1]] for i in range(k)]
+        groups = [g for g in groups if g]
+        if all(_line_w(g) <= max_text_w for g in groups):
+            return groups
+
+    k = min(MAX_LINES, n)
+    boundaries = [i * n // k for i in range(k)] + [n]
+    return [g for g in (words[boundaries[i]:boundaries[i + 1]] for i in range(k)) if g]
+
+
+def _compute_max_chars(font, width: int) -> int:
+    """Safe chars-per-line limit derived from measured font metrics and screen width."""
+    sample = "מה יותר חשוב ממחיר"
+    tmp_draw = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
+    bbox = tmp_draw.textbbox((0, 0), sample, font=font)
+    avg_char_w = (bbox[2] - bbox[0]) / len(sample)
+    usable_w = width - BAR_PADDING_X * 2
+    return max(8, int(usable_w / avg_char_w))
 
 
 # ── Phrase grouping ───────────────────────────────────────────────
@@ -266,15 +299,12 @@ def _render_uniform(text: str, color, font, width: int, height: int) -> Image.Im
     line_h = ascent + descent
 
     bar_w = text_w + BAR_PADDING_X * 2
-    # Always reserve two-line height so the block never jumps when switching
-    # between single-line and two-line phrases.
-    bar_h = line_h * 2 + LINE_GAP + BAR_PADDING_Y * 2
+    bar_h = line_h * MIN_RESERVED_LINES + LINE_GAP * (MIN_RESERVED_LINES - 1) + BAR_PADDING_Y * 2
     bar_x = (width - bar_w) // 2
     bar_y = int(height * TEXT_Y_RATIO) - bar_h
 
     draw_x = bar_x + BAR_PADDING_X - bbox[0]
-    # Anchored to the top slot — 2-line phrases share this position for line 1 and expand downward.
-    draw_y = bar_y + BAR_PADDING_Y
+    draw_y = bar_y + BAR_PADDING_Y + (MIN_RESERVED_LINES - 1) * (line_h + LINE_GAP)
     _draw_shadow(draw, (draw_x, draw_y), visual, font, SHADOW_COLOR, SHADOW_DROP_OFFSET)
     draw.text((draw_x, draw_y), visual, font=font, fill=color)
     return img
@@ -297,8 +327,8 @@ def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, heigh
             active_line, active_word_idx = 0, active_idx
         else:
             active_line, active_word_idx = 1, active_idx - n1
-        return _render_two_lines(
-            line1_words, line2_words, line1_script, line2_script,
+        return _render_lines(
+            [line1_words, line2_words], [line1_script, line2_script],
             active_line, active_word_idx, font, width, height,
         )
 
@@ -307,9 +337,10 @@ def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, heigh
     visual_words = visual_phrase.split()
 
     n_visual = len(visual_words)
-    # BiDi reverses RTL word order; only mirror the logical index for Hebrew phrases.
-    # Pure Latin phrases are unchanged by get_display, so logical == visual order.
-    is_rtl = any(_word_script(w) == 'hebrew' for w in word_texts)
+    # BiDi reverses RTL word order; mirror the logical index whenever any Hebrew
+    # character is present — even a single prefix like "ב-Business" causes get_display
+    # to reorder words in an RTL paragraph, so word-script classification is insufficient.
+    is_rtl = any('֐' <= c <= '׿' for c in full_text)
     visual_active_idx = max(0, min(n_visual - 1, (n_visual - 1 - active_idx) if is_rtl else active_idx))
 
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
@@ -326,29 +357,31 @@ def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, heigh
 
     total_w = sum(m[1] for m in word_metrics) + space_w * max(0, n_visual - 1)
 
-    # Overflow check: if a pure-script phrase is too wide, split at midpoint into two lines.
+    # Overflow check: split into 2–MAX_LINES if phrase is too wide for one line.
     max_text_w = width - BAR_PADDING_X * 2
     if total_w > max_text_w and len(word_texts) >= 2:
-        mid = len(word_texts) // 2
         script = 'hebrew' if is_rtl else 'latin'
-        al, awdx = (0, active_idx) if active_idx < mid else (1, active_idx - mid)
-        return _render_two_lines(
-            word_texts[:mid], word_texts[mid:], script, script, al, awdx, font, width, height,
-        )
+        groups = _split_words_to_lines(word_texts, draw, font, space_w, max_text_w)
+        offset = 0
+        al, awdx = len(groups) - 1, 0
+        for li, g in enumerate(groups):
+            if active_idx < offset + len(g):
+                al, awdx = li, active_idx - offset
+                break
+            offset += len(g)
+        return _render_lines(groups, [script] * len(groups), al, awdx, font, width, height)
 
     ascent, descent = font.getmetrics()
     line_h = ascent + descent
 
     bar_w = total_w + BAR_PADDING_X * 2
-    # Always reserve two-line height — consistent with two-line phrases so the
-    # block never jumps vertically when script switches trigger a layout change.
-    bar_h = line_h * 2 + LINE_GAP + BAR_PADDING_Y * 2
+    bar_h = line_h * MIN_RESERVED_LINES + LINE_GAP * (MIN_RESERVED_LINES - 1) + BAR_PADDING_Y * 2
     bar_x = (width - bar_w) // 2
     bar_y = int(height * TEXT_Y_RATIO) - bar_h
 
     x = bar_x + BAR_PADDING_X
-    # Anchored to the top slot — 2-line phrases share this position for line 1 and expand downward.
-    base_draw_y = bar_y + BAR_PADDING_Y
+    # Bottom-anchored: single line sits in the last slot of the reserved block.
+    base_draw_y = bar_y + BAR_PADDING_Y + (MIN_RESERVED_LINES - 1) * (line_h + LINE_GAP)
 
     for i, (word, advance_w, word_bbox) in enumerate(word_metrics):
         is_active = i == visual_active_idx
@@ -388,7 +421,7 @@ def build_spans(
                 l1, l2 = split
                 s1 = next((_word_script(w) for w in l1 if _word_script(w) != 'neutral'), 'latin')
                 s2 = 'hebrew' if any(_word_script(w) == 'hebrew' for w in l2) else 'latin'
-                img = _render_two_lines(l1, l2, s1, s2, -1, -1, font, width, height, highlight_all=True)
+                img = _render_lines([l1, l2], [s1, s2], -1, -1, font, width, height, highlight_all=True)
             else:
                 img = _render_uniform(phrase.text, HIGHLIGHT_COLOR, font, width, height)
             spans.append(SubtitleSpan(img, phrase.start, phrase.end))
@@ -542,6 +575,64 @@ def _apply_timed_overlays(
     return output_path
 
 
+def build_scene_spans(chunks, scene_starts, font, width, height):
+    """
+    Scene-aware subtitles: all scene words appear at once from the scene start.
+    Active word is highlighted as it is spoken.
+    """
+    total_dur = chunks[-1]['end'] if chunks else 0.0
+    scene_ends = scene_starts[1:] + [total_dur]
+
+    tmp_img  = Image.new("RGBA", (1, 1))
+    tmp_draw = ImageDraw.Draw(tmp_img)
+    space_w  = tmp_draw.textbbox((0, 0), " ", font=font)[2] - tmp_draw.textbbox((0, 0), " ", font=font)[0]
+    max_text_w = width - BAR_PADDING_X * 2
+
+    spans: list[SubtitleSpan] = []
+
+    for sc_start, sc_end in zip(scene_starts, scene_ends):
+        sc_words = [c for c in chunks if sc_start <= c['start'] < sc_end]
+        if not sc_words:
+            continue
+
+        word_texts = [w['text'] for w in sc_words]
+        script = 'hebrew' if any('֐' <= c <= '׿' for c in ' '.join(word_texts)) else 'latin'
+
+        total_w = (
+            sum(tmp_draw.textbbox((0, 0), w, font=font)[2] - tmp_draw.textbbox((0, 0), w, font=font)[0]
+                for w in word_texts)
+            + space_w * max(0, len(word_texts) - 1)
+        )
+        lines = [word_texts] if total_w <= max_text_w else _split_words_to_lines(word_texts, tmp_draw, font, space_w, max_text_w)
+        line_scripts = [script] * len(lines)
+
+        # flat logical word index → (line_idx, word_idx_in_line)
+        line_for_word = [(li, wi) for li, line in enumerate(lines) for wi in range(len(line))]
+
+        # Leading silence: scene starts before first spoken word
+        first_start = sc_words[0]['start']
+        if first_start > sc_start:
+            img = _render_lines(lines, line_scripts, -1, -1, font, width, height)
+            spans.append(SubtitleSpan(img, sc_start, first_start))
+
+        # One span per word — whole scene block stays, active word highlighted
+        for i, wc in enumerate(sc_words):
+            w_start = wc['start']
+            w_end   = sc_words[i + 1]['start'] if i + 1 < len(sc_words) else sc_end
+            li, wi  = line_for_word[i]
+            img = _render_lines(lines, line_scripts, li, wi, font, width, height)
+            spans.append(SubtitleSpan(img, w_start, w_end))
+
+        # Trailing silence: keep last word highlighted until scene end
+        last_end = sc_words[-1]['end']
+        if last_end < sc_end:
+            li, wi = line_for_word[-1]
+            img = _render_lines(lines, line_scripts, li, wi, font, width, height)
+            spans.append(SubtitleSpan(img, last_end, sc_end))
+
+    return spans
+
+
 # ── Public API ────────────────────────────────────────────────────
 
 def apply_subtitles(
@@ -566,18 +657,33 @@ def apply_subtitles(
     apply_subs = layers in ("subs", "both")
     apply_screen = layers in ("screen", "both")
 
+    import json as _json
+    raw    = _json.loads(transcript_json.read_text(encoding='utf-8'))
     chunks = load_transcript(transcript_json)
-    phrases = group_into_phrases(chunks, max_words=max_words, max_duration=max_duration, max_chars=max_chars)
-    font = ImageFont.truetype(str(font_path), font_size)
+    font   = ImageFont.truetype(str(font_path), font_size)
+    max_chars = _compute_max_chars(font, width)
 
-    if preview_segment:
-        seg_start, seg_end = preview_segment
-        phrases = [p for p in phrases if p.end > seg_start and p.start < seg_end]
-        for p in phrases:
-            p.words = [w for w in p.words if w.end > seg_start and w.start < seg_end]
-        phrases = [p for p in phrases if p.words]
+    scene_starts = raw.get('scene_starts')
 
-    spans = build_spans(phrases, mode, font, width, height) if apply_subs else []
+    if apply_subs:
+        if scene_starts and len(scene_starts) > 1:
+            s1_end = scene_starts[1]
+            hook_chunks = [c for c in chunks if c['start'] < s1_end]
+            rest_chunks = [c for c in chunks if c['start'] >= s1_end]
+            hook_spans  = build_scene_spans(hook_chunks, [scene_starts[0]], font, width, height)
+            phrases     = group_into_phrases(rest_chunks, max_words=max_words, max_duration=max_duration, max_chars=max_chars)
+            spans       = hook_spans + build_spans(phrases, mode, font, width, height)
+        else:
+            phrases = group_into_phrases(chunks, max_words=max_words, max_duration=max_duration, max_chars=max_chars)
+            if preview_segment:
+                seg_start, seg_end = preview_segment
+                phrases = [p for p in phrases if p.end > seg_start and p.start < seg_end]
+                for p in phrases:
+                    p.words = [w for w in p.words if w.end > seg_start and w.start < seg_end]
+                phrases = [p for p in phrases if p.words]
+            spans = build_spans(phrases, mode, font, width, height)
+    else:
+        spans = []
 
     if preview_segment:
         seg_start, seg_end = preview_segment

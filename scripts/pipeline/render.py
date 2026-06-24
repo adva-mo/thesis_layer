@@ -10,7 +10,7 @@ Usage:
     python3 scripts/render_reel.py \\
         --blueprint output/club-place-dubai-hills/hebrew/reels/club-place-dubai-hills-he-reels.md \\
         --audio-dir output/club-place-dubai-hills/experiments/ \\
-        --assets-dir assets/club-place-dubai-hills/canonical/ \\
+        --assets-dir assets/club-place-dubai-hills \\
         --output output/club-place-dubai-hills/hebrew/reels/club-place-dubai-hills-he-reel-1-draft.mp4 \\
         --reel 1 --max-scenes 2
 
@@ -75,7 +75,7 @@ def print_dry_run(scenes, audio_dir, output_path, clip_overrides):
         elif scene.asset_type == "image":
             if scene.visual_type == "kling":
                 vsource = f"KLING FALLBACK (no clip) — {scene.asset_path.name}"
-            else:
+            else:  # static image, or legacy blueprint (visual_type=None) — both render as Ken Burns
                 vsource = f"image (Ken Burns): {scene.asset_path.name}"
         elif scene.freeze_last_frame:
             vsource = "freeze last frame"
@@ -119,6 +119,9 @@ def main():
     blueprint      = Path(args.blueprint)
     audio_dir      = Path(args.audio_dir)
     assets_dir     = Path(args.assets_dir)
+    # parser.py appends canonical/ internally — strip it if the caller already included it
+    if assets_dir.name == "canonical":
+        assets_dir = assets_dir.parent
     output         = Path(args.output)
     font_path      = Path(args.font)
     clip_overrides = _parse_clip_overrides(args.clip_override)
