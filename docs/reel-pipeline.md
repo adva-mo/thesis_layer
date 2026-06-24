@@ -213,6 +213,7 @@ Override the Ken Burns parameters per scene with `[PHOTO_TYPE:]`:
 | Kling scene with no clip, `Critical=yes` in VEP | Hard stop — exit before render starts |
 | Kling scene with no clip, `Critical=no` in VEP | Warning — render proceeds with blur-fill |
 | `--draft` flag present | Skip all fallback checks (work-in-progress render only) |
+| Legacy blueprint — no `[VISUAL_TYPE:]` tag, image-type scene | Treated as static image — Ken Burns; "KLING FALLBACK" label only appears for scenes with explicit `VISUAL_TYPE: kling` |
 
 Blur-fill Ken Burns is the fallback for ungenerated Kling scenes. It is never production-ready for critical beats.
 
@@ -337,7 +338,7 @@ python3 scripts/generate/kling_batch.py ... --scenes 2,4 --confirm-paid-api-call
 
 **VEP lifecycle for Kling scenes:**
 1. Write VEP `Source` pointing to the source image (`canonical/a001_*.jpg`) — kling_batch reads these. Leave `Render` blank.
-2. Run kling_batch → clips land in `canonical/kling_r1_XX-XXs.mp4` (e.g. `kling_r1_04-12s.mp4`). `kling_batch.py` writes the clip path into the `Render` column automatically.
+2. Run kling_batch → clips land in `canonical/kling_r1_XX-XXs.mp4` (e.g. `kling_r1_04-12s.mp4`). `kling_batch.py` writes the clip path into the `Render` column automatically. The `Render` column is located by reading the header row — column reorders and future schema changes don't break the update.
 3. render.py reads `Render` first; `Source` is untouched and always points to the original image.
 
 ---
@@ -782,7 +783,7 @@ python3 scripts/pipeline/subtitle.py \
 |------|---------|
 | `motion.py` | **Motion Language System** — single source of truth for all motion constants: easing functions, `CARD_ENTRY` animation timing, `MOTION_VOCAB` (9 tokens), `BEAT_MOTION_MAP`, `KEN_BURNS_PARAMS`, `resolve_motion_style()`, `get_transition()` |
 | `assembler.py` | Core reel assembly — combines clips + audio into MP4; routes image scenes to Ken Burns, Kling fallbacks to blur-fill composite, optional xfade transitions |
-| `parser.py` | Parses reel `.md` blueprints into `Scene` objects; handles `[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`, `[BEAT:]`, `[PHOTO_TYPE:]`, `[TEXT_CARD:]`, VEP table |
+| `parser.py` | Parses reel `.md` blueprints into `Scene` objects; handles `[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`, `[BEAT:]`, `[PHOTO_TYPE:]`, `[TEXT_CARD:]`, VEP table; legacy blueprints without `[VISUAL_TYPE:]` emit a deprecation warning and fall back to asset-type inference |
 | `graphic_generator.py` | PIL renderers for generated scenes (timeline, text_card, cta_card) |
 | `subtitles.py` | Subtitle grouping, BiDi rendering, PIL frame compositing |
 | `text_overlay.py` | `[SCREEN:]` text overlay (constants shared with subtitles) |

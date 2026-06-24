@@ -75,7 +75,7 @@ def print_dry_run(scenes, audio_dir, output_path, clip_overrides):
         elif scene.asset_type == "image":
             if scene.visual_type == "kling":
                 vsource = f"KLING FALLBACK (no clip) — {scene.asset_path.name}"
-            else:
+            else:  # static image, or legacy blueprint (visual_type=None) — both render as Ken Burns
                 vsource = f"image (Ken Burns): {scene.asset_path.name}"
         elif scene.freeze_last_frame:
             vsource = "freeze last frame"

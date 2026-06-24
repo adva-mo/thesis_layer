@@ -253,7 +253,7 @@ def assemble_reel(
         elif scene.asset_type == "image":
             if scene.visual_type == "kling":
                 print(f"    Visual:   KLING FALLBACK (blur-fill) → {scene.asset_path.name}")
-            else:
+            else:  # static image, or legacy blueprint (visual_type=None) — Ken Burns is correct for both
                 print(f"    Visual:   image (Ken Burns) → {scene.asset_path.name}")
             image_to_clip_kenburns(
                 scene.asset_path, duration, base_clip,
