@@ -158,6 +158,7 @@ See `templates/content-generation-workflow.md` for all content type specs, count
 
 **Reel format selection** (which narrative structure to use for a reel): see `templates/reels/reel-formats.md`.
 **User-scripted reels** (you provide the script, system produces it): see `templates/reels/directed-reel-workflow.md`.
+**Reel creative strategy** (plan a reel, choose a format, review a hook or script): skill `reel-strategist`.
 
 ---
 
