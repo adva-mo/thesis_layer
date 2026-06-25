@@ -105,5 +105,5 @@ Verdict: Go / Revise
 **Visual note (blueprint only):** one observation — either a specific visual-VO mismatch that undermines the concept, or a confirmed alignment worth keeping. No motion token suggestions, no VEP comments — creative register only.
 
 **Verdict:**
-- Go — hook is 3+ and the arc delivers on the hook's promise
-- Revise — hook is below 3, OR arc doesn't deliver the hook's promise, OR format is wrong for current account stage
+- Go — I would publish this as-is
+- Revise — fix the issue in "One upgrade" first
