@@ -45,9 +45,8 @@ assets/[slug]/          ← collected image assets (canonical/)
        ↳ User flips Status to VISUAL-APPROVED to authorise Kling spend.
        ↳ kling_batch.py hard-stops on any status other than VISUAL-APPROVED.
 
-2a. Generate TTS review        → scripts/generate/vo_combined.py --prepare-tts-review
-    ↳ edit tts_review.md, set APPROVED: true
-2b. Generate VO audio          → scripts/generate/vo_combined.py --require-tts-review --confirm-paid-api-call
+2. Generate VO audio          → scripts/generate/vo_combined.py --confirm-paid-api-call
+   ↳ dry-run (no flag): prints plan and exits — use to verify TTS text before spending
 3. Generate visual clips       → scripts/generate/kling_batch.py  (Kling I2V — recommended)
                                   scripts/generate/kling.py          (single clip — manual use)
                                   scripts/generate/timeline.py
@@ -59,7 +58,7 @@ assets/[slug]/          ← collected image assets (canonical/)
 7. Publish                     → post to channel; set **Status: PUBLISHED** in blueprint; update hook-log.md row to PUBLISHED
 ```
 
-Steps 2b–3 can run in any order. Step 2a must complete (and be approved) before 2b. Step 4 requires step 2b to be complete (needs `alignment.json`). Step 4 must come before step 6.
+Steps 2–3 can run in any order. Step 4 requires step 2 to be complete (needs `alignment.json`). Step 4 must come before step 6.
 
 **Status progression:**
 ```

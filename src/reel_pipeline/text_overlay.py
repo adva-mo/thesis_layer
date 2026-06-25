@@ -75,27 +75,59 @@ def _render_text_overlay(
 ) -> Image.Image:
     """Return a transparent RGBA image with the text rendered.
 
-    Use literal \\n in text to produce multiple lines (e.g. "line 1\\nline 2").
-    Each line is centered independently. y_ratio controls the bottom edge of the block.
+    Literal \\n in text forces a hard line break. Long lines are word-wrapped
+    automatically to fit within the canvas (up to 3 lines). Font size shrinks
+    in steps of 4 only if 3 wrapped lines still overflow.
     """
-    lines = text.split(r"\n")
-    visuals = [_visual_hebrew(line) for line in lines]
-    font = ImageFont.truetype(str(font_path), font_size)
+    MAX_LINES = 3
+    MIN_FONT  = 40
+    max_usable = width - BAR_PADDING_X * 2
 
     tmp = Image.new("RGBA", (1, 1))
-    draw = ImageDraw.Draw(tmp)
-    ascent, descent = font.getmetrics()
-    line_h = ascent + descent
-    line_gap = int(line_h * 0.15)
+    draw_tmp = ImageDraw.Draw(tmp)
 
-    widths = [
-        (bb := draw.textbbox((0, 0), v, font=font))[2] - bb[0]
-        for v in visuals
-    ]
-    total_h = line_h * len(visuals) + line_gap * (len(visuals) - 1) + BAR_PADDING_Y * 2
+    def _measure(s: str, f) -> int:
+        bb = draw_tmp.textbbox((0, 0), s, font=f)
+        return bb[2] - bb[0]
+
+    def _wrap(words: list[str], f) -> list[str]:
+        """Greedy word-wrap into lines that each fit max_usable."""
+        result, current = [], []
+        for word in words:
+            test = " ".join(current + [word])
+            if _measure(_visual_hebrew(test), f) > max_usable and current:
+                result.append(" ".join(current))
+                current = [word]
+            else:
+                current.append(word)
+        if current:
+            result.append(" ".join(current))
+        return result
+
+    # Flatten words, respecting hard \n as a group separator (re-wrap each group)
+    groups = [g.strip() for g in text.split(r"\n") if g.strip()]
+    all_words = []
+    for g in groups:
+        all_words.extend(g.split())
+
+    font = ImageFont.truetype(str(font_path), font_size)
+    wrapped = _wrap(all_words, font)
+
+    while len(wrapped) > MAX_LINES and font_size > MIN_FONT:
+        font_size -= 4
+        font = ImageFont.truetype(str(font_path), font_size)
+        wrapped = _wrap(all_words, font)
+
+    visuals = [_visual_hebrew(line) for line in wrapped]
+    widths  = [_measure(v, font) for v in visuals]
+
+    ascent, descent = font.getmetrics()
+    line_h  = ascent + descent
+    line_gap = int(line_h * 0.15)
+    total_h  = line_h * len(visuals) + line_gap * (len(visuals) - 1) + BAR_PADDING_Y * 2
 
     overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(overlay)
+    draw    = ImageDraw.Draw(overlay)
 
     block_top = int(height * y_ratio) - total_h
     for i, (visual, tw) in enumerate(zip(visuals, widths)):

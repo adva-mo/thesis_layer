@@ -43,12 +43,14 @@ from reel_pipeline.parser import parse_reel_file, read_reel_status
 def _is_kling_scene(scene) -> bool:
     """True if this scene needs a new Kling API call."""
     if scene.visual_type is not None:
-        return scene.visual_type == "kling" and not scene.reuse_source
+        return scene.visual_type == "kling" and not scene.reuse_source and not scene.freeze_last_frame
     # Legacy blueprint without [VISUAL_TYPE:] — fall back to asset_type
     return scene.asset_type == "image"
 
 
 def _skip_label(scene) -> str:
+    if scene.visual_type == "kling" and scene.freeze_last_frame:
+        return "freeze — hold last frame"
     if scene.visual_type == "kling" and scene.reuse_source:
         return f"reuse — copy from {scene.reuse_source}"
     if scene.visual_type in ("generated", "timeline"):

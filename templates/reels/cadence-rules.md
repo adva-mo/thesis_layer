@@ -34,6 +34,25 @@ The first published reel (Club Place at Dubai Hills, Reel 1 — Format 2, 45s) w
 
 ---
 
+## Compress-First Gate
+
+Run this before selecting a format. Required for every reel during an active sprint.
+
+**Question:** Can the core thesis be delivered in one insight within 15–25 seconds?
+
+Answer yes or no. If no, document the specific reason — what breaks when compressed:
+- Does the reality check collapse without a reframe that needs its own beat?
+- Are there 2+ independent claims that each require a separate scene to land?
+- Does the hook require setup that cannot fit in 3 seconds?
+
+**If yes:** use a short format. Do not select a longer format because the thesis feels like a breakdown or a case study.
+
+**If no:** long format is permitted. State the reason in the reel header's `Sprint mode` field before scripting.
+
+**Default is short.** The burden of justification is on the long format, not the short one.
+
+---
+
 ## Short Reels (15–25s) — Discovery / Cold Audience
 
 **Goal:** hook the mind and stop the scroll.
