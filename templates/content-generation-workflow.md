@@ -214,7 +214,9 @@ For each approved reel:
 
 **Do not proceed to Step 2.6 (asset collection) or any paid API call until the user explicitly approves the visual plan.** `VISUAL-DIRECTED` means the plan is ready for review — it is not spend authorization.
 
-Status progression: `APPROVED` → `VISUAL-DIRECTED` (awaiting user sign-off on visuals)
+Status progression: `APPROVED` → `VISUAL-DIRECTED` (awaiting user sign-off on visuals) → `VISUAL-APPROVED`
+
+Once the user approves the visual plan, run the producibility check before proceeding: `templates/reels/producibility-check.md`. The check must return **READY TO PRODUCE** before asset collection or any paid API call.
 
 ---
 
