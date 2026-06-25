@@ -312,6 +312,7 @@ The token is expanded to its full Kling prompt description before the API call. 
 
 | Keyword in VISUAL_INTENT | Graphic type | What renders |
 |---|---|---|
+| `stacked text card` | stacked_text_card | Fixed 3-line grid — top-anchored so line 1 stays at the same Y across all scenes; use 1–3 quoted strings joined with ` \| `; unfilled slots are empty but space is always reserved. Enables additive text build across consecutive scenes. Must be checked before `text card` (substring). |
 | `text card` or `bold text` or `text on screen` | text_card | Centered text extracted from `"quoted string"` in the description |
 | `split text card` | text_card | Two quoted strings joined with ` \| ` — use for contrast/comparison hooks |
 | `cta card` | cta_card | **Not used in reel CTA beats.** Reel CTAs use `[VISUAL_TYPE: static]` + `[TEXT_CARD:]` — see CTA scenes above. `cta card` remains valid for non-reel content (carousels, PDFs). |
