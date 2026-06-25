@@ -28,7 +28,7 @@ The first published reel (Club Place at Dubai Hills, Reel 1 — Format 2, 45s) w
 
 ## Audience Stage
 
-**Cold / discovery.** The viewer does not know the brand, the project, or the analytical voice yet. A short reel's only job is to hook the mind and stop the scroll — not to prove the thesis. Trust-building and full-thesis depth come later, once the audience already knows who's talking.
+Account stage and goal type: see `market.md § Channel State`.
 
 **Brand Frame Enforcement (this sprint):** Brand Frame minimum applies — definition and examples in `retention-layer.md`. Explicit naming of framework terms — "Thesis", "Assumption", "Signal" — is optional per reel; tracking happens at channel level via `hook-log.md` `brand_frames` column.
 

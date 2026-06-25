@@ -40,7 +40,7 @@ Claude is the engine. The templates are scaffolds. This file is the law.
 
 At the start of every session, before doing anything else, read these files:
 
-1. `market.md` — business context, CTAs, hashtag rules, language settings, audience framing
+1. `market.md` — business context, CTAs, hashtag rules, language settings, audience framing, channel state (account stage + goal type)
 2. `docs/voice-examples.md` — voice calibration (applies to all content types)
 3. `primary_language.md` — Hebrew writing rules (skip if primary language is English)
 4. `assets/branding/brand-guidelines.md` — brand positioning, visual identity, voice calibration table
