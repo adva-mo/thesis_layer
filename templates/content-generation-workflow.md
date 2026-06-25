@@ -101,7 +101,7 @@ Before scripting any reel:
 
 Step 2.4a below is a verification pass, not the first time these criteria apply — drafting against them now should mean Step 2.4a mostly confirms rather than rewrites.
 
-Produce 5 reel scripts, one per format (Data Drop, Investment Case, Myth Bust, Area Spotlight, Payment Plan Breakdown).
+Produce 5 reel scripts, one per format (Data Drop, Investment Case, Myth Bust, Area Spotlight, Payment Plan Breakdown). For full format definitions and additional format types (Formats 6–11), see `templates/reels/reel-formats.md`.
 
 Each script includes:
 - Format name + duration

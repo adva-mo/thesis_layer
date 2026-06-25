@@ -54,6 +54,8 @@ Brand hooks build the account voice. Performance hooks drive conversion and rete
 
 ## C. Format-Hook Fit
 
+> This table defines Format → Hook affinity only. For format definitions, beat patterns, and all format types (including Formats 6–11), see `templates/reels/reel-formats.md`.
+
 | Reel Format | Strongest hook families |
 |-------------|------------------------|
 | Format 1 — Market Signal (30s) | H1, H4, H6 |
@@ -61,6 +63,12 @@ Brand hooks build the account voice. Performance hooks drive conversion and rete
 | Format 3 — Myth Bust (30s) | H7, H8 |
 | Format 4 — Area Thesis (45s) | H1, H4, H8 |
 | Format 5 — Payment Plan (30s) | H3, H5 |
+| Format 6 — Personal Experience | H1, H8 |
+| Format 7 — Contrarian / Reframe | H7, H8 |
+| Format 8 — Comparison | H1, H4 |
+| Format 9 — Mistake / Lesson | H7, H6 |
+| Format 10 — Opportunity | H1, H4 |
+| Format 11 — Case Study | H8, H9 |
 
 Format fit is a tiebreaker within the affinity matrix, not an override. If the top thesis-fit candidate also has strong format fit: confirmed. If not: prefer the thesis-fit candidate and adapt the hook language to the format's rhythm.
 

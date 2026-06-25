@@ -156,6 +156,8 @@ Three tiers. Match the tier to the content type.
 
 See `templates/content-generation-workflow.md` for all content type specs, counts, and quality rules.
 
+**Reel format selection** (which narrative structure to use for a reel): see `templates/reels/reel-formats.md`.
+
 ---
 
 ## 9. PDF Generation Rules
