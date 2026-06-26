@@ -101,6 +101,8 @@ All I2V clips are generated via fal.ai. Choose a model tier per scene based on q
 | Kling v1 Standard *(current default)* | `fal-ai/kling-video/v1/standard/image-to-video` | 720p | $0.22 | No | Drafts, POC |
 | Kling 2.5 Turbo | `fal-ai/kling-video/v2.5/turbo/image-to-video` | 1080p | $0.35 | Optional | Standard production |
 | Kling 3.0 Pro | `fal-ai/kling-video/v3/pro/image-to-video` | 1080p / 4K | $0.56 | Optional | Hero scenes, final renders |
+
+*Pricing above is for model selection guidance. Authoritative per-call pricing is in `docs/api-cost-tracking.md`.*
 | Veo 3.1 Lite | `fal-ai/veo3/lite` | 720p–1080p | $0.25 | Native | Budget 1080p with audio |
 | Seedance 2.0 Fast | `fal-ai/seedance/v2/fast/image-to-video` | 1080p | $1.21 | Native | Architecture, multi-ref inputs |
 | Hailuo 02 Pro | `fal-ai/hailuo-ai/video/v2/pro/image-to-video` | 1080p | $0.49 | No | Cinematic one-shot scenes |
@@ -292,6 +294,10 @@ Calls ElevenLabs once per segment. Use only to regenerate a single segment witho
 ```bash
 python3 scripts/generate/vo.py output/[slug]/hebrew/reels/reel_01/reel_01.md \
   --segment 4 --confirm-paid-api-call
+
+# Legacy combined-file blueprint: also pass --reel N
+# python3 scripts/generate/vo.py output/[slug]/hebrew/reels/[slug]-he-reels.md \
+#   --reel 1 --segment 4 --confirm-paid-api-call
 ```
 
 ---
@@ -679,25 +685,9 @@ No automatic text transforms are applied — `[TTS:]` is the exact string sent t
 
 ## Output Folder Structure
 
-```
-output/[slug]/[lang]/reels/
-└── reel_01/
-    ├── reel_01.md                ← blueprint lives inside its reel folder
-    ├── audio/
-    │   ├── seg01_0-4s.mp3
-    │   ├── seg02_4-15s.mp3
-    │   ├── ...
-    │   ├── alignment.json
-    │   ├── transcript.json
-    │   └── _tests/               ← all test/experiment outputs go here (safe to delete)
-    │       ├── seg01_test_style017.mp3
-    │       └── seg04_test_no_dirham_entry.mp3
-    ├── scenes/                   ← pre-rendered animated clips (exclamation, CTA, etc.)
-    │   ├── scene03_exclamation.mp4
-    │   └── scene05_cta.mp4
-    ├── reel_01_raw.mp4
-    └── reel_01_raw_final.mp4
+For the full `output/` folder tree (reel folders, audio, renders), see `docs/output-conventions.md`.
 
+```
 assets/[slug]/
 ├── canonical/                    ← validated source images + Kling output clips
 │   ├── a001_description.jpg
