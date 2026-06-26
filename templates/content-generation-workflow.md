@@ -9,6 +9,7 @@ The master production workflow. Run this after you have a confirmed PROJECT DATA
 Before starting:
 - [ ] PROJECT DATA block is complete (or has documented `[MISSING]` fields)
 - [ ] CLAUDE.md has been read in this session — `market.md`, `docs/voice-examples.md`, and `primary_language.md` loaded at session init
+- [ ] Read `docs/output-conventions.md` — file naming, folder structure, and content block headers for saving outputs
 - [ ] Language confirmed: Hebrew / English / Both
 - [ ] `output/[project-slug]/thesis.md` exists — produced by `templates/positioning-framework.md` after positioning is confirmed
 - [ ] `output/[project-slug]/thesis.md` is loaded now — read it once here, do not re-read per step below

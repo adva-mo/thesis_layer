@@ -29,8 +29,12 @@ See `market.md` for business context, target audience, languages, and market-spe
 
 1. Drop input files into `input/` or paste raw property information into the conversation
 2. Run the extraction workflow (`templates/extraction-workflow.md`) to get a structured PROJECT DATA block
-3. Run the content generation workflow (`templates/content-generation-workflow.md`) using that data
+3. Run the content generation workflow (`templates/content-generation-workflow.md`) using that data — content type specs, counts, and quality rules are all there
 4. Save outputs to the correct folders with correct filenames
+
+**Reel format selection** (which narrative structure to use for a reel): see `templates/reels/reel-formats.md`.
+**User-scripted reels** (you provide the script, system produces it): see `templates/reels/directed-reel-workflow.md`.
+**Reel creative strategy** (plan a reel, choose a format, review a hook or script): skill `reel-strategist`.
 
 Claude is the engine. The templates are scaffolds. This file is the law.
 
@@ -153,16 +157,6 @@ Three tiers. Match the tier to the content type.
 
 ---
 
-## 8. Content Types
-
-See `templates/content-generation-workflow.md` for all content type specs, counts, and quality rules.
-
-**Reel format selection** (which narrative structure to use for a reel): see `templates/reels/reel-formats.md`.
-**User-scripted reels** (you provide the script, system produces it): see `templates/reels/directed-reel-workflow.md`.
-**Reel creative strategy** (plan a reel, choose a format, review a hook or script): skill `reel-strategist`.
-
----
-
 ## 9. PDF Generation Rules
 
 PDFs are educational lead magnets. They build trust and generate inbound.
@@ -200,275 +194,78 @@ See `templates/extraction-workflow.md` for the full schema, input handling rules
 
 ## 11. Content Repurposing Rules
 
-ONE PROJECT → MANY CONTENT PIECES. This is the core leverage principle.
+ONE PROJECT → MANY CONTENT PIECES. Extract once; adapt per format.
 
-**What stays fixed across all content:**
+**Fixed across all content:** project name, developer, key numbers, location, investment angle.
+**Adapts per format:** hook type (different category each) · depth (hooks = surface, LinkedIn = depth, PDF = full) · tone (WhatsApp = personal, LinkedIn = professional, Reels = fast) · CTA tier (platform-matched).
 
-- Project name and developer
-- Key numbers (price, payment plan)
-- Location
-- Investment angle
+**Sequence:** extract → LinkedIn post → repurpose body as investor summary → carousel slides as reel talking points → hooks as reel openers + WhatsApp subject lines → investor summary as PDF section.
 
-**What adapts per format:**
-
-- Hook type (different category per format)
-- Depth (hooks = surface, LinkedIn = depth, PDF = full explainer)
-- Tone (WhatsApp = personal, LinkedIn = professional, Reels = fast)
-- CTA tier (platform-matched)
-
-**Repurposing sequence:**
-
-1. Extract once → PROJECT DATA block
-2. LinkedIn post → repurpose body as investor summary
-3. Carousel slides → repurpose as reel talking points
-4. Hooks → repurpose as reel opening lines and WhatsApp subject lines
-5. Investor summary → repurpose as PDF section on the project
-
-**Do not generate each format from scratch.** Always look for content that can be adapted from an already-generated format.
+Do not generate each format from scratch. Always adapt from what's already been generated.
 
 ---
 
 ## 12. Output Formatting Conventions
 
-### File naming:
+File naming: `[project-slug]-[language]-[content-type].md`. Reels: `reel_NN.md` inside its own `reel_NN/` folder.
 
-```
-[project-slug]-[language]-[content-type].md
-```
-
-Examples:
-
-- `sky-gardens-he-hooks.md`
-- `sky-gardens-en-linkedin.md`
-- `damac-lagoons-he-carousel.md`
-
-**Reels:** blueprint is named `reel_NN.md` and lives inside its own `reel_NN/` folder — the path provides the project/language context so no slug prefix is needed.
-
-Project slug: lowercase, hyphens, no spaces. Derive from project name.
-
-### Folder placement:
-
-```
-output/
-├── [project-slug]/
-│   ├── hebrew/
-│   │   ├── hooks/
-│   │   ├── carousel/
-│   │   ├── linkedin/
-│   │   ├── whatsapp/
-│   │   ├── pdfs/
-│   │   └── reels/
-│   │       ├── reel_01/
-│   │       │   ├── reel_01.md        ← blueprint lives inside its reel folder
-│   │       │   ├── audio/
-│   │       │   │   ├── seg01_*.mp3
-│   │       │   │   ├── transcript.json
-│   │       │   │   ├── alignment.json
-│   │       │   │   └── screen_text.json
-│   │       │   ├── scenes/
-│   │       │   └── reel_01_raw.mp4 / reel_01_raw_final.mp4
-│   │       └── reel_02/
-│   │           ├── reel_02.md
-│   │           └── ...
-│   └── english/
-│       └── ...
-└── general/
-    ├── hebrew/pdfs/    → non-project PDFs (guides, checklists)
-    └── english/pdfs/
-```
-
-Each project gets its own folder. The slug is lowercase, hyphens, derived from the project name (e.g., `arlington-park-2`, `sky-gardens`).
-
-**Legacy combined-file format:** older projects use a single `[slug]-he-reels.md` file containing all reels, with `reel_01/`, `reel_02/` production folders alongside it. This pattern is still supported — all pipeline scripts accept `--blueprint [slug]-he-reels.md --reel N`. Do not migrate existing projects; use the new per-reel pattern for all new reels.
-
-### Test outputs:
-
-All test and experiment outputs (voice tuning samples, render tests, pronunciation tests) must be saved to a `_tests/` subfolder within the relevant directory — never alongside production files. `_tests/` is safe to delete at any time without affecting the pipeline.
-
-Example: `output/[slug]/[lang]/reels/reel_01/audio/_tests/seg04_test_style017.mp3`
-
-### Content block headers:
-
-Label each generated item clearly:
-
-```
-## Hook 1 [CURIOSITY]
-## Hook 2 [PRICE]
-## Reel 1 — Data Drop (30s)
-## Slide 1 — Hook
-```
-
-For file frontmatter format and the extraction warning block, see the **File Header Template** and **Extraction Warning Block** sections in `templates/content-generation-workflow.md`.
+See `docs/output-conventions.md` for full folder structure, legacy format support, test output rules, and content block header format.
 
 ## 13. Operation Modes
 
-The system supports two separate operational modes.
-
-These modes must remain clearly separated.
+The system has two modes. Never mix them.
 
 ---
 
-## 13.1 Content Mode
+### Content Mode
 
-### Goal
+Public-facing content: reels, hooks, carousels, LinkedIn, WhatsApp, captions, newsletter snippets.
 
-Generate engaging lead-generation content for public-facing platforms.
+**Priorities:** hooks · retention · curiosity · clarity · authority · emotional engagement
+**Tone:** confident · concise · modern · investor-oriented
+**Never:** excessive disclaimers · analytical wording · legal/compliance tone · risk-heavy framing · caveat overload
 
-### Priorities
-
-- hooks
-- retention
-- curiosity
-- clarity
-- authority positioning
-- CTA optimization
-- emotional engagement
-
-### Tone
-
-The tone should remain:
-
-- confident
-- modern
-- concise
-- engaging
-- investor-oriented
-
-### Content Types
-
-This mode is responsible for generating:
-
-- reels
-- TikTok hooks
-- carousel posts
-- LinkedIn posts
-- WhatsApp messages
-- captions
-- CTA variations
-- newsletter snippets
-
-### Important Rules
-
-- avoid excessive disclaimers
-- avoid overly analytical wording
-- avoid sounding like legal/compliance text
-- avoid risk-heavy framing
-- do not overload content with caveats
-
-Analysis findings may inform the positioning,
-but should NOT dominate the content itself.
+Analysis findings may inform positioning — but must not dominate the content itself.
 
 ---
 
-## 13.2 Analysis Mode
+### Analysis Mode
 
-### Goal
+Internal decision support only. Not public-facing.
 
-Provide internal investment analysis for decision-making.
-
-This mode is NOT public-facing.
-
-### Priorities
-
-- inconsistencies
-- missing information
-- confidence levels
-- investment risks
-- developer credibility
-- extraction validation
-- pricing conflicts
-- payment-plan verification
-- market positioning
-
-### Responsibilities
-
-This mode should:
-
-- identify missing data
-- flag suspicious claims
-- separate verified vs inferred information
-- identify weak assumptions
-- detect contradictions between sources
-- assess data confidence
-
-### Output Style
-
-Analysis outputs should:
-
-- be structured
-- concise
-- evidence-oriented
-- confidence-aware
-
-### Important Rules
-
-This mode should NOT:
-
-- generate marketing language
-- generate hype
-- create exaggerated investment claims
-- optimize for engagement
-
-The goal is:
-long-term trust and positioning quality,
-not short-term emotional selling.
+**Priorities:** inconsistencies · missing data · confidence levels · investment risks · developer credibility · pricing conflicts · payment-plan verification
+**Responsibilities:** flag suspicious claims · separate verified vs inferred · identify weak assumptions · detect contradictions
+**Output:** structured · concise · evidence-oriented · confidence-aware
+**Never:** marketing language · hype · exaggerated investment claims · engagement optimization
 
 ---
 
-## 13.3 Mode Separation
+### Mode Separation
 
-Do NOT mix the modes.
+Analysis findings should improve positioning, hook selection, and messaging accuracy — but must NOT turn public content into legal disclaimers, compliance reports, or overly defensive writing.
 
-Analysis Mode findings should improve:
-
-- project positioning
-- hook selection
-- messaging accuracy
-- audience targeting
-
-But should NOT turn public-facing content into:
-
-- legal disclaimers
-- compliance reports
-- pessimistic analysis
-- overly defensive writing
-
-The system must maintain:
-
-- analytical intelligence internally
-- clean engaging communication externally
+The system maintains: analytical intelligence internally, clean engaging communication externally.
 
 ---
 
-## 13.4 Final Impression Rule
+### Final Impression Rule
 
-Risk, caveats, and downside are required for credibility. But content must never END with unresolved negativity.
+Risk, caveats, and downside are required for credibility. But content must never END on unresolved negativity.
 
 **Applies to:** reels, captions, PDFs, WhatsApp messages, carousel, LinkedIn posts, investor summaries.
 
-**The final emotional impression must be:**
-- Clarity
-- Curiosity
-- Informed conviction
-- Constructive uncertainty
-- A question worth exploring
+**Final impression must be:** Clarity · Curiosity · Informed conviction · Constructive uncertainty · A question worth exploring
 
-**Never:**
-- Fear
-- Anxiety
-- Unresolved doubt
-- Paralysis
+**Never end on:** Fear · Anxiety · Unresolved doubt · Paralysis
 
-**Allowed closing mechanisms (use one):**
+**Closing mechanisms (use one):**
 1. Return to the thesis
 2. Reframe the risk
 3. Surface the real investor question
 4. Compare tradeoffs
 5. Create curiosity
 
-The goal is not optimism. The goal is: leave the audience thinking, not worrying.
-
-**Test:** Read the last sentence of any content piece. If the natural response is "this sounds risky" or "maybe I shouldn't," the rule is violated. If the natural response is "interesting — I want to understand the answer," the rule passes.
+**Test:** Read the last sentence. If the natural response is "this sounds risky" or "maybe I shouldn't" → rule violated. If the natural response is "interesting — I want to understand the answer" → rule passes.
 
 ---
 
@@ -477,27 +274,11 @@ The goal is not optimism. The goal is: leave the audience thinking, not worrying
 Before generating content, determine the project's primary positioning angle.
 See `templates/positioning-framework.md` for categories, decision logic, and content mapping.
 
-## 15. Brand Voice
-
-See `assets/branding/brand-guidelines.md` for this brand's voice, tone, and writing style.
-
----
-
 ## 16. Asset Collection
 
 After generating reel scripts (Step 2 in `templates/content-generation-workflow.md`), append a Visual Evidence Plan to each reel and execute automated asset collection.
 
-Reference: `templates/asset-collection.md` for full execution rules.
-
-**Key rules:**
-
-- Every `[VISUAL:]` tag requiring a real image must have a row in the Visual Evidence Plan
-- Generated cards (text overlays, CTA cards, graphics) are skipped — not collected
-- Every asset is stored once in `assets/[project-slug]/canonical/` — never duplicated per output
-- Reuse canonical assets across reels, carousels, and PDFs via the manifest `used_in` field
-- Thesis type × beat type determines source priority — see source matrix in `templates/asset-collection.md`
-- A reel is not ready for editing if any `prove` or `reinforce` asset is MISSING
-- Vision-rejected assets go to `assets/[project-slug]/raw/rejected/` — never deleted
+See `templates/asset-collection.md` for full execution rules, source priority matrix, and criticality thresholds.
 
 **Folder structure per project:**
 
@@ -509,35 +290,12 @@ assets/[project-slug]/
 └── raw/rejected/
 ```
 
-**Manifest location:** `assets/[project-slug]/manifest.md`
+- Reuse canonical assets across reels, carousels, and PDFs via the manifest `used_in` field
+- Vision-rejected assets go to `raw/rejected/` — never deleted
 
 ---
 
 ## 17. API Cost Tracking
 
-After every paid API call, append one line to `output/history/costs`.
-
-**Triggers:**
-- `vo_combined.py --confirm-paid-api-call` → ElevenLabs
-- `vo.py --confirm-paid-api-call` → ElevenLabs
-- `kling_batch.py --confirm-paid-api-call` → fal.ai
-- `kling.py --confirm-paid-api-call` → fal.ai
-
-**Pricing:**
-- ElevenLabs: $0.10 per 1,000 characters
-- Kling v1 Standard: $0.22 / 5s clip
-- Kling 2.5 Turbo: $0.35 / 5s clip
-- Kling 3.0 Pro: $0.56 / 5s clip
-
-**Line format:**
-```
-DD/MM/YYYY - [project-slug] [reel context] - $X.XX [provider] ([details])
-```
-
-**Examples:**
-```
-22/6/2026 - binghatti-skyhall reel_01 - 0.04 11labs (399 chars, 3 calls)
-22/6/2026 - binghatti-skyhall reel_01 - 1.10 fal (3 clips: 5s+10s+10s, 1 reuse free)
-```
-
-Calculate costs from the call output (chars sent, clip durations, model used). Do not leave TBD — compute and write before moving on.
+After every paid API call, append one cost line to `output/history/costs`.
+See `docs/api-cost-tracking.md` for triggers, pricing, and format.
