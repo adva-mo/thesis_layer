@@ -254,28 +254,28 @@ Outputs are saved to `output/[project-slug]/`.
 
 ```bash
 # Generate voice-over (ElevenLabs — 1 API call)
-python3 scripts/generate/vo_combined.py output/[slug]/hebrew/reels/[slug]-he-reels.md \
-  --reel 1 --output-dir output/[slug]/hebrew/reels/reel_01/audio --confirm-paid-api-call
+python3 scripts/generate/vo_combined.py output/[slug]/hebrew/reels/reel_01/reel_01.md \
+  --output-dir output/[slug]/hebrew/reels/reel_01/audio --confirm-paid-api-call
 
 # Generate video clips (Kling via fal.ai — charged per clip)
 python3 scripts/generate/kling_batch.py \
-  --blueprint output/[slug]/hebrew/reels/[slug]-he-reels.md \
-  --reel 1 --assets-dir assets/[slug]/canonical \
-  --model fal-ai/kling-video/v3/pro/image-to-video --confirm-paid-api-call
+  --blueprint output/[slug]/hebrew/reels/reel_01/reel_01.md \
+  --assets-dir assets/[slug]/canonical \
+  --model fal-ai/kling-video/v1/standard/image-to-video --confirm-paid-api-call
 
 # Build transcript timing
 python3 scripts/pipeline/align_timing.py --audio-dir output/[slug]/hebrew/reels/reel_01/audio
 
-# Render + subtitle + compact
+# Render + subtitle
 python3 scripts/pipeline/render.py \
-  --blueprint output/[slug]/hebrew/reels/[slug]-he-reels.md \
+  --blueprint output/[slug]/hebrew/reels/reel_01/reel_01.md \
   --audio-dir output/[slug]/hebrew/reels/reel_01/audio \
   --assets-dir assets/[slug]/canonical \
-  --output output/[slug]/hebrew/reels/reel_01/reel01_draft.mp4 \
-  --reel 1 --render
+  --output output/[slug]/hebrew/reels/reel_01/reel_01_raw.mp4 \
+  --render
 
 python3 scripts/pipeline/subtitle.py \
-  --video output/[slug]/hebrew/reels/reel_01/reel01_draft.mp4 \
+  --video output/[slug]/hebrew/reels/reel_01/reel_01_raw.mp4 \
   --transcript output/[slug]/hebrew/reels/reel_01/audio/transcript.json
 ```
 
