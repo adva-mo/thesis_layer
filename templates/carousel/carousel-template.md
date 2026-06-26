@@ -387,7 +387,7 @@ The `[how to think about it]` line is mandatory. It converts the risk from a dea
 Good: “לא בעיה בפני עצמה — זה אומר שצריך לבדוק ביקוש בזמן המסירה.”
 Bad: “יכול להיות בעיה.” [no forward anchor]
 
-See CLAUDE.md §13.4.
+See CLAUDE.md §13 — Final Impression Rule.
 
 ### Example
 

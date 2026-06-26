@@ -584,32 +584,31 @@ The parser resolves `canonical/X` via `--assets-dir`, and any other path relativ
 Composites Hebrew subtitles and/or `[TEXT_TIMING:]` screen text onto the rendered video in a single PIL pass. Also automatically applies the brand logo watermark (top-right corner, 200px wide, 36px padding) from `assets/branding/logo-wide.png` on every frame. No author action required — the logo is applied if the file exists, skipped silently if not.
 
 ```bash
-# Subtitles only (default):
+# Both layers — subtitles + screen text (default):
 python3 scripts/pipeline/subtitle.py \
-  --video output/[slug]/hebrew/reels/reel_01/reel01_draft.mp4 \
+  --video output/[slug]/hebrew/reels/reel_01/reel_01_raw.mp4 \
   --transcript output/[slug]/[lang]/reels/reel_01/audio/transcript.json
 
 # Screen text only (no subs — useful during visual direction testing):
 python3 scripts/pipeline/subtitle.py \
-  --video output/[slug]/hebrew/reels/reel_01/reel01_draft.mp4 \
+  --video output/[slug]/hebrew/reels/reel_01/reel_01_raw.mp4 \
   --transcript output/[slug]/[lang]/reels/reel_01/audio/transcript.json \
   --screen-text output/[slug]/[lang]/reels/reel_01/audio/screen_text.json \
   --layers screen
 
-# Both layers (production):
+# Subtitles only:
 python3 scripts/pipeline/subtitle.py \
-  --video output/[slug]/hebrew/reels/reel_01/reel01_draft.mp4 \
+  --video output/[slug]/hebrew/reels/reel_01/reel_01_raw.mp4 \
   --transcript output/[slug]/[lang]/reels/reel_01/audio/transcript.json \
-  --screen-text output/[slug]/[lang]/reels/reel_01/audio/screen_text.json \
-  --layers both
+  --layers subs
 ```
 
 **Output:** `_subtitled.mp4`, then auto-compacts to `_final.mp4` at `video_speed` from `config/voice-settings.json`. Preview runs (`--preview-segment`) skip the compact step.
 
 **`--layers` flag:**
-- `subs` (default) — subtitles only
+- `both` (default) — subtitles + screen text composited in a single PIL pass; screen text first (lower), subtitles on top
+- `subs` — subtitles only
 - `screen` — `[TEXT_TIMING:]` / `[TEXT_CARD:]` overlays only (no subs)
-- `both` — both layers composited in a single PIL pass; screen text is composited first (lower), subtitles on top
 
 **`--screen-text PATH`** — path to `screen_text.json` written by `render.py` automatically when any scene has `[TEXT_TIMING:]` or `[TEXT_CARD:]` tags.
 
