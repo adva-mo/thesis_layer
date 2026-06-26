@@ -112,13 +112,31 @@ Missing information stays missing.
 
 Every thesis includes downside.
 
-Credibility depends on it.
+```bash
+# Generate voice-over (ElevenLabs — 1 API call)
+python3 scripts/generate/vo_combined.py output/[slug]/hebrew/reels/reel_01/reel_01.md \
+  --output-dir output/[slug]/hebrew/reels/reel_01/audio --confirm-paid-api-call
 
-### Final Impression Rule
+# Generate video clips (Kling via fal.ai — charged per clip)
+python3 scripts/generate/kling_batch.py \
+  --blueprint output/[slug]/hebrew/reels/reel_01/reel_01.md \
+  --assets-dir assets/[slug]/canonical \
+  --model fal-ai/kling-video/v1/standard/image-to-video --confirm-paid-api-call
 
 Content never ends on unresolved negativity.
 
-The goal is not optimism.
+# Render + subtitle
+python3 scripts/pipeline/render.py \
+  --blueprint output/[slug]/hebrew/reels/reel_01/reel_01.md \
+  --audio-dir output/[slug]/hebrew/reels/reel_01/audio \
+  --assets-dir assets/[slug]/canonical \
+  --output output/[slug]/hebrew/reels/reel_01/reel_01_raw.mp4 \
+  --render
+
+python3 scripts/pipeline/subtitle.py \
+  --video output/[slug]/hebrew/reels/reel_01/reel_01_raw.mp4 \
+  --transcript output/[slug]/hebrew/reels/reel_01/audio/transcript.json
+```
 
 The goal is clarity.
 

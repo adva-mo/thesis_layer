@@ -198,7 +198,7 @@ Never hide it.
 Incomplete: "RAK עדיין שוק צעיר יותר מדובאי."
 Complete: "RAK עדיין שוק צעיר יותר מדובאי — זה אומר שהתשואה צריכה לפצות על הסיכון הנוסף. השאלה היא אם היא עושה את זה."
 
-See CLAUDE.md §13.4.
+See CLAUDE.md §13 — Final Impression Rule.
 
 ---
 

@@ -738,7 +738,7 @@ Leaves: "This sounds risky."
 4. Compare tradeoffs
 5. Create curiosity
 
-See CLAUDE.md §13.4.
+See CLAUDE.md §13 — Final Impression Rule.
 
 ---
 

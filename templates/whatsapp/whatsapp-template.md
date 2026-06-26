@@ -8,7 +8,7 @@ Three message variants per project. Hebrew-first. Conversational, direct, never 
 - No formal sign-offs ("בברכה", "Regards") — just natural closing
 - Never open with "היי, אני מציע לך..."
 - Sound like a message from a knowledgeable friend, not a sales rep
-- Final Impression Rule: if risk or uncertainty is mentioned, close with a forward-leaning question or tradeoff before the CTA line — never end on bare doubt (see CLAUDE.md §13.4)
+- Final Impression Rule: if risk or uncertainty is mentioned, close with a forward-leaning question or tradeoff before the CTA line — never end on bare doubt (see CLAUDE.md §13 — Final Impression Rule)
 
 **Language note (Hebrew):** WhatsApp is Tier 3 — direct and personal. Hebrew must sound like a real person, not a sales template. `primary_language.md` is loaded at session init — no re-read needed here.
 

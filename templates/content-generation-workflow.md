@@ -9,6 +9,7 @@ The master production workflow. Run this after you have a confirmed PROJECT DATA
 Before starting:
 - [ ] PROJECT DATA block is complete (or has documented `[MISSING]` fields)
 - [ ] CLAUDE.md has been read in this session — `market.md`, `docs/voice-examples.md`, and `primary_language.md` loaded at session init
+- [ ] Read `docs/output-conventions.md` — file naming, folder structure, and content block headers for saving outputs
 - [ ] Language confirmed: Hebrew / English / Both
 - [ ] `output/[project-slug]/thesis.md` exists — produced by `templates/positioning-framework.md` after positioning is confirmed
 - [ ] `output/[project-slug]/thesis.md` is loaded now — read it once here, do not re-read per step below
@@ -402,7 +403,7 @@ Before marking any file `status: ready`, check:
 - [ ] No scarcity claims unless unit count is confirmed and sourced
 - [ ] No "Dubai is booming" or equivalent clichés
 - [ ] Tone is calm and analytical — not broker-urgent
-- [ ] Final Impression Rule: no content piece ends on unresolved negativity — last emotional note is clarity, curiosity, or informed conviction (CLAUDE.md §13.4)
+- [ ] Final Impression Rule: no content piece ends on unresolved negativity — last emotional note is clarity, curiosity, or informed conviction (CLAUDE.md §13 — Final Impression Rule)
 
 **Naturalizer**
 - [ ] Every Hebrew file has a naturalizer sign-off at the bottom

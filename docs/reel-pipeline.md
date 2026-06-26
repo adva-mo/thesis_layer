@@ -101,6 +101,8 @@ All I2V clips are generated via fal.ai. Choose a model tier per scene based on q
 | Kling v1 Standard *(current default)* | `fal-ai/kling-video/v1/standard/image-to-video` | 720p | $0.22 | No | Drafts, POC |
 | Kling 2.5 Turbo | `fal-ai/kling-video/v2.5/turbo/image-to-video` | 1080p | $0.35 | Optional | Standard production |
 | Kling 3.0 Pro | `fal-ai/kling-video/v3/pro/image-to-video` | 1080p / 4K | $0.56 | Optional | Hero scenes, final renders |
+
+*Pricing above is for model selection guidance. Authoritative per-call pricing is in `docs/api-cost-tracking.md`.*
 | Veo 3.1 Lite | `fal-ai/veo3/lite` | 720p–1080p | $0.25 | Native | Budget 1080p with audio |
 | Seedance 2.0 Fast | `fal-ai/seedance/v2/fast/image-to-video` | 1080p | $1.21 | Native | Architecture, multi-ref inputs |
 | Hailuo 02 Pro | `fal-ai/hailuo-ai/video/v2/pro/image-to-video` | 1080p | $0.49 | No | Cinematic one-shot scenes |
@@ -241,14 +243,12 @@ Sends all segments as one combined string to the ElevenLabs `/with-timestamps` e
 ```bash
 # Dry-run (see plan, no API call):
 python3 scripts/generate/vo_combined.py \
-  output/[slug]/hebrew/reels/[slug]-he-reels.md \
-  --reel 1 \
+  output/[slug]/hebrew/reels/reel_01/reel_01.md \
   --output-dir output/[slug]/hebrew/reels/reel_01/audio
 
 # Generate (paid):
 python3 scripts/generate/vo_combined.py \
-  output/[slug]/hebrew/reels/[slug]-he-reels.md \
-  --reel 1 \
+  output/[slug]/hebrew/reels/reel_01/reel_01.md \
   --output-dir output/[slug]/hebrew/reels/reel_01/audio \
   --confirm-paid-api-call
 ```
@@ -266,8 +266,7 @@ python3 scripts/generate/vo_combined.py \
 ```bash
 # Generate VO audio (1 API call, produces alignment.json):
 python3 scripts/generate/vo_combined.py \
-  output/[slug]/hebrew/reels/[slug]-he-reels.md \
-  --reel 1 \
+  output/[slug]/hebrew/reels/reel_01/reel_01.md \
   --output-dir output/[slug]/hebrew/reels/reel_01/audio \
   --confirm-paid-api-call
 ```
@@ -290,11 +289,15 @@ When done: update `EL_PRONUNCIATION_DICT_VERSION_ID` in `.env` → regenerate VO
 
 ### vo.py — ElevenLabs TTS, per-segment *(single-segment regeneration only)*
 
-Calls ElevenLabs once per segment. Use only to regenerate a single segment without re-running the full combined call. Does **not** produce `alignment.json` — run `align_timing.py` is not available after a `vo.py` run; use `align.py` instead.
+Calls ElevenLabs once per segment. Use only to regenerate a single segment without re-running the full combined call. Does **not** produce `alignment.json` — `align_timing.py` is not available after a `vo.py` run; use `align.py` instead.
 
 ```bash
-python3 scripts/generate/vo.py output/[slug]/hebrew/reels/[slug]-he-reels.md \
-  --reel 1 --segment 4 --confirm-paid-api-call
+python3 scripts/generate/vo.py output/[slug]/hebrew/reels/reel_01/reel_01.md \
+  --segment 4 --confirm-paid-api-call
+
+# Legacy combined-file blueprint: also pass --reel N
+# python3 scripts/generate/vo.py output/[slug]/hebrew/reels/[slug]-he-reels.md \
+#   --reel 1 --segment 4 --confirm-paid-api-call
 ```
 
 ---
@@ -308,15 +311,13 @@ Reads a reel blueprint, finds all image-type scenes, and generates one Kling cli
 ```bash
 # Dry run — see plan and cost estimate (no API call):
 python3 scripts/generate/kling_batch.py \
-  --blueprint output/[slug]/[lang]/reels/[slug]-he-reels.md \
-  --reel 1 \
+  --blueprint output/[slug]/[lang]/reels/reel_01/reel_01.md \
   --assets-dir assets/[slug]/canonical \
   --model fal-ai/kling-video/v3/pro/image-to-video
 
 # Paid run:
 python3 scripts/generate/kling_batch.py \
-  --blueprint output/[slug]/[lang]/reels/[slug]-he-reels.md \
-  --reel 1 \
+  --blueprint output/[slug]/[lang]/reels/reel_01/reel_01.md \
   --assets-dir assets/[slug]/canonical \
   --model fal-ai/kling-video/v3/pro/image-to-video \
   --confirm-paid-api-call
@@ -523,10 +524,9 @@ accidental use of approximate timing when proper ElevenLabs alignment is availab
 ```bash
 # Dev/test only — requires --approximate flag when alignment.json is missing
 python3 scripts/pipeline/align.py \
-  --blueprint output/[slug]/hebrew/reels/[slug]-he-reels.md \
+  --blueprint output/[slug]/hebrew/reels/reel_01/reel_01.md \
   --audio-dir output/[slug]/[lang]/reels/reel_01/audio \
   --output output/[slug]/[lang]/reels/reel_01/audio/transcript.json \
-  --reel 1 \
   --approximate
 ```
 
@@ -548,11 +548,11 @@ Combines audio segments and visual clips into a single MP4. Defaults to dry-run 
 
 ```bash
 python3 scripts/pipeline/render.py \
-  --blueprint output/[slug]/[lang]/reels/[slug]-he-reels.md \
+  --blueprint output/[slug]/[lang]/reels/reel_01/reel_01.md \
   --audio-dir output/[slug]/[lang]/reels/reel_01/audio \
   --assets-dir assets/[slug]/canonical/ \
-  --output output/[slug]/[lang]/reels/reel_01/reel01_draft.mp4 \
-  --reel 1 --render
+  --output output/[slug]/[lang]/reels/reel_01/reel_01_raw.mp4 \
+  --render
 ```
 
 **Key flags:**
@@ -590,32 +590,31 @@ The parser resolves `canonical/X` via `--assets-dir`, and any other path relativ
 Composites Hebrew subtitles and/or `[TEXT_TIMING:]` screen text onto the rendered video in a single PIL pass. Also automatically applies the brand logo watermark (top-right corner, 200px wide, 36px padding) from `assets/branding/logo-wide.png` on every frame. No author action required — the logo is applied if the file exists, skipped silently if not.
 
 ```bash
-# Subtitles only (default):
+# Both layers — subtitles + screen text (default):
 python3 scripts/pipeline/subtitle.py \
-  --video output/[slug]/hebrew/reels/reel_01/reel01_draft.mp4 \
+  --video output/[slug]/hebrew/reels/reel_01/reel_01_raw.mp4 \
   --transcript output/[slug]/[lang]/reels/reel_01/audio/transcript.json
 
 # Screen text only (no subs — useful during visual direction testing):
 python3 scripts/pipeline/subtitle.py \
-  --video output/[slug]/hebrew/reels/reel_01/reel01_draft.mp4 \
+  --video output/[slug]/hebrew/reels/reel_01/reel_01_raw.mp4 \
   --transcript output/[slug]/[lang]/reels/reel_01/audio/transcript.json \
   --screen-text output/[slug]/[lang]/reels/reel_01/audio/screen_text.json \
   --layers screen
 
-# Both layers (production):
+# Subtitles only:
 python3 scripts/pipeline/subtitle.py \
-  --video output/[slug]/hebrew/reels/reel_01/reel01_draft.mp4 \
+  --video output/[slug]/hebrew/reels/reel_01/reel_01_raw.mp4 \
   --transcript output/[slug]/[lang]/reels/reel_01/audio/transcript.json \
-  --screen-text output/[slug]/[lang]/reels/reel_01/audio/screen_text.json \
-  --layers both
+  --layers subs
 ```
 
-**Output:** `_subtitled.mp4`, then auto-compacts to `_final.mp4` at `video_speed` from `config/voice-settings.json`. Preview runs (`--preview-segment`) skip the compact step.
+**Output:** `_subtitled.mp4`. If `video_speed != 1.0` in `config/voice-settings.json`, subtitle.py auto-compacts the result to `_final.mp4`. Preview runs (`--preview-segment`) skip the compact step.
 
 **`--layers` flag:**
-- `subs` (default) — subtitles only
+- `both` (default) — subtitles + screen text composited in a single PIL pass; screen text first (lower), subtitles on top
+- `subs` — subtitles only
 - `screen` — `[TEXT_TIMING:]` / `[TEXT_CARD:]` overlays only (no subs)
-- `both` — both layers composited in a single PIL pass; screen text is composited first (lower), subtitles on top
 
 **`--screen-text PATH`** — path to `screen_text.json` written by `render.py` automatically when any scene has `[TEXT_TIMING:]` or `[TEXT_CARD:]` tags.
 
@@ -686,25 +685,9 @@ No automatic text transforms are applied — `[TTS:]` is the exact string sent t
 
 ## Output Folder Structure
 
-```
-output/[slug]/[lang]/reels/
-├── [slug]-he-reels.md            ← blueprint
-└── reel_01/
-    ├── audio/
-    │   ├── seg01_0-4s.mp3
-    │   ├── seg02_4-15s.mp3
-    │   ├── ...
-    │   ├── alignment.json
-    │   ├── transcript.json
-    │   └── _tests/               ← all test/experiment outputs go here (safe to delete)
-    │       ├── seg01_test_style017.mp3
-    │       └── seg04_test_no_dirham_entry.mp3
-    ├── scenes/                   ← pre-rendered animated clips (exclamation, CTA, etc.)
-    │   ├── scene03_exclamation.mp4
-    │   └── scene05_cta.mp4
-    ├── reel01_draft.mp4
-    └── reel01_draft_subtitled.mp4
+For the full `output/` folder tree (reel folders, audio, renders), see `docs/output-conventions.md`.
 
+```
 assets/[slug]/
 ├── canonical/                    ← validated source images + Kling output clips
 │   ├── a001_description.jpg
@@ -714,6 +697,8 @@ assets/[slug]/
 ├── manifest.md
 └── raw/
 ```
+
+**Legacy combined-file format:** older projects use a single `[slug]-he-reels.md` file alongside the production folders. This is still fully supported — all scripts accept `--blueprint [slug]-he-reels.md --reel N`. Do not migrate existing projects; use the per-reel pattern above for all new reels.
 
 ---
 
@@ -728,16 +713,14 @@ ASSETS_DIR=assets/$SLUG/canonical
 
 # 1. Generate VO — timing endpoint (1 API call, produces alignment.json)
 python3 scripts/generate/vo_combined.py \
-  $REEL_DIR/$SLUG-he-reels.md \
-  --reel 1 \
+  $REEL_DIR/reel_01/reel_01.md \
   --output-dir $AUDIO_DIR \
   --confirm-paid-api-call
 # → listen; if mispronunciation: add word to EL dictionary, update .env, regenerate
 
 # 2. Generate Kling clips (paid — VEP Source column must point to source images; Render is blank)
 python3 scripts/generate/kling_batch.py \
-  --blueprint $REEL_DIR/$SLUG-he-reels.md \
-  --reel 1 \
+  --blueprint $REEL_DIR/reel_01/reel_01.md \
   --assets-dir $ASSETS_DIR \
   --model fal-ai/kling-video/v3/pro/image-to-video \
   --confirm-paid-api-call
@@ -759,15 +742,15 @@ python3 scripts/pipeline/align_timing.py --audio-dir $AUDIO_DIR
 
 # 5. Render — VEP is the single source of truth; no --clip-override needed
 python3 scripts/pipeline/render.py \
-  --blueprint $REEL_DIR/$SLUG-he-reels.md \
+  --blueprint $REEL_DIR/reel_01/reel_01.md \
   --audio-dir $AUDIO_DIR \
   --assets-dir $ASSETS_DIR \
-  --output $REEL_DIR/reel_01/reel01_draft.mp4 \
-  --reel 1 --render
+  --output $REEL_DIR/reel_01/reel_01_raw.mp4 \
+  --render
 
 # 6. Subtitle
 python3 scripts/pipeline/subtitle.py \
-  --video $REEL_DIR/reel_01/reel01_draft.mp4 \
+  --video $REEL_DIR/reel_01/reel_01_raw.mp4 \
   --transcript $AUDIO_DIR/transcript.json \
   --mode highlighted_phrase
 ```

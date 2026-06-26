@@ -263,7 +263,7 @@ NOT:
 
 “This is a great opportunity.”
 
-**Final Impression Rule:** The verdict is the last substantive section — it must leave the reader in informed decision-readiness or defined uncertainty, not unresolved worry. State the conditions clearly: “This works if X. The question is whether Y.” A verdict that ends on a bare risk statement without anchoring it to a decision frame violates this rule. See CLAUDE.md §13.4.
+**Final Impression Rule:** The verdict is the last substantive section — it must leave the reader in informed decision-readiness or defined uncertainty, not unresolved worry. State the conditions clearly: “This works if X. The question is whether Y.” A verdict that ends on a bare risk statement without anchoring it to a decision frame violates this rule. See CLAUDE.md §13 — Final Impression Rule.
 
 ---
 
