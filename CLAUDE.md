@@ -53,8 +53,9 @@ If a project is already active (e.g., resuming work), also read:
 If the session involves reel generation (rendering, scripting, or pipeline work), also read:
 
 6. `templates/reels/reel-template.md` — **script format spec** (required before writing any scene: VISUAL_TYPE values, VISUAL_INTENT keyword contract for generated scenes, MOTION_STYLE tokens, VEP table format, TTS rules)
-7. `docs/reel-pipeline.md` — full technical reference for the reel generation pipeline (scripts, workflow, commands)
-8. `output/history/hook-log.md` — hook history for all projects (create if missing)
+7. `templates/reels/reel-formats.md` — **format library** (all 11 format definitions: beat patterns, scaffolds, account stage fit, goal types — required before selecting a format or writing a script)
+8. `docs/reel-pipeline.md` — full technical reference for the reel generation pipeline (scripts, workflow, commands)
+9. `output/history/hook-log.md` — hook history for all projects (create if missing)
 
 These files are referenced throughout the system from multiple templates. Reading them once here eliminates per-template re-reads and prevents "see market.md" pointers from triggering repeated loads of the same file during CTA, hashtag, and language sections.
 
