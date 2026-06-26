@@ -405,12 +405,13 @@ def main() -> None:
             errors.append(scene.index)
 
     print()
+    if billed:
+        _append_cost_entry(blueprint, args.reel, model, billed)
     if errors:
         print(f"  ✗ Failed scenes: {errors}")
         sys.exit(1)
     else:
         print(f"  ✓ Done — {len(to_generate)} clip(s) saved to {assets_dir}/")
-        _append_cost_entry(blueprint, args.reel, model, billed)
 
 
 if __name__ == "__main__":
