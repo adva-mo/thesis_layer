@@ -3,6 +3,7 @@ Hebrew [SCREEN:] text overlay using PIL + python-bidi.
 Composited onto a video clip via FFmpeg.
 """
 
+import re
 import subprocess
 import sys
 import tempfile
@@ -95,28 +96,35 @@ def _render_text_overlay(
         result, current = [], []
         for word in words:
             test = " ".join(current + [word])
-            if _measure(_visual_hebrew(test), f) > max_usable and current:
-                result.append(" ".join(current))
-                current = [word]
+            if _measure(_visual_hebrew(test), f) > max_usable:
+                if current:
+                    result.append(" ".join(current))
+                    current = [word]
+                else:
+                    result.append(word)  # oversized single word — accept it, no alternative
             else:
                 current.append(word)
         if current:
             result.append(" ".join(current))
         return result
 
-    # Flatten words, respecting hard \n as a group separator (re-wrap each group)
-    groups = [g.strip() for g in text.split(r"\n") if g.strip()]
-    all_words = []
-    for g in groups:
-        all_words.extend(g.split())
+    def _wrap_groups(gs: list[str], f) -> list[str]:
+        """Wrap each hard-break group independently, preserving author line-break intent."""
+        result = []
+        for g in gs:
+            result.extend(_wrap(g.split(), f))
+        return result
+
+    # Split on both literal \n (blueprint escape) and actual newline (captured by parser)
+    groups = [g.strip() for g in re.split(r'\\n|\n', text) if g.strip()]
 
     font = ImageFont.truetype(str(font_path), font_size)
-    wrapped = _wrap(all_words, font)
+    wrapped = _wrap_groups(groups, font)
 
     while len(wrapped) > MAX_LINES and font_size > MIN_FONT:
         font_size -= 4
         font = ImageFont.truetype(str(font_path), font_size)
-        wrapped = _wrap(all_words, font)
+        wrapped = _wrap_groups(groups, font)
 
     visuals = [_visual_hebrew(line) for line in wrapped]
     widths  = [_measure(v, font) for v in visuals]

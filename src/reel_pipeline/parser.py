@@ -239,9 +239,10 @@ def parse_reel_file(
         ms_match = re.search(r"\[MOTION_STYLE:\s*(.*?)\]", block, re.DOTALL)
         motion_style = ms_match.group(1).strip() if ms_match else None
 
-        tc_match = re.search(r"\[TEXT_CARD:\s*(.*?)\]", block, re.DOTALL)
+        # [^\]]* matches any char including newlines, stops at first ] — tag values must not contain ]
+        tc_match = re.search(r"\[TEXT_CARD:\s*([^\]]*)\]", block)
         if not tc_match:
-            tc_match = re.search(r"\[SCREEN:\s*(.*?)\]", block, re.DOTALL)
+            tc_match = re.search(r"\[SCREEN:\s*([^\]]*)\]", block)
         text_card = tc_match.group(1).strip() if tc_match else None
 
         beat_match = re.search(r"\[BEAT:\s*(\w+)\s*\]", block)

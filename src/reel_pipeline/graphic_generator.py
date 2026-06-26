@@ -185,18 +185,18 @@ def render_stacked_text_card(lines: list[str], font_path: Path,
     img = Image.new("RGBA", (width, height), bg)
     draw = ImageDraw.Draw(img)
 
-    # Auto-fit: start at max, shrink until every line fits horizontally
+    # Auto-fit: check fit at each size, stop when lines fit or floor is reached.
+    # Uses bb[2]-bb[0] (true width) not bb[2] (right edge), consistent with rest of file.
     font_size = STACKED_FONT_MAX
-    font = ImageFont.truetype(str(font_path), font_size)
-    while font_size > STACKED_FONT_MIN:
-        widths = [
-            draw.textbbox((0, 0), _visual(l.strip()), font=font)[2]
-            for l in lines
-        ]
-        if max(widths, default=0) <= STACKED_MAX_USABLE_W:
+    while True:
+        font = ImageFont.truetype(str(font_path), font_size)
+        widths = []
+        for l in lines:
+            bb = draw.textbbox((0, 0), _visual(l.strip()), font=font)
+            widths.append(bb[2] - bb[0])
+        if max(widths, default=0) <= STACKED_MAX_USABLE_W or font_size <= STACKED_FONT_MIN:
             break
         font_size -= 4
-        font = ImageFont.truetype(str(font_path), font_size)
 
     ascent, descent = font.getmetrics()
     line_h   = ascent + descent
