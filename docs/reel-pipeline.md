@@ -241,14 +241,12 @@ Sends all segments as one combined string to the ElevenLabs `/with-timestamps` e
 ```bash
 # Dry-run (see plan, no API call):
 python3 scripts/generate/vo_combined.py \
-  output/[slug]/hebrew/reels/[slug]-he-reels.md \
-  --reel 1 \
+  output/[slug]/hebrew/reels/reel_01/reel_01.md \
   --output-dir output/[slug]/hebrew/reels/reel_01/audio
 
 # Generate (paid):
 python3 scripts/generate/vo_combined.py \
-  output/[slug]/hebrew/reels/[slug]-he-reels.md \
-  --reel 1 \
+  output/[slug]/hebrew/reels/reel_01/reel_01.md \
   --output-dir output/[slug]/hebrew/reels/reel_01/audio \
   --confirm-paid-api-call
 ```
@@ -266,8 +264,7 @@ python3 scripts/generate/vo_combined.py \
 ```bash
 # Generate VO audio (1 API call, produces alignment.json):
 python3 scripts/generate/vo_combined.py \
-  output/[slug]/hebrew/reels/[slug]-he-reels.md \
-  --reel 1 \
+  output/[slug]/hebrew/reels/reel_01/reel_01.md \
   --output-dir output/[slug]/hebrew/reels/reel_01/audio \
   --confirm-paid-api-call
 ```
@@ -293,8 +290,8 @@ When done: update `EL_PRONUNCIATION_DICT_VERSION_ID` in `.env` → regenerate VO
 Calls ElevenLabs once per segment. Use only to regenerate a single segment without re-running the full combined call. Does **not** produce `alignment.json` — run `align_timing.py` is not available after a `vo.py` run; use `align.py` instead.
 
 ```bash
-python3 scripts/generate/vo.py output/[slug]/hebrew/reels/[slug]-he-reels.md \
-  --reel 1 --segment 4 --confirm-paid-api-call
+python3 scripts/generate/vo.py output/[slug]/hebrew/reels/reel_01/reel_01.md \
+  --segment 4 --confirm-paid-api-call
 ```
 
 ---
@@ -308,15 +305,13 @@ Reads a reel blueprint, finds all image-type scenes, and generates one Kling cli
 ```bash
 # Dry run — see plan and cost estimate (no API call):
 python3 scripts/generate/kling_batch.py \
-  --blueprint output/[slug]/[lang]/reels/[slug]-he-reels.md \
-  --reel 1 \
+  --blueprint output/[slug]/[lang]/reels/reel_01/reel_01.md \
   --assets-dir assets/[slug]/canonical \
   --model fal-ai/kling-video/v3/pro/image-to-video
 
 # Paid run:
 python3 scripts/generate/kling_batch.py \
-  --blueprint output/[slug]/[lang]/reels/[slug]-he-reels.md \
-  --reel 1 \
+  --blueprint output/[slug]/[lang]/reels/reel_01/reel_01.md \
   --assets-dir assets/[slug]/canonical \
   --model fal-ai/kling-video/v3/pro/image-to-video \
   --confirm-paid-api-call
@@ -523,10 +518,9 @@ accidental use of approximate timing when proper ElevenLabs alignment is availab
 ```bash
 # Dev/test only — requires --approximate flag when alignment.json is missing
 python3 scripts/pipeline/align.py \
-  --blueprint output/[slug]/hebrew/reels/[slug]-he-reels.md \
+  --blueprint output/[slug]/hebrew/reels/reel_01/reel_01.md \
   --audio-dir output/[slug]/[lang]/reels/reel_01/audio \
   --output output/[slug]/[lang]/reels/reel_01/audio/transcript.json \
-  --reel 1 \
   --approximate
 ```
 
@@ -548,11 +542,11 @@ Combines audio segments and visual clips into a single MP4. Defaults to dry-run 
 
 ```bash
 python3 scripts/pipeline/render.py \
-  --blueprint output/[slug]/[lang]/reels/[slug]-he-reels.md \
+  --blueprint output/[slug]/[lang]/reels/reel_01/reel_01.md \
   --audio-dir output/[slug]/[lang]/reels/reel_01/audio \
   --assets-dir assets/[slug]/canonical/ \
-  --output output/[slug]/[lang]/reels/reel_01/reel01_draft.mp4 \
-  --reel 1 --render
+  --output output/[slug]/[lang]/reels/reel_01/reel_01_raw.mp4 \
+  --render
 ```
 
 **Key flags:**
@@ -688,8 +682,8 @@ No automatic text transforms are applied — `[TTS:]` is the exact string sent t
 
 ```
 output/[slug]/[lang]/reels/
-├── [slug]-he-reels.md            ← blueprint
 └── reel_01/
+    ├── reel_01.md                ← blueprint lives inside its reel folder
     ├── audio/
     │   ├── seg01_0-4s.mp3
     │   ├── seg02_4-15s.mp3
@@ -702,8 +696,8 @@ output/[slug]/[lang]/reels/
     ├── scenes/                   ← pre-rendered animated clips (exclamation, CTA, etc.)
     │   ├── scene03_exclamation.mp4
     │   └── scene05_cta.mp4
-    ├── reel01_draft.mp4
-    └── reel01_draft_subtitled.mp4
+    ├── reel_01_raw.mp4
+    └── reel_01_raw_final.mp4
 
 assets/[slug]/
 ├── canonical/                    ← validated source images + Kling output clips
@@ -714,6 +708,8 @@ assets/[slug]/
 ├── manifest.md
 └── raw/
 ```
+
+**Legacy combined-file format:** older projects use a single `[slug]-he-reels.md` file alongside the production folders. This is still fully supported — all scripts accept `--blueprint [slug]-he-reels.md --reel N`. Do not migrate existing projects; use the per-reel pattern above for all new reels.
 
 ---
 
@@ -728,16 +724,14 @@ ASSETS_DIR=assets/$SLUG/canonical
 
 # 1. Generate VO — timing endpoint (1 API call, produces alignment.json)
 python3 scripts/generate/vo_combined.py \
-  $REEL_DIR/$SLUG-he-reels.md \
-  --reel 1 \
+  $REEL_DIR/reel_01/reel_01.md \
   --output-dir $AUDIO_DIR \
   --confirm-paid-api-call
 # → listen; if mispronunciation: add word to EL dictionary, update .env, regenerate
 
 # 2. Generate Kling clips (paid — VEP Source column must point to source images; Render is blank)
 python3 scripts/generate/kling_batch.py \
-  --blueprint $REEL_DIR/$SLUG-he-reels.md \
-  --reel 1 \
+  --blueprint $REEL_DIR/reel_01/reel_01.md \
   --assets-dir $ASSETS_DIR \
   --model fal-ai/kling-video/v3/pro/image-to-video \
   --confirm-paid-api-call
@@ -759,15 +753,15 @@ python3 scripts/pipeline/align_timing.py --audio-dir $AUDIO_DIR
 
 # 5. Render — VEP is the single source of truth; no --clip-override needed
 python3 scripts/pipeline/render.py \
-  --blueprint $REEL_DIR/$SLUG-he-reels.md \
+  --blueprint $REEL_DIR/reel_01/reel_01.md \
   --audio-dir $AUDIO_DIR \
   --assets-dir $ASSETS_DIR \
-  --output $REEL_DIR/reel_01/reel01_draft.mp4 \
-  --reel 1 --render
+  --output $REEL_DIR/reel_01/reel_01_raw.mp4 \
+  --render
 
 # 6. Subtitle
 python3 scripts/pipeline/subtitle.py \
-  --video $REEL_DIR/reel_01/reel01_draft.mp4 \
+  --video $REEL_DIR/reel_01/reel_01_raw.mp4 \
   --transcript $AUDIO_DIR/transcript.json \
   --mode highlighted_phrase
 ```
