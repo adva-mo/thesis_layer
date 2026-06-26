@@ -129,18 +129,54 @@ def _output_path(assets_dir: Path, reel_number: int, start_s: float, end_s: floa
     return assets_dir / "canonical" / f"kling_r{reel_number}_{int(start_s):02d}-{int(end_s):02d}s.mp4"
 
 
+_KLING_COST_PER_5S: dict[str, float] = {
+    "v1/standard": 0.22,
+    "v2.5/turbo":  0.35,
+    "v3/pro":      0.56,
+    "seedance":    1.21,
+    "hailuo":      0.49,
+    "veo3":        0.25,
+}
+
+
+def _clip_cost(duration_s: int, model: str) -> float:
+    per_5s = next((v for k, v in _KLING_COST_PER_5S.items() if k in model), 0.56)
+    return per_5s * (duration_s / 5)
+
+
 def _estimate_cost(scenes_to_generate: list, model: str) -> str:
-    costs = {
-        "v1/standard": 0.22,
-        "v2.5/turbo":  0.35,
-        "v3/pro":      0.56,
-        "seedance":    1.21,
-        "hailuo":      0.49,
-        "veo3":        0.25,
-    }
-    per_5s = next((v for k, v in costs.items() if k in model), 0.56)
-    total = sum(per_5s * (_clip_duration(s.end_s - s.start_s) / 5) for s in scenes_to_generate)
-    return f"~${total:.2f} ({', '.join(f'{int(s.start_s)}-{int(s.end_s)}s=${per_5s * _clip_duration(s.end_s - s.start_s) / 5:.2f}' for s in scenes_to_generate)})"
+    total = sum(_clip_cost(_clip_duration(s.end_s - s.start_s), model) for s in scenes_to_generate)
+    breakdown = ", ".join(
+        f"{int(s.start_s)}-{int(s.end_s)}s=${_clip_cost(_clip_duration(s.end_s - s.start_s), model):.2f}"
+        for s in scenes_to_generate
+    )
+    return f"~${total:.2f} ({breakdown})"
+
+
+def _append_cost_entry(blueprint: Path, reel_n: int, model: str, billed: list[tuple[int, object]]) -> None:
+    """Append one cost line to output/history/costs per CLAUDE.md §17."""
+    if not billed:
+        return
+    from datetime import date
+    total = sum(_clip_cost(dur, model) for dur, _ in billed)
+    dur_str = "+".join(f"{dur}s" for dur, _ in billed)
+
+    try:
+        bp_rel = blueprint.resolve().relative_to(REPO_ROOT)
+        slug = bp_rel.parts[1] if len(bp_rel.parts) > 1 and bp_rel.parts[0] == "output" else blueprint.stem
+    except ValueError:
+        slug = blueprint.stem
+
+    today = date.today()
+    n_clips = len(billed)
+    line = (f"{today.day}/{today.month}/{today.year} - {slug} reel_{reel_n:02d}"
+            f" - {total:.2f} fal ({n_clips} clip{'s' if n_clips != 1 else ''}: {dur_str})\n")
+
+    costs_path = REPO_ROOT / "output" / "history" / "costs"
+    costs_path.parent.mkdir(parents=True, exist_ok=True)
+    with costs_path.open("a") as f:
+        f.write(line)
+    print(f"  ✓ Cost logged → output/history/costs  ({line.strip()})")
 
 
 def main() -> None:
@@ -336,11 +372,16 @@ def main() -> None:
 
     # ── Paid run ──────────────────────────────────────────────────────
     print()
-    errors = []
+    errors      = []
+    billed      = []   # (duration_s, scene) for actual API calls (cache hits excluded)
     for scene in to_generate:
         dur      = _clip_duration(scene.end_s - scene.start_s)
         out_path = _output_path(assets_dir, args.reel, scene.start_s, scene.end_s)
         prompt   = resolved_prompts[scene.index]
+
+        # Check cache before calling so we know whether this will cost money
+        cache_key  = fal_kling.compute_cache_key(scene.asset_path, prompt, dur, model, scene.kling_avoid)
+        is_api_call = fal_kling.get_cached_path(cache_key) is None
 
         print(f"  Generating scene {scene.index} → {out_path.name}  ({dur}s) …")
         print(f"    Prompt: {prompt}")
@@ -349,6 +390,8 @@ def main() -> None:
         try:
             fal_kling.generate_clip(scene.asset_path, prompt, dur, model, out_path,
                                     negative_prompt=scene.kling_avoid)
+            if is_api_call:
+                billed.append((dur, scene))
             print(f"    ✓ {out_path.name}")
             _open_for_review(out_path)
             print(f"    → opening for review (re-run with --scenes {scene.index} to regenerate)")
@@ -367,6 +410,7 @@ def main() -> None:
         sys.exit(1)
     else:
         print(f"  ✓ Done — {len(to_generate)} clip(s) saved to {assets_dir}/")
+        _append_cost_entry(blueprint, args.reel, model, billed)
 
 
 if __name__ == "__main__":
