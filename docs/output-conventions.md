@@ -36,7 +36,9 @@ output/
 │   │       │   │   ├── alignment.json
 │   │       │   │   └── screen_text.json
 │   │       │   ├── scenes/
-│   │       │   └── reel_01_raw.mp4 / reel_01_raw_final.mp4
+│   │       │   ├── reel_01_raw.mp4
+│   │       │   ├── reel_01_raw_subtitled.mp4
+│   │       │   └── reel_01_raw_final.mp4     ← only when video_speed != 1.0
 │   │       └── reel_02/
 │   │           ├── reel_02.md
 │   │           └── ...

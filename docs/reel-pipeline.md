@@ -603,7 +603,7 @@ python3 scripts/pipeline/subtitle.py \
   --layers subs
 ```
 
-**Output:** `_subtitled.mp4`, then auto-compacts to `_final.mp4` at `video_speed` from `config/voice-settings.json`. Preview runs (`--preview-segment`) skip the compact step.
+**Output:** `_subtitled.mp4`. If `video_speed != 1.0` in `config/voice-settings.json`, subtitle.py auto-compacts the result to `_final.mp4`. Preview runs (`--preview-segment`) skip the compact step.
 
 **`--layers` flag:**
 - `both` (default) — subtitles + screen text composited in a single PIL pass; screen text first (lower), subtitles on top
