@@ -81,7 +81,7 @@ def main():
     parser.add_argument("--leading-pad-ms", type=int, default=0, metavar="MS",
                         help="Leading pad added by render.py — subtitles are shifted by this amount (default: 0)")
     parser.add_argument("--screen-text", metavar="PATH",
-                        help="Path to screen_text.json written by render.py (timed text overlays)")
+                        help="Path to screen_text.json (optional — auto-discovered from transcript dir if present)")
     parser.add_argument("--layers", default="both", choices=["subs", "screen", "both"],
                         help="Which layers to composite: subs, screen, or both (default: both)")
     args = parser.parse_args()
@@ -98,19 +98,28 @@ def main():
     leading_pad_ms = args.leading_pad_ms
     layers = args.layers
 
-    # Load screen text spans if provided
-    screen_text_spans = None
+    # Resolve screen_text.json: explicit arg → auto-discover next to transcript → none
+    screen_text_path: Path | None = None
     if args.screen_text:
-        st_path = Path(args.screen_text)
-        if not st_path.exists():
-            print(f"Error: --screen-text not found — {st_path}")
+        screen_text_path = Path(args.screen_text)
+        if not screen_text_path.exists():
+            print(f"Error: --screen-text not found — {screen_text_path}")
             sys.exit(1)
-        data = json.loads(st_path.read_text())
+    else:
+        auto = transcript_path.parent / "screen_text.json"
+        if auto.exists():
+            screen_text_path = auto
+
+    screen_text_spans = None
+    if screen_text_path:
+        data = json.loads(screen_text_path.read_text())
         screen_text_spans = build_screen_text_spans(
             data["entries"],
             font_path=font_path,
             default_font_size=args.font_size,
         )
+    elif layers in ("screen", "both"):
+        print(f"Warning: --layers {layers} requested but no screen_text.json found — screen layer will be empty.")
 
     preview_segment = _parse_segment(args.preview_segment) if args.preview_segment else None
     output_path = _output_path(video_path, preview_segment)
@@ -119,8 +128,9 @@ def main():
     print(f"  Video:      {video_path.name}")
     print(f"  Transcript: {transcript_path.name}")
     print(f"  Layers:     {layers}")
-    if args.screen_text:
-        print(f"  Screen txt: {Path(args.screen_text).name}  ({len(screen_text_spans)} entries)")
+    if screen_text_path:
+        tag = "" if args.screen_text else " (auto)"
+        print(f"  Screen txt: {screen_text_path.name}{tag}  ({len(screen_text_spans)} entries)")
     print(f"  Mode:       {args.mode}")
     print(f"  Max words:  {args.max_words}")
     if preview_segment:

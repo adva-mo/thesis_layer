@@ -96,3 +96,51 @@ For primary language PDF framing, see `primary_language.md` — PDF Audience Fra
 `#DubaiRealEstate #DubaiInvestment #OffPlanDubai #DubaiProperty #RealEstateInvesting`
 
 For primary language hashtags, see `primary_language.md` — Hashtags.
+
+---
+
+## Channel State
+
+Runtime settings. Update when the channel grows into a new stage or the production goal shifts.
+
+### Account Stage
+
+**Current: `cold-discovery`**
+
+No brand awareness. Viewers encounter content with zero prior context about the account or voice.
+
+Operational implications:
+- Hooks must create immediate tension, curiosity, or surprise — cannot rely on brand recognition
+- Content must establish credibility within the reel itself
+- CTAs must be soft (comment, save, follow) — not direct (WhatsApp, DM, booking)
+- Formats with broad cold-audience appeal take priority (Myth Bust, Personal Experience, Market Signal)
+
+| Stage | Description |
+|---|---|
+| `cold-discovery` | No brand awareness; every viewer is a stranger |
+| `growing` | Returning viewers exist; some shared vocabulary; medium CTAs appropriate |
+| `established` | Stable audience base; direct CTAs appropriate; deep content works |
+
+**Re-evaluate after:** 50 published reels, or when analytics show significant growth in returning viewers, saves, and profile visits.
+
+---
+
+### Goal Type
+
+**Current: `exposure`**
+
+Maximize reach and discovery. Optimize for watch time, saves, and follower growth — not direct lead generation.
+
+Operational implications:
+- Prefer formats with broad appeal and high shareability
+- Avoid direct lead-gen hooks and Tier 3 CTAs
+- Content should teach something memorable — shareable and saveable is the signal
+
+| Goal | Description |
+|---|---|
+| `exposure` | Reach and discovery; watch time, saves, follower growth |
+| `engagement` | Deepen existing audience relationship; comments, replies, shares |
+| `conversion` | Move investors toward direct contact; Tier 3 CTAs appropriate |
+| `authority` | Build expertise positioning; deep content, case studies, analysis |
+
+**Re-evaluate after:** account stage shifts, or when exposure metrics plateau and a stable audience base exists.

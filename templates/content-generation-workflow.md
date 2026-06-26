@@ -101,7 +101,7 @@ Before scripting any reel:
 
 Step 2.4a below is a verification pass, not the first time these criteria apply — drafting against them now should mean Step 2.4a mostly confirms rather than rewrites.
 
-Produce 5 reel scripts, one per format (Data Drop, Investment Case, Myth Bust, Area Spotlight, Payment Plan Breakdown).
+Produce 5 reel scripts, one per format (Data Drop, Investment Case, Myth Bust, Area Spotlight, Payment Plan Breakdown). For full format definitions and additional format types (Formats 6–11), see `templates/reels/reel-formats.md`.
 
 Each script includes:
 - Format name + duration
@@ -214,7 +214,9 @@ For each approved reel:
 
 **Do not proceed to Step 2.6 (asset collection) or any paid API call until the user explicitly approves the visual plan.** `VISUAL-DIRECTED` means the plan is ready for review — it is not spend authorization.
 
-Status progression: `APPROVED` → `VISUAL-DIRECTED` (awaiting user sign-off on visuals)
+Status progression: `APPROVED` → `VISUAL-DIRECTED` (awaiting user sign-off on visuals) → `VISUAL-APPROVED`
+
+Once the user approves the visual plan, run the producibility check before proceeding: `templates/reels/producibility-check.md`. The check must return **READY TO PRODUCE** before asset collection or any paid API call.
 
 ---
 

@@ -40,7 +40,7 @@ Claude is the engine. The templates are scaffolds. This file is the law.
 
 At the start of every session, before doing anything else, read these files:
 
-1. `market.md` — business context, CTAs, hashtag rules, language settings, audience framing
+1. `market.md` — business context, CTAs, hashtag rules, language settings, audience framing, channel state (account stage + goal type)
 2. `docs/voice-examples.md` — voice calibration (applies to all content types)
 3. `primary_language.md` — Hebrew writing rules (skip if primary language is English)
 4. `assets/branding/brand-guidelines.md` — brand positioning, visual identity, voice calibration table
@@ -53,8 +53,9 @@ If a project is already active (e.g., resuming work), also read:
 If the session involves reel generation (rendering, scripting, or pipeline work), also read:
 
 6. `templates/reels/reel-template.md` — **script format spec** (required before writing any scene: VISUAL_TYPE values, VISUAL_INTENT keyword contract for generated scenes, MOTION_STYLE tokens, VEP table format, TTS rules)
-7. `docs/reel-pipeline.md` — full technical reference for the reel generation pipeline (scripts, workflow, commands)
-8. `output/history/hook-log.md` — hook history for all projects (create if missing)
+7. `templates/reels/reel-formats.md` — **format library** (all 11 format definitions: beat patterns, scaffolds, account stage fit, goal types — required before selecting a format or writing a script)
+8. `docs/reel-pipeline.md` — full technical reference for the reel generation pipeline (scripts, workflow, commands)
+9. `output/history/hook-log.md` — hook history for all projects (create if missing)
 
 These files are referenced throughout the system from multiple templates. Reading them once here eliminates per-template re-reads and prevents "see market.md" pointers from triggering repeated loads of the same file during CTA, hashtag, and language sections.
 
@@ -155,6 +156,10 @@ Three tiers. Match the tier to the content type.
 ## 8. Content Types
 
 See `templates/content-generation-workflow.md` for all content type specs, counts, and quality rules.
+
+**Reel format selection** (which narrative structure to use for a reel): see `templates/reels/reel-formats.md`.
+**User-scripted reels** (you provide the script, system produces it): see `templates/reels/directed-reel-workflow.md`.
+**Reel creative strategy** (plan a reel, choose a format, review a hook or script): skill `reel-strategist`.
 
 ---
 

@@ -650,7 +650,7 @@ def apply_subtitles(
     preview_segment: Optional[tuple[float, float]] = None,
     leading_pad_s: float = 0.0,
     screen_text_spans: list[ScreenTextSpan] | None = None,
-    layers: str = "subs",
+    layers: str = "both",
 ) -> Path:
     from .fal_wizper import load_transcript
 

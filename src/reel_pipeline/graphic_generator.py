@@ -29,6 +29,12 @@ FONT_SIZE_LARGE  = 64
 FONT_SIZE_MEDIUM = 52
 FONT_SIZE_ARROW  = 44
 
+STACKED_LINES        = 3                   # fixed grid height — never changes
+STACKED_BG_COLOR     = (26, 26, 26, 255)  # #1a1a1a — dark but not pure black
+STACKED_FONT_MAX     = 110                # starting size; auto-shrinks to fit longest line
+STACKED_FONT_MIN     = 48                 # floor
+STACKED_MAX_USABLE_W = 960               # max line width (px) before shrinking kicks in
+
 BOX_W       = 560
 BOX_H       = 96
 BOX_RADIUS  = 16
@@ -38,6 +44,7 @@ ARROW_GAP   = 52    # total gap between boxes (arrow lives here)
 # ── Type detection ────────────────────────────────────────────────
 
 _VALID_KEYWORDS = (
+    "stacked text card",
     "text card", "split text card", "bold text", "text on screen",
     "cta card",
     "timeline", "payment plan", "breakdown",
@@ -46,6 +53,9 @@ _VALID_KEYWORDS = (
 
 def detect_type(visual: str) -> str:
     v = visual.lower()
+    # stacked text card must be checked before text card (substring match order)
+    if "stacked text card" in v:
+        return "stacked_text_card"
     if "timeline" in v or "payment plan" in v or "breakdown" in v:
         return "timeline"
     if "bold text" in v or "text on screen" in v or "text card" in v:
@@ -150,6 +160,63 @@ def render_text_card(visual: str, font_path: Path,
     return img
 
 
+def _parse_stacked_items(visual: str) -> list[str]:
+    """Extract up to STACKED_LINES items from 'stacked text card: "A" | "B" | "C"'."""
+    quotes = re.findall(r'"([^"]+)"', visual)
+    if quotes:
+        return [q.strip() for q in quotes[:STACKED_LINES]]
+    # Fallback: plain text after colon, pipe-separated
+    m = re.search(r'stacked text card\s*[:\-]\s*(.+)', visual, re.IGNORECASE)
+    if m:
+        return [i.strip() for i in m.group(1).split('|') if i.strip()][:STACKED_LINES]
+    return []
+
+
+def render_stacked_text_card(lines: list[str], font_path: Path,
+                              width: int = 1080, height: int = 1920,
+                              bg: tuple = STACKED_BG_COLOR) -> Image.Image:
+    """Fixed STACKED_LINES-line grid. All slots always occupy the same vertical
+    positions — only filled lines are drawn. Line 1 stays at the same Y across
+    all three scenes, creating the additive text build effect on playback.
+
+    Font auto-shrinks from STACKED_FONT_MAX until all provided lines fit within
+    STACKED_MAX_USABLE_W — fills as much screen as possible without clipping.
+    """
+    img = Image.new("RGBA", (width, height), bg)
+    draw = ImageDraw.Draw(img)
+
+    # Auto-fit: check fit at each size, stop when lines fit or floor is reached.
+    # Uses bb[2]-bb[0] (true width) not bb[2] (right edge), consistent with rest of file.
+    font_size = STACKED_FONT_MAX
+    while True:
+        font = ImageFont.truetype(str(font_path), font_size)
+        widths = []
+        for l in lines:
+            bb = draw.textbbox((0, 0), _visual(l.strip()), font=font)
+            widths.append(bb[2] - bb[0])
+        if max(widths, default=0) <= STACKED_MAX_USABLE_W or font_size <= STACKED_FONT_MIN:
+            break
+        font_size -= 4
+
+    ascent, descent = font.getmetrics()
+    line_h   = ascent + descent
+    line_gap = int(line_h * 0.8)  # generous spacing — text dominates the frame
+
+    total_h  = STACKED_LINES * line_h + (STACKED_LINES - 1) * line_gap
+    grid_top = int(height * 0.47) - total_h // 2
+
+    for i in range(STACKED_LINES):
+        if i >= len(lines):
+            break
+        visual_text = _visual(lines[i].strip())
+        bbox = draw.textbbox((0, 0), visual_text, font=font)
+        tx = (width - (bbox[2] - bbox[0])) // 2 - bbox[0]
+        ty = grid_top + i * (line_h + line_gap) - bbox[1]
+        draw.text((tx, ty), visual_text, font=font, fill=TEXT_WHITE)
+
+    return img
+
+
 def render_cta_card(width: int = 1080, height: int = 1920) -> Image.Image:
     """Plain dark background — subtitles and VO carry the CTA text."""
     return Image.new("RGBA", (width, height), BG_COLOR)
@@ -184,12 +251,20 @@ def validate_generated_scene(visual: str) -> None:
     """Validate a generated scene's VISUAL_INTENT without rendering anything.
 
     Raises ValueError with a clear message if the keyword is unrecognized or
-    the timeline format is malformed. Call this for all generated scenes before
-    the render loop starts to fail fast.
+    the timeline/stacked format is malformed. Call this for all generated scenes
+    before the render loop starts to fail fast.
     """
     gtype = detect_type(visual)   # raises on unknown keyword
     if gtype == "timeline":
         _parse_timeline_items(visual)   # raises on bad format
+    if gtype == "stacked_text_card":
+        items = _parse_stacked_items(visual)
+        if not items:
+            raise ValueError(
+                f"stacked text card parse failed — no items found.\n"
+                f"  Got: {visual!r}\n"
+                f"  Expected: stacked text card: \"line 1\" | \"line 2\" | \"line 3\""
+            )
 
 
 # ── Public API ────────────────────────────────────────────────────
@@ -214,6 +289,9 @@ def generate_graphic_png(
     if graphic_type == "timeline":
         items = _parse_timeline_items(visual)
         img = render_timeline(items, font_path, width, height, bg=bg)
+    elif graphic_type == "stacked_text_card":
+        items = _parse_stacked_items(visual)
+        img = render_stacked_text_card(items, font_path, width, height, bg=bg)
     elif graphic_type == "text_card":
         img = render_text_card(visual, font_path, width, height, bg=bg)
     elif graphic_type == "cta_card":
@@ -248,6 +326,9 @@ def generate_graphic_clip(
     if graphic_type == "timeline":
         items = _parse_timeline_items(visual)
         img = render_timeline(items, font_path, width, height, bg=bg)
+    elif graphic_type == "stacked_text_card":
+        items = _parse_stacked_items(visual)
+        img = render_stacked_text_card(items, font_path, width, height, bg=bg)
     elif graphic_type == "text_card":
         img = render_text_card(visual, font_path, width, height, bg=bg)
     elif graphic_type == "cta_card":

@@ -227,7 +227,10 @@ def assemble_reel(
         # ── Generate base video clip ──────────────────────────────
         base_clip = work_dir / f"scene_{scene.index:02d}_base.mp4"
 
-        if scene.freeze_last_frame and scene_clips:
+        if scene.freeze_last_frame and not scene_clips:
+            print(f"  ✗ Scene {scene.index}: [FREEZE_LAST_FRAME: yes] on the first scene — there is no prior clip to freeze. Set a real visual for scene 1.")
+            sys.exit(1)
+        elif scene.freeze_last_frame and scene_clips:
             freeze_jpg = work_dir / f"scene_{scene.index:02d}_freeze.jpg"
             _ffmpeg("-sseof", "-0.1", "-i", str(scene_clips[-1]),
                     "-vframes", "1", "-q:v", "2", str(freeze_jpg), label="freeze extract")
@@ -267,14 +270,17 @@ def assemble_reel(
             # Prefer still image over video clip for blur background — blurring a
             # frame from a clip the viewer just watched moving creates a jarring echo.
             bg_asset = last_real_image or _first_real_image or last_real_asset or _first_real_asset
-            if bg_asset and not scene.plain_bg:
+            # stacked_text_card always renders on its own background — the progressive
+            # text build only works against a consistent dark backdrop, not a blurred image.
+            force_plain = scene.plain_bg or gtype == "stacked_text_card"
+            if bg_asset and not force_plain:
                 print(f"    Visual:   generated ({gtype}) over real → {bg_asset.name}")
                 _render_generated_over_real(
                     scene.visual_intent, bg_asset, duration, base_clip,
                     font_path, width, height,
                 )
             else:
-                reason = "plain_bg" if scene.plain_bg else "no real assets in reel"
+                reason = "plain_bg" if scene.plain_bg else ("stacked_text_card" if gtype == "stacked_text_card" else "no real assets in reel")
                 print(f"    Visual:   generated graphic ({gtype}) [{reason}]")
                 generate_graphic_clip(scene.visual_intent, duration, base_clip, font_path, width, height)
 
