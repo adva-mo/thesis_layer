@@ -290,6 +290,7 @@ assets/[project-slug]/
 └── raw/rejected/
 ```
 
+- Every `[VISUAL_TYPE:]` tag in a reel must have a matching VEP row before the reel is ready for rendering
 - A reel is not ready for editing if any `prove` or `reinforce` asset is MISSING
 - Reuse canonical assets across reels, carousels, and PDFs via the manifest `used_in` field
 - Vision-rejected assets go to `raw/rejected/` — never deleted

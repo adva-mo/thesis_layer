@@ -287,7 +287,7 @@ When done: update `EL_PRONUNCIATION_DICT_VERSION_ID` in `.env` → regenerate VO
 
 ### vo.py — ElevenLabs TTS, per-segment *(single-segment regeneration only)*
 
-Calls ElevenLabs once per segment. Use only to regenerate a single segment without re-running the full combined call. Does **not** produce `alignment.json` — run `align_timing.py` is not available after a `vo.py` run; use `align.py` instead.
+Calls ElevenLabs once per segment. Use only to regenerate a single segment without re-running the full combined call. Does **not** produce `alignment.json` — `align_timing.py` is not available after a `vo.py` run; use `align.py` instead.
 
 ```bash
 python3 scripts/generate/vo.py output/[slug]/hebrew/reels/reel_01/reel_01.md \
