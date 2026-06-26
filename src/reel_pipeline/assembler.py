@@ -227,7 +227,10 @@ def assemble_reel(
         # ── Generate base video clip ──────────────────────────────
         base_clip = work_dir / f"scene_{scene.index:02d}_base.mp4"
 
-        if scene.freeze_last_frame and scene_clips:
+        if scene.freeze_last_frame and not scene_clips:
+            print(f"  ✗ Scene {scene.index}: [FREEZE_LAST_FRAME: yes] on the first scene — there is no prior clip to freeze. Set a real visual for scene 1.")
+            sys.exit(1)
+        elif scene.freeze_last_frame and scene_clips:
             freeze_jpg = work_dir / f"scene_{scene.index:02d}_freeze.jpg"
             _ffmpeg("-sseof", "-0.1", "-i", str(scene_clips[-1]),
                     "-vframes", "1", "-q:v", "2", str(freeze_jpg), label="freeze extract")

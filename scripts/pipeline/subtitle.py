@@ -118,6 +118,8 @@ def main():
             font_path=font_path,
             default_font_size=args.font_size,
         )
+    elif layers in ("screen", "both"):
+        print(f"Warning: --layers {layers} requested but no screen_text.json found — screen layer will be empty.")
 
     preview_segment = _parse_segment(args.preview_segment) if args.preview_segment else None
     output_path = _output_path(video_path, preview_segment)
