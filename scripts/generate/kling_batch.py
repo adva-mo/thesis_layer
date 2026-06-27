@@ -125,8 +125,12 @@ def _clip_duration(segment_s: float) -> int:
     return 10 if segment_s > 5 else 5
 
 
-def _output_path(assets_dir: Path, reel_number: int, start_s: float, end_s: float) -> Path:
-    return assets_dir / "canonical" / f"kling_r{reel_number}_{int(start_s):02d}-{int(end_s):02d}s.mp4"
+def _output_path(scene, assets_dir: Path, reel_number: int) -> Path:
+    if scene.clip_filename:
+        return assets_dir / "canonical" / scene.clip_filename
+    # LEGACY: timestamp-based naming for blueprints without [CLIP: vNNN_slug.mp4]
+    # TODO: remove once all active blueprints have a [CLIP:] tag
+    return assets_dir / "canonical" / f"kling_r{reel_number}_{int(scene.start_s):02d}-{int(scene.end_s):02d}s.mp4"
 
 
 _KLING_COST_PER_5S: dict[str, float] = {
@@ -272,7 +276,7 @@ def main() -> None:
             continue
 
         dur      = _clip_duration(scene.end_s - scene.start_s)
-        out_path = _output_path(assets_dir, args.reel, scene.start_s, scene.end_s)
+        out_path = _output_path(scene, assets_dir, args.reel)
         prompt   = resolved_prompts.get(scene.index, "")
 
         # Portrait crop detection + dimension check (results reused for abort gate below)
@@ -320,14 +324,20 @@ def main() -> None:
     for scene in scenes:
         if not (scene.visual_type == "kling" and scene.reuse_source):
             continue
-        try:
-            rs_start, rs_end = _parse_source_ts(scene.reuse_source)
-        except (ValueError, IndexError):
-            print(f"  ⚠  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]: "
-                  f"could not parse REUSE_SOURCE '{scene.reuse_source}' — skip")
-            continue
-        src = _output_path(assets_dir, args.reel, rs_start, rs_end)
-        dst = _output_path(assets_dir, args.reel, scene.start_s, scene.end_s)
+        if scene.reuse_source.endswith(".mp4"):
+            # vNNN_slug.mp4 — direct canonical lookup
+            src = assets_dir / "canonical" / scene.reuse_source
+        else:
+            # LEGACY: timestamp-based REUSE_SOURCE (e.g. "5-10s")
+            # TODO: remove once all active blueprints use [REUSE_SOURCE: vNNN_slug.mp4]
+            try:
+                rs_start, rs_end = _parse_source_ts(scene.reuse_source)
+                src = assets_dir / "canonical" / f"kling_r{args.reel}_{int(rs_start):02d}-{int(rs_end):02d}s.mp4"
+            except (ValueError, IndexError):
+                print(f"  ⚠  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]: "
+                      f"could not parse REUSE_SOURCE '{scene.reuse_source}' — skip")
+                continue
+        dst = _output_path(scene, assets_dir, args.reel)
         if dst.exists():
             print(f"  Scene {scene.index} [{scene.start_s:.0f}–{scene.end_s:.0f}s]  "
                   f"reuse — already exists ({dst.name})")
@@ -376,7 +386,7 @@ def main() -> None:
     billed      = []   # (duration_s, scene) for actual API calls (cache hits excluded)
     for scene in to_generate:
         dur      = _clip_duration(scene.end_s - scene.start_s)
-        out_path = _output_path(assets_dir, args.reel, scene.start_s, scene.end_s)
+        out_path = _output_path(scene, assets_dir, args.reel)
         prompt   = resolved_prompts[scene.index]
 
         # Check cache before calling so we know whether this will cost money
