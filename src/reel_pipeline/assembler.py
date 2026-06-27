@@ -2,10 +2,12 @@
 Assemble scene clips + audio segments into a final 9:16 MP4.
 """
 
+import json
 import sys
 from pathlib import Path
 from typing import Optional
 
+from .brand import VISUAL_DECISION_SCHEMA, validate_vdo
 from .graphic_generator import detect_type, generate_graphic_clip, generate_graphic_png, validate_generated_scene
 from .local_clip import (
     color_card_to_clip,
@@ -40,6 +42,7 @@ def _render_generated_over_real(
     font_path: Path,
     width: int,
     height: int,
+    vdo: Optional[dict] = None,
 ) -> None:
     """Composite a generated graphic over a blurred real-asset background.
 
@@ -66,7 +69,7 @@ def _render_generated_over_real(
             blur_overlay=True,
         )
 
-    generate_graphic_png(visual_intent, fg_png, font_path, width, height, transparent_bg=True)
+    generate_graphic_png(visual_intent, fg_png, font_path, width, height, transparent_bg=True, vdo=vdo)
 
     _ffmpeg(
         "-i", str(bg_clip),
@@ -165,14 +168,37 @@ def assemble_reel(
 
     # ── Pre-flight: validate all generated scenes before any rendering ───────
     errors: list[str] = []
+    reel_generated_types: set[str] = set()
     for scene in scenes:
         if scene.asset_type not in ("image", "video") and scene.index not in clip_overrides and not scene.freeze_last_frame:
             try:
                 validate_generated_scene(scene.visual_intent or "")
+                reel_generated_types.add(detect_type(scene.visual_intent or ""))
             except ValueError as e:
                 errors.append(f"  Scene {scene.index}: {e}")
     if errors:
         print("✗ Generated scene validation failed — fix the reel script and re-run:\n" + "\n".join(errors))
+        sys.exit(1)
+
+    # ── Load and validate visual-direction.json (VDO) ────────────────────────
+    vdo_path = output_path.parent / "visual-direction.json"
+    vdo: Optional[dict] = None
+    schema_covered = {t for t in reel_generated_types if t in VISUAL_DECISION_SCHEMA}
+
+    if vdo_path.exists():
+        vdo = json.loads(vdo_path.read_text(encoding="utf-8"))
+        try:
+            validate_vdo(vdo, reel_generated_types)
+        except ValueError as e:
+            print(f"✗ visual-direction.json validation failed: {e}")
+            sys.exit(1)
+        print(f"  Visual direction: {vdo_path.name} (types: {', '.join(sorted(vdo.keys()))})")
+    elif schema_covered:
+        print(
+            f"✗ visual-direction.json not found but reel contains schema-covered visual types: "
+            f"{sorted(schema_covered)}\n"
+            f"  Expected: {vdo_path}"
+        )
         sys.exit(1)
 
     scene_clips: list[Path] = []
@@ -260,12 +286,12 @@ def assemble_reel(
                 print(f"    Visual:   generated ({gtype}) over real → {bg_asset.name}")
                 _render_generated_over_real(
                     scene.visual_intent, bg_asset, duration, base_clip,
-                    font_path, width, height,
+                    font_path, width, height, vdo=vdo,
                 )
             else:
                 reason = "plain_bg" if scene.plain_bg else ("stacked_text_card" if gtype == "stacked_text_card" else "no real assets in reel")
                 print(f"    Visual:   generated graphic ({gtype}) [{reason}]")
-                generate_graphic_clip(scene.visual_intent, duration, base_clip, font_path, width, height)
+                generate_graphic_clip(scene.visual_intent, duration, base_clip, font_path, width, height, vdo=vdo)
 
         # ── Collect screen text for post-render compositing pass ─────
         # Text overlays are deferred to subtitle.py — no ffmpeg re-encode here.

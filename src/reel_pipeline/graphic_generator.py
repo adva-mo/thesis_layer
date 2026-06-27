@@ -14,7 +14,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-from .brand import HOOK_BG_COLOR
+from .brand import HOOK_BG_COLOR, resolve_visual
 from .render_utils import visual_hebrew as _visual, strip_spans as _strip_spans, parse_spans as _parse_spans
 from .text_overlay import FONT_PATH
 
@@ -77,7 +77,10 @@ def detect_type(visual: str) -> str:
 
 def render_timeline(items: list[str], font_path: Path,
                     width: int = 1080, height: int = 1920,
-                    bg: tuple = BG_COLOR) -> Image.Image:
+                    bg: tuple = BG_COLOR,
+                    text_color: tuple = TEXT_WHITE,
+                    box_border: tuple = BOX_BORDER,
+                    arrow: tuple = ARROW_COLOR) -> Image.Image:
     img = Image.new("RGBA", (width, height), bg)
     draw = ImageDraw.Draw(img)
 
@@ -102,7 +105,7 @@ def render_timeline(items: list[str], font_path: Path,
                                     radius=BOX_RADIUS, fill=BOX_FILL)
         # Border
         box_draw.rounded_rectangle([0, 0, BOX_W - 1, BOX_H - 1],
-                                    radius=BOX_RADIUS, outline=BOX_BORDER, width=2)
+                                    radius=BOX_RADIUS, outline=box_border, width=2)
         img.alpha_composite(box_img, (box_x, y))
 
         # Text centered in box
@@ -110,22 +113,23 @@ def render_timeline(items: list[str], font_path: Path,
         bbox = draw.textbbox((0, 0), visual_text, font=font_text)
         tx = box_x + (BOX_W - (bbox[2] - bbox[0])) // 2 - bbox[0]
         ty = y + (BOX_H - (bbox[3] - bbox[1])) // 2 - bbox[1]
-        draw.text((tx, ty), visual_text, font=font_text, fill=TEXT_WHITE)
+        draw.text((tx, ty), visual_text, font=font_text, fill=text_color)
 
         # Arrow below (not after last item)
         if i < n - 1:
-            arrow = "↓"
-            a_bbox = draw.textbbox((0, 0), arrow, font=font_arrow)
+            arrow_char = "↓"
+            a_bbox = draw.textbbox((0, 0), arrow_char, font=font_arrow)
             ax = (width - (a_bbox[2] - a_bbox[0])) // 2 - a_bbox[0]
             ay = y + BOX_H + (ARROW_GAP - (a_bbox[3] - a_bbox[1])) // 2 - a_bbox[1]
-            draw.text((ax, ay), arrow, font=font_arrow, fill=ARROW_COLOR)
+            draw.text((ax, ay), arrow_char, font=font_arrow, fill=arrow)
 
     return img
 
 
 def render_text_card(visual: str, font_path: Path,
                      width: int = 1080, height: int = 1920,
-                     bg: tuple = BG_COLOR) -> Image.Image:
+                     bg: tuple = BG_COLOR,
+                     text_color: tuple = TEXT_WHITE) -> Image.Image:
     """Background with centered text extracted from the visual description."""
     # Try em-dash prefix first: — "text". Fall back to any quoted strings (handles
     # "split text card: "A" | "B"" and similar formats). Join multiple quotes with |.
@@ -147,7 +151,7 @@ def render_text_card(visual: str, font_path: Path,
     bbox = draw.textbbox((0, 0), visual_text, font=font)
     tx = (width - (bbox[2] - bbox[0])) // 2 - bbox[0]
     ty = int(height * 0.47) - (bbox[3] - bbox[1]) // 2 - bbox[1]
-    draw.text((tx, ty), visual_text, font=font, fill=TEXT_WHITE)
+    draw.text((tx, ty), visual_text, font=font, fill=text_color)
 
     return img
 
@@ -166,7 +170,8 @@ def _parse_stacked_items(visual: str) -> list[str]:
 
 def render_stacked_text_card(lines: list[str], font_path: Path,
                               width: int = 1080, height: int = 1920,
-                              bg: tuple = STACKED_BG_COLOR) -> Image.Image:
+                              bg: tuple = STACKED_BG_COLOR,
+                              text_color: tuple = TEXT_WHITE) -> Image.Image:
     """Fixed STACKED_LINES-line grid. All slots always occupy the same vertical
     positions — only filled lines are drawn. Line 1 stays at the same Y across
     all three scenes, creating the additive text build effect on playback.
@@ -201,7 +206,7 @@ def render_stacked_text_card(lines: list[str], font_path: Path,
         if i >= len(lines):
             break
         ty_base = grid_top + i * (line_h + line_gap)
-        spans = _parse_spans(lines[i], TEXT_WHITE)
+        spans = _parse_spans(lines[i], text_color)
 
         if len(spans) == 1:
             visual_text = _visual(spans[0][0].strip())
@@ -228,9 +233,10 @@ def render_stacked_text_card(lines: list[str], font_path: Path,
     return img
 
 
-def render_cta_card(width: int = 1080, height: int = 1920) -> Image.Image:
+def render_cta_card(width: int = 1080, height: int = 1920,
+                    bg: tuple = BG_COLOR) -> Image.Image:
     """Plain dark background — subtitles and VO carry the CTA text."""
-    return Image.new("RGBA", (width, height), BG_COLOR)
+    return Image.new("RGBA", (width, height), bg)
 
 
 def render_color_card(width: int = 1080, height: int = 1920) -> Image.Image:
@@ -286,23 +292,44 @@ def _render_graphic_image(
     width: int,
     height: int,
     transparent_bg: bool,
+    vdo: "dict | None" = None,
 ) -> Image.Image:
     """Dispatch visual description to the correct renderer and return a PIL image.
 
     CTA cards always use a dark background regardless of transparent_bg —
     the plain dark outro is an intentional brand choice, not a rendering default.
+
+    vdo: the visual-direction.json dict for this reel, used to resolve unlocked slots.
     """
+    def _rv(key: str) -> "tuple | None":
+        return resolve_visual(graphic_type, key, vdo)
+
     graphic_type = detect_type(visual)
-    bg = (0, 0, 0, 0) if transparent_bg else BG_COLOR
+    resolved_bg = _rv("background")
+    bg = (0, 0, 0, 0) if transparent_bg else (resolved_bg or BG_COLOR)
 
     if graphic_type == "timeline":
-        return render_timeline(_parse_timeline_items(visual), font_path, width, height, bg=bg)
+        return render_timeline(
+            _parse_timeline_items(visual), font_path, width, height,
+            bg=bg,
+            text_color=_rv("text_color") or TEXT_WHITE,
+            box_border=_rv("box_border") or BOX_BORDER,
+            arrow=_rv("arrow") or ARROW_COLOR,
+        )
     if graphic_type == "stacked_text_card":
-        return render_stacked_text_card(_parse_stacked_items(visual), font_path, width, height, bg=bg)
+        return render_stacked_text_card(
+            _parse_stacked_items(visual), font_path, width, height,
+            bg=bg,
+            text_color=_rv("text_color") or TEXT_WHITE,
+        )
     if graphic_type == "text_card":
-        return render_text_card(visual, font_path, width, height, bg=bg)
+        return render_text_card(
+            visual, font_path, width, height,
+            bg=bg,
+            text_color=_rv("text_color") or TEXT_WHITE,
+        )
     if graphic_type == "cta_card":
-        return render_cta_card(width, height)
+        return render_cta_card(width, height, bg=resolved_bg or BG_COLOR)
     raise AssertionError(f"Unreachable: detect_type returned {graphic_type!r} for {visual!r}")
 
 
@@ -313,13 +340,14 @@ def generate_graphic_png(
     width: int = 1080,
     height: int = 1920,
     transparent_bg: bool = True,
+    vdo: "dict | None" = None,
 ) -> Path:
     """Render a graphic as a PNG (no video conversion).
 
     Used by the compositing path: the PNG is overlaid on a blurred real-asset
     background clip via FFmpeg rather than being rendered on a dark background.
     """
-    _render_graphic_image(visual, font_path, width, height, transparent_bg).save(output_png, "PNG")
+    _render_graphic_image(visual, font_path, width, height, transparent_bg, vdo).save(output_png, "PNG")
     return output_png
 
 
@@ -331,6 +359,7 @@ def generate_graphic_clip(
     width: int = 1080,
     height: int = 1920,
     transparent_bg: bool = False,
+    vdo: "dict | None" = None,
 ) -> Path:
     """Render a PIL graphic for a generated scene and convert to a video clip.
 
@@ -339,7 +368,7 @@ def generate_graphic_clip(
     """
     from .local_clip import image_to_clip
 
-    img = _render_graphic_image(visual, font_path, width, height, transparent_bg)
+    img = _render_graphic_image(visual, font_path, width, height, transparent_bg, vdo)
 
     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
         tmp_path = Path(tmp.name)

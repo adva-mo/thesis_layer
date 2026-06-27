@@ -26,6 +26,25 @@
       "highlight_color": "investment_gold"
     }
   },
+  "visual_decision_schema": {
+    "text_card": {
+      "background": { "value": "charcoal", "locked": true },
+      "text_color":  { "value": null,      "locked": false }
+    },
+    "stacked_text_card": {
+      "background": { "value": null, "locked": false },
+      "text_color":  { "value": null, "locked": false }
+    },
+    "timeline": {
+      "background":  { "value": "charcoal", "locked": true },
+      "text_color":  { "value": null,       "locked": false },
+      "box_border":  { "value": null,       "locked": false },
+      "arrow":       { "value": null,       "locked": false }
+    },
+    "cta_card": {
+      "background": { "value": "charcoal", "locked": true }
+    }
+  },
   "carousels": {
     "background": "platinum"
   },

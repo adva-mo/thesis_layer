@@ -43,6 +43,62 @@ SCREEN_TEXT_HIGHLIGHT_COLOR = _color(_st["highlight_color"])
 # ── Reel graphic cards ────────────────────────────────────────────
 HOOK_BG_COLOR = _color(_settings["reels"]["hooks"]["text_card"]["background"])
 
+# ── Visual decision schema ────────────────────────────────────────
+VISUAL_DECISION_SCHEMA: dict = _settings.get("visual_decision_schema", {})
+
+
+def resolve_visual(visual_type: str, key: str, vdo: "dict | None") -> "tuple | None":
+    """Resolve a visual slot to an RGBA tuple, or None if not schema-covered.
+
+    Resolution order:
+      locked slot  → schema value (ignores VDO)
+      unlocked slot → VDO value
+      no schema coverage → None (caller uses hardcoded fallback)
+    """
+    slot = VISUAL_DECISION_SCHEMA.get(visual_type, {}).get(key)
+    if slot is None:
+        return None
+    if slot["locked"]:
+        return _color(slot["value"])
+    if vdo is None:
+        return None
+    val = vdo.get(visual_type, {}).get(key)
+    return _color(val) if val else None
+
+
+def validate_vdo(vdo: dict, reel_visual_types: "set[str]") -> None:
+    """Validate a VDO against the schema for the generated visual types in the reel.
+
+    Raises ValueError with a descriptive message on any contract violation.
+    """
+    palette = set(_settings["color_system"].keys())
+    for vtype in reel_visual_types:
+        if vtype not in VISUAL_DECISION_SCHEMA:
+            continue
+        schema_keys = set(VISUAL_DECISION_SCHEMA[vtype].keys())
+        vdo_entry = vdo.get(vtype)
+        if vdo_entry is None:
+            raise ValueError(f"VDO missing entry for schema-covered visual type '{vtype}'")
+        vdo_keys = set(vdo_entry.keys())
+        extra = vdo_keys - schema_keys
+        if extra:
+            raise ValueError(f"VDO has extra keys for '{vtype}': {sorted(extra)}")
+        missing = schema_keys - vdo_keys
+        if missing:
+            raise ValueError(f"VDO missing keys for '{vtype}': {sorted(missing)}")
+        for key, val in vdo_entry.items():
+            if val is None:
+                raise ValueError(f"VDO value for {vtype}.{key} cannot be null")
+            if val not in palette:
+                raise ValueError(
+                    f"VDO value for {vtype}.{key}='{val}' is not in color_system"
+                )
+            slot = VISUAL_DECISION_SCHEMA[vtype][key]
+            if slot["locked"] and val != slot["value"]:
+                raise ValueError(
+                    f"VDO locked slot {vtype}.{key} must be '{slot['value']}', got '{val}'"
+                )
+
 # ── Typography ────────────────────────────────────────────────────
 _font_name = _settings["typography"]["reels"]["subtitle_font"]
 FONT_PATH = Path(f"/System/Library/Fonts/Supplemental/{_font_name}.ttf")
