@@ -334,8 +334,7 @@ def _render_graphic_image(
             text_color=_rv("text_color") or TEXT_WHITE,
         )
     if graphic_type == "cta_card":
-        bg = (0, 0, 0, 0) if transparent_bg else (resolved_bg or BG_COLOR)
-        return render_cta_card(width, height, bg=bg)
+        return render_cta_card(width, height, bg=resolved_bg or BG_COLOR)
     raise AssertionError(f"Unreachable: detect_type returned {graphic_type!r} for {visual!r}")
 
 

@@ -73,7 +73,7 @@ def resolve_visual(visual_type: str, key: str, vdo: "dict | None") -> "tuple | N
     if vdo is None:
         return None
     val = vdo.get(visual_type, {}).get(key)
-    return _color(val, alpha) if val else None
+    return _color(val, alpha) if val is not None else None
 
 
 def validate_vdo(vdo: dict, reel_visual_types: "set[str]") -> None:
@@ -107,7 +107,7 @@ def validate_vdo(vdo: dict, reel_visual_types: "set[str]") -> None:
                     f"VDO value for {vtype}.{key}='{val}' is not in color_system"
                 )
             slot = VISUAL_DECISION_SCHEMA[vtype][key]
-            if slot["locked"] and val != slot["value"]:
+            if slot["locked"] and slot["value"] is not None and val != slot["value"]:
                 raise ValueError(
                     f"VDO locked slot {vtype}.{key} must be '{slot['value']}', got '{val}'"
                 )
