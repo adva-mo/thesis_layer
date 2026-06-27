@@ -4,8 +4,6 @@ Composited onto a video clip via FFmpeg.
 """
 
 import re
-import subprocess
-import sys
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -190,42 +188,3 @@ def build_screen_text_spans(
         spans.append(ScreenTextSpan(img, entry["start"], entry["end"],
                                     suppress_sub=entry.get("suppress_sub", False)))
     return spans
-
-
-def add_screen_text(
-    clip_path: Path,
-    text: str,
-    output_path: Path,
-    font_path: Path = FONT_PATH,
-    font_size: int = FONT_SIZE,
-    width: int = 1080,
-    height: int = 1920,
-    y_ratio: float = TEXT_Y_RATIO,
-) -> Path:
-    """Composite Hebrew screen text onto every frame of clip_path → output_path."""
-    overlay_img = _render_text_overlay(text, width, height, font_path, font_size, y_ratio)
-
-    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
-        overlay_path = Path(tmp.name)
-        overlay_img.save(overlay_path, format="PNG")
-
-    try:
-        cmd = [
-            "ffmpeg", "-y",
-            "-i", str(clip_path),
-            "-i", str(overlay_path),
-            "-filter_complex", "[0:v][1:v]overlay=0:0",
-            "-c:v", "libx264",
-            "-preset", "ultrafast",
-            "-pix_fmt", "yuv420p",
-            "-an",
-            str(output_path),
-        ]
-        result = subprocess.run(cmd, capture_output=True)
-        if result.returncode != 0:
-            print(f"  ✗ text overlay failed:\n{result.stderr.decode()[-600:]}")
-            sys.exit(1)
-    finally:
-        overlay_path.unlink(missing_ok=True)
-
-    return output_path
