@@ -20,9 +20,9 @@ from .text_overlay import FONT_PATH
 
 # ── Visual constants ──────────────────────────────────────────────
 
-BG_COLOR        = HOOK_BG_COLOR               # charcoal — from brand settings
-BOX_FILL        = (255, 255, 255, 12)         # very subtle white
-BOX_BORDER      = (255, 255, 255, 80)         # dim white
+BG_COLOR        = HOOK_BG_COLOR
+BOX_FILL        = (255, 255, 255, 12)
+BOX_BORDER      = (255, 255, 255, 80)
 TEXT_WHITE      = (255, 255, 255, 255)
 TEXT_DIM        = (255, 255, 255, 160)
 ARROW_COLOR     = (255, 255, 255, 120)
@@ -32,7 +32,7 @@ FONT_SIZE_MEDIUM = 52
 FONT_SIZE_ARROW  = 44
 
 STACKED_LINES        = 3                   # fixed grid height — never changes
-STACKED_BG_COLOR     = (26, 26, 26, 255)  # #1a1a1a — dark but not pure black
+STACKED_BG_COLOR     = (26, 26, 26, 255)
 STACKED_FONT_MAX     = 110                # starting size; auto-shrinks to fit longest line
 STACKED_FONT_MIN     = 48                 # floor
 STACKED_MAX_USABLE_W = 960               # max line width (px) before shrinking kicks in
