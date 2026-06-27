@@ -301,10 +301,11 @@ def _render_graphic_image(
 
     vdo: the visual-direction.json dict for this reel, used to resolve unlocked slots.
     """
+    graphic_type = detect_type(visual)
+
     def _rv(key: str) -> "tuple | None":
         return resolve_visual(graphic_type, key, vdo)
 
-    graphic_type = detect_type(visual)
     resolved_bg = _rv("background")
 
     if graphic_type == "timeline":

@@ -47,8 +47,7 @@ SUBTITLE_ACTIVE_COLOR = _color(_sub["active_word_color"])
 
 # ── Reel screen text ([SCREEN:] overlays) ─────────────────────────
 _st = _settings["reels"]["screen_text"]
-SCREEN_TEXT_BASE_COLOR      = _color(_st["base_color"])
-SCREEN_TEXT_HIGHLIGHT_COLOR = _color(_st["highlight_color"])
+SCREEN_TEXT_BASE_COLOR = _color(_st["base_color"])
 
 # ── Reel graphic cards ────────────────────────────────────────────
 HOOK_BG_COLOR = _color(_settings["reels"]["hooks"]["text_card"]["background"])
