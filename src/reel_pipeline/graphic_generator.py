@@ -79,6 +79,7 @@ def render_timeline(items: list[str], font_path: Path,
                     width: int = 1080, height: int = 1920,
                     bg: tuple = BG_COLOR,
                     text_color: tuple = TEXT_WHITE,
+                    box_fill: tuple = BOX_FILL,
                     box_border: tuple = BOX_BORDER,
                     arrow: tuple = ARROW_COLOR) -> Image.Image:
     img = Image.new("RGBA", (width, height), bg)
@@ -102,7 +103,7 @@ def render_timeline(items: list[str], font_path: Path,
         box_img = Image.new("RGBA", (BOX_W, BOX_H), (0, 0, 0, 0))
         box_draw = ImageDraw.Draw(box_img)
         box_draw.rounded_rectangle([0, 0, BOX_W - 1, BOX_H - 1],
-                                    radius=BOX_RADIUS, fill=BOX_FILL)
+                                    radius=BOX_RADIUS, fill=box_fill)
         # Border
         box_draw.rounded_rectangle([0, 0, BOX_W - 1, BOX_H - 1],
                                     radius=BOX_RADIUS, outline=box_border, width=2)
@@ -314,6 +315,7 @@ def _render_graphic_image(
             _parse_timeline_items(visual), font_path, width, height,
             bg=bg,
             text_color=_rv("text_color") or TEXT_WHITE,
+            box_fill=_rv("box_fill") or BOX_FILL,
             box_border=_rv("box_border") or BOX_BORDER,
             arrow=_rv("arrow") or ARROW_COLOR,
         )

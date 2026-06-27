@@ -67,12 +67,13 @@ def resolve_visual(visual_type: str, key: str, vdo: "dict | None") -> "tuple | N
     slot = VISUAL_DECISION_SCHEMA.get(visual_type, {}).get(key)
     if slot is None:
         return None
+    alpha = slot.get("alpha", 255)
     if slot["locked"]:
-        return _color(slot["value"]) if slot["value"] is not None else None
+        return _color(slot["value"], alpha) if slot["value"] is not None else None
     if vdo is None:
         return None
     val = vdo.get(visual_type, {}).get(key)
-    return _color(val) if val else None
+    return _color(val, alpha) if val else None
 
 
 def validate_vdo(vdo: dict, reel_visual_types: "set[str]") -> None:

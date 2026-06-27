@@ -38,8 +38,9 @@
     "timeline": {
       "background":  { "value": "charcoal", "locked": true },
       "text_color":  { "value": null,       "locked": false },
-      "box_border":  { "value": null,       "locked": false },
-      "arrow":       { "value": null,       "locked": false }
+      "box_border":  { "value": null,       "locked": false, "alpha": 80 },
+      "arrow":       { "value": null,       "locked": false, "alpha": 120 },
+      "box_fill":    { "value": null,       "locked": false, "alpha": 12 }
     },
     "cta_card": {
       "background": { "value": "charcoal", "locked": true }
