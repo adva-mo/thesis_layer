@@ -10,7 +10,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-from .render_utils import visual_hebrew as _visual_hebrew, Y_RATIO_CENTER, strip_spans, parse_span_colors
+from .render_utils import visual_hebrew as _visual_hebrew, Y_RATIO_BOTTOM, strip_spans, parse_span_colors
 
 
 FONT_PATH = Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf")
@@ -25,7 +25,7 @@ class ScreenTextSpan:
     suppress_sub: bool = False  # if True, subtitle layer is suppressed while this span is active
 
 # Bottom edge of subtitle block — block grows upward from this Y position
-TEXT_Y_RATIO = Y_RATIO_CENTER
+TEXT_Y_RATIO = Y_RATIO_BOTTOM
 
 # Text style
 FONT_SIZE      = 72

@@ -52,6 +52,10 @@ def visual_hebrew(text: str, base_dir: str = 'R') -> str:
 _SPAN_RE = re.compile(r'\{#([0-9A-Fa-f]{6})\}(.+?)\{/#\}', re.DOTALL)
 
 
+def _hex_to_rgba(h: str) -> tuple:
+    return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16), 255)
+
+
 def strip_spans(text: str) -> str:
     """Remove {#RRGGBB}...{/#} markup, returning plain text for measurement."""
     return _SPAN_RE.sub(r'\2', text)
@@ -66,8 +70,7 @@ def parse_spans(text: str, default_color: tuple) -> list[tuple[str, tuple]]:
     for m in _SPAN_RE.finditer(text):
         if m.start() > last:
             spans.append((text[last:m.start()], default_color))
-        h = m.group(1)
-        color = (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16), 255)
+        color = _hex_to_rgba(m.group(1))
         spans.append((m.group(2), color))
         last = m.end()
     if last < len(text):
@@ -80,8 +83,7 @@ def parse_span_colors(text: str) -> dict[str, tuple]:
     Each span's content is split on spaces — multi-word spans are supported."""
     colors: dict[str, tuple] = {}
     for m in _SPAN_RE.finditer(text):
-        h = m.group(1)
-        color = (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16), 255)
+        color = _hex_to_rgba(m.group(1))
         for word in m.group(2).strip().split():
             colors[word] = color
     return colors

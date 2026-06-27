@@ -291,15 +291,14 @@ def assemble_reel(
             _fs = scene.text_font_size if scene.text_font_size is not None else (96 if is_hook else font_size)
             _yr = _POS_MAP.get(scene.text_position, Y_RATIO_CENTER if is_hook else Y_RATIO_BOTTOM)
             print(f"    Text:     {scene.text_card!r} → screen_text.json")
-            _entry: dict = {
+            screen_text_entries.append({
                 "text": scene.text_card,
                 "start": round(scene_start_s, 4),
                 "end": round(scene_start_s + duration, 4),
                 "y_ratio": _yr,
                 "font_size": _fs,
                 "suppress_sub": True,
-            }
-            screen_text_entries.append(_entry)
+            })
 
         final_clip = work_dir / f"scene_{scene.index:02d}_final.mp4"
         base_clip.rename(final_clip)

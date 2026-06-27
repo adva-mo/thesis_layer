@@ -118,6 +118,8 @@ def _render_lines(
     width: int,
     height: int,
     highlight_all: bool = False,
+    highlight_color: tuple = HIGHLIGHT_COLOR,
+    dim_color: tuple = DIM_COLOR,
 ) -> 'Image.Image':
     """
     Render 1–MAX_LINES subtitle lines. Each line uses its own script direction.
@@ -174,7 +176,7 @@ def _render_lines(
         x = bar_x + (bar_w - total_w) // 2
         for i, (word, adv, bbox) in enumerate(met):
             is_active = highlight_all or i == va
-            color = HIGHLIGHT_COLOR if is_active else DIM_COLOR
+            color = highlight_color if is_active else dim_color
             draw_x = x - bbox[0]
             _draw_shadow(draw, (draw_x, base_y), word, font, SHADOW_COLOR, SHADOW_DROP_OFFSET)
             draw.text((draw_x, base_y), word, font=font, fill=color)
@@ -304,7 +306,8 @@ def _render_uniform(text: str, color, font, width: int, height: int) -> Image.Im
     return img
 
 
-def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, height: int) -> Image.Image:
+def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, height: int,
+                        highlight_color: tuple = HIGHLIGHT_COLOR, dim_color: tuple = DIM_COLOR) -> Image.Image:
     """
     Render phrase with active word highlighted, others dimmed.
     Mixed Hebrew/English phrases are split onto two stacked lines (one script per line).
@@ -324,6 +327,7 @@ def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, heigh
         return _render_lines(
             [line1_words, line2_words], [line1_script, line2_script],
             active_line, active_word_idx, font, width, height,
+            highlight_color=highlight_color, dim_color=dim_color,
         )
 
     full_text = " ".join(w.text for w in phrase.words)
@@ -363,7 +367,8 @@ def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, heigh
                 al, awdx = li, active_idx - offset
                 break
             offset += len(g)
-        return _render_lines(groups, [script] * len(groups), al, awdx, font, width, height)
+        return _render_lines(groups, [script] * len(groups), al, awdx, font, width, height,
+                             highlight_color=highlight_color, dim_color=dim_color)
 
     ascent, descent = font.getmetrics()
     line_h = ascent + descent
@@ -379,7 +384,7 @@ def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, heigh
 
     for i, (word, advance_w, word_bbox) in enumerate(word_metrics):
         is_active = i == visual_active_idx
-        color = HIGHLIGHT_COLOR if is_active else DIM_COLOR
+        color = highlight_color if is_active else dim_color
         draw_x = x - word_bbox[0]
         _draw_shadow(draw, (draw_x, base_draw_y), word, font, SHADOW_COLOR, SHADOW_DROP_OFFSET)
         draw.text((draw_x, base_draw_y), word, font=font, fill=color)
@@ -404,6 +409,8 @@ def build_spans(
     font,
     width: int,
     height: int,
+    highlight_color: tuple = HIGHLIGHT_COLOR,
+    dim_color: tuple = DIM_COLOR,
 ) -> list[SubtitleSpan]:
     spans: list[SubtitleSpan] = []
 
@@ -417,18 +424,19 @@ def build_spans(
                 s2 = 'hebrew' if any(_word_script(w) == 'hebrew' for w in l2) else 'latin'
                 img = _render_lines([l1, l2], [s1, s2], -1, -1, font, width, height, highlight_all=True)
             else:
-                img = _render_uniform(phrase.text, HIGHLIGHT_COLOR, font, width, height)
+                img = _render_uniform(phrase.text, highlight_color, font, width, height)
             spans.append(SubtitleSpan(img, phrase.start, phrase.end))
 
         elif mode == "highlighted_phrase":
             for i, word in enumerate(phrase.words):
-                img = _render_highlighted(phrase, i, font, width, height)
+                img = _render_highlighted(phrase, i, font, width, height,
+                                          highlight_color=highlight_color, dim_color=dim_color)
                 span_end = phrase.words[i + 1].start if i + 1 < len(phrase.words) else word.end
                 spans.append(SubtitleSpan(img, word.start, span_end))
 
         elif mode == "single_word":
             for word in phrase.words:
-                img = _render_uniform(word.text, HIGHLIGHT_COLOR, font, width, height)
+                img = _render_uniform(word.text, highlight_color, font, width, height)
                 spans.append(SubtitleSpan(img, word.start, word.end))
 
     return spans
@@ -569,7 +577,8 @@ def _apply_timed_overlays(
     return output_path
 
 
-def build_scene_spans(chunks, scene_starts, font, width, height):
+def build_scene_spans(chunks, scene_starts, font, width, height,
+                      highlight_color: tuple = HIGHLIGHT_COLOR, dim_color: tuple = DIM_COLOR):
     """
     Scene-aware subtitles: all scene words appear at once from the scene start.
     Active word is highlighted as it is spoken.
@@ -606,7 +615,8 @@ def build_scene_spans(chunks, scene_starts, font, width, height):
         # Leading silence: scene starts before first spoken word
         first_start = sc_words[0]['start']
         if first_start > sc_start:
-            img = _render_lines(lines, line_scripts, -1, -1, font, width, height)
+            img = _render_lines(lines, line_scripts, -1, -1, font, width, height,
+                                highlight_color=highlight_color, dim_color=dim_color)
             spans.append(SubtitleSpan(img, sc_start, first_start))
 
         # One span per word — whole scene block stays, active word highlighted
@@ -614,14 +624,16 @@ def build_scene_spans(chunks, scene_starts, font, width, height):
             w_start = wc['start']
             w_end   = sc_words[i + 1]['start'] if i + 1 < len(sc_words) else sc_end
             li, wi  = line_for_word[i]
-            img = _render_lines(lines, line_scripts, li, wi, font, width, height)
+            img = _render_lines(lines, line_scripts, li, wi, font, width, height,
+                                highlight_color=highlight_color, dim_color=dim_color)
             spans.append(SubtitleSpan(img, w_start, w_end))
 
         # Trailing silence: keep last word highlighted until scene end
         last_end = sc_words[-1]['end']
         if last_end < sc_end:
             li, wi = line_for_word[-1]
-            img = _render_lines(lines, line_scripts, li, wi, font, width, height)
+            img = _render_lines(lines, line_scripts, li, wi, font, width, height,
+                                highlight_color=highlight_color, dim_color=dim_color)
             spans.append(SubtitleSpan(img, last_end, sc_end))
 
     return spans
@@ -648,9 +660,6 @@ def apply_subtitles(
     highlight_color: tuple = HIGHLIGHT_COLOR,
     dim_color: tuple = DIM_COLOR,
 ) -> Path:
-    _g = globals()
-    _orig_h, _orig_d = _g['HIGHLIGHT_COLOR'], _g['DIM_COLOR']
-    _g['HIGHLIGHT_COLOR'], _g['DIM_COLOR'] = highlight_color, dim_color
     from .fal_wizper import load_transcript
 
     apply_subs = layers in ("subs", "both")
@@ -669,9 +678,11 @@ def apply_subtitles(
             s1_end = scene_starts[1]
             hook_chunks = [c for c in chunks if c['start'] < s1_end]
             rest_chunks = [c for c in chunks if c['start'] >= s1_end]
-            hook_spans  = build_scene_spans(hook_chunks, [scene_starts[0]], font, width, height)
+            hook_spans  = build_scene_spans(hook_chunks, [scene_starts[0]], font, width, height,
+                                            highlight_color=highlight_color, dim_color=dim_color)
             phrases     = group_into_phrases(rest_chunks, max_words=max_words, max_duration=max_duration, max_chars=max_chars)
-            spans       = hook_spans + build_spans(phrases, mode, font, width, height)
+            spans       = hook_spans + build_spans(phrases, mode, font, width, height,
+                                                   highlight_color=highlight_color, dim_color=dim_color)
         else:
             phrases = group_into_phrases(chunks, max_words=max_words, max_duration=max_duration, max_chars=max_chars)
             if preview_segment:
@@ -680,7 +691,8 @@ def apply_subtitles(
                 for p in phrases:
                     p.words = [w for w in p.words if w.end > seg_start and w.start < seg_end]
                 phrases = [p for p in phrases if p.words]
-            spans = build_spans(phrases, mode, font, width, height)
+            spans = build_spans(phrases, mode, font, width, height,
+                                highlight_color=highlight_color, dim_color=dim_color)
     else:
         spans = []
 
@@ -706,13 +718,10 @@ def apply_subtitles(
 
     # Subtract the leading pad so timestamps stay locked to the VO audio.
     # time_offset = -P makes the frame→transcript lookup: t = frame_time - P.
-    try:
-        return _apply_timed_overlays(
-            video_path, spans, output_path,
-            time_offset=-leading_pad_s,
-            screen_text_spans=screen_text_spans,
-            apply_subs=apply_subs,
-            apply_screen=apply_screen,
-        )
-    finally:
-        _g['HIGHLIGHT_COLOR'], _g['DIM_COLOR'] = _orig_h, _orig_d
+    return _apply_timed_overlays(
+        video_path, spans, output_path,
+        time_offset=-leading_pad_s,
+        screen_text_spans=screen_text_spans,
+        apply_subs=apply_subs,
+        apply_screen=apply_screen,
+    )

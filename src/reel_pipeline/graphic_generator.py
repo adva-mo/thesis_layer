@@ -214,8 +214,7 @@ def render_stacked_text_card(lines: list[str], font_path: Path,
             # which creates the gap between spans. Stripping removes that gap.
             visual_spans = [(s, c) for s, c in reversed(spans) if s.strip()]
             total_w = sum(
-                draw.textbbox((0, 0), _visual(s), font=font)[2] -
-                draw.textbbox((0, 0), _visual(s), font=font)[0]
+                (bb := draw.textbbox((0, 0), _visual(s), font=font))[2] - bb[0]
                 for s, _ in visual_spans
             )
             x = (width - total_w) // 2
