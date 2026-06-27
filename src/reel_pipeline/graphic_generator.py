@@ -72,9 +72,6 @@ def detect_type(visual: str) -> str:
     )
 
 
-# ── RTL helper ────────────────────────────────────────────────────
-    return spans
-
 # ── Renderers ─────────────────────────────────────────────────────
 
 def render_timeline(items: list[str], font_path: Path,
