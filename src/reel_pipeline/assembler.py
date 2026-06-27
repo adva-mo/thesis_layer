@@ -2,7 +2,6 @@
 Assemble scene clips + audio segments into a final 9:16 MP4.
 """
 
-import subprocess
 import sys
 from pathlib import Path
 from typing import Optional
@@ -17,7 +16,10 @@ from .local_clip import (
 )
 from .motion import get_transition
 from .parser import Scene
+from .render_utils import ffmpeg as _ffmpeg, Y_RATIO_TOP, Y_RATIO_CENTER, Y_RATIO_BOTTOM
 from .text_overlay import FONT_PATH, FONT_SIZE, TEXT_Y_RATIO
+
+_POS_MAP = {"top": Y_RATIO_TOP, "center": Y_RATIO_CENTER, "bottom": Y_RATIO_BOTTOM}
 
 
 def _find_audio(audio_dir: Path, scene_index: int) -> Optional[Path]:
@@ -28,25 +30,6 @@ def _find_audio(audio_dir: Path, scene_index: int) -> Optional[Path]:
     pattern = f"seg{scene_index:02d}_*.mp3"
     matches = sorted(audio_dir.glob(pattern))
     return matches[-1] if matches else None
-
-
-def _ffmpeg(*args: str, label: str = "ffmpeg") -> None:
-    cmd = ["ffmpeg", "-y"] + list(args)
-    result = subprocess.run(cmd, capture_output=True)
-    if result.returncode != 0:
-        print(f"  ✗ {label} failed:\n{result.stderr.decode()[-800:]}")
-        sys.exit(1)
-
-
-def _resolve_beat(scene: Scene, total_scenes: int) -> str | None:
-    """Infer beat from explicit tag or scene position when [BEAT:] is absent."""
-    if scene.beat:
-        return scene.beat
-    if scene.index == 1:
-        return "hook"
-    if scene.index == total_scenes:
-        return "cta"
-    return None
 
 
 def _render_generated_over_real(
@@ -128,7 +111,7 @@ def _concat_with_transitions(
     scene_video_starts = [0.0]   # actual video start time per scene after xfade overlap
 
     for i in range(n - 1):
-        to_beat = _resolve_beat(scenes[i + 1], total)
+        to_beat = scenes[i + 1].effective_beat(total)
         from_type = scenes[i].visual_type or "generated"
         to_type   = scenes[i + 1].visual_type or "generated"
         xf_name, xf_dur = get_transition(from_type, to_type, to_beat)
@@ -288,14 +271,13 @@ def assemble_reel(
         # Text overlays are deferred to subtitle.py — no ffmpeg re-encode here.
         scene_start_s = running_time
         if scene.text_timing:
-            beat = _resolve_beat(scene, len(scenes))
-            beat_default_yr = 0.55 if beat == "hook" else TEXT_Y_RATIO
-            _pos_map = {"top": 0.30, "center": 0.55, "bottom": 0.75}
+            beat = scene.effective_beat(len(scenes))
+            beat_default_yr = Y_RATIO_CENTER if beat == "hook" else Y_RATIO_BOTTOM
             print(f"    Text:     {len(scene.text_timing)} timed entries → screen_text.json")
             for entry in scene.text_timing:
                 text, rel_start, rel_end, position = entry[0], entry[1], entry[2], entry[3]
                 entry_fs = entry[4] if len(entry) > 4 and entry[4] is not None else font_size
-                _yr = _pos_map.get(position, beat_default_yr) if position else beat_default_yr
+                _yr = _POS_MAP.get(position, beat_default_yr) if position else beat_default_yr
                 screen_text_entries.append({
                     "text": text,
                     "start": round(scene_start_s + rel_start, 4),
@@ -304,17 +286,10 @@ def assemble_reel(
                     "font_size": entry_fs,
                 })
         elif scene.text_card:
-            beat = _resolve_beat(scene, len(scenes))
+            beat = scene.effective_beat(len(scenes))
             is_hook = beat == "hook"
             _fs = scene.text_font_size if scene.text_font_size is not None else (96 if is_hook else font_size)
-            if scene.text_position == "bottom":
-                _yr = 0.75
-            elif scene.text_position == "center":
-                _yr = 0.55
-            elif scene.text_position == "top":
-                _yr = 0.30
-            else:
-                _yr = 0.55 if is_hook else 0.75
+            _yr = _POS_MAP.get(scene.text_position, Y_RATIO_CENTER if is_hook else Y_RATIO_BOTTOM)
             print(f"    Text:     {scene.text_card!r} → screen_text.json")
             screen_text_entries.append({
                 "text": scene.text_card,
@@ -364,17 +339,21 @@ def assemble_reel(
         )
 
     # ── Concatenate audio segments ────────────────────────────────
+    # Decode to PCM via filter_complex aconcat — avoids MP3 encoder-delay
+    # artifacts (clicks/pops) that appear at segment boundaries when using
+    # the concat demuxer with -c copy on MP3 files.
     print("  Concatenating audio segments...")
-    audio_list = work_dir / "concat_audio.txt"
-    audio_list.write_text(
-        "\n".join(f"file '{p.resolve()}'" for p in audio_files),
-        encoding="utf-8",
-    )
-    audio_only = work_dir / "audio_only.mp3"
+    n = len(audio_files)
+    inputs = []
+    for p in audio_files:
+        inputs += ["-i", str(p)]
+    fc = "".join(f"[{i}:a]" for i in range(n)) + f"concat=n={n}:v=0:a=1[out]"
+    audio_only = work_dir / "audio_only.wav"
     _ffmpeg(
-        "-f", "concat", "-safe", "0",
-        "-i", str(audio_list),
-        "-c", "copy",
+        *inputs,
+        "-filter_complex", fc,
+        "-map", "[out]",
+        "-c:a", "pcm_s16le",
         str(audio_only),
         label="concat audio",
     )
@@ -384,7 +363,7 @@ def assemble_reel(
         pad_s = leading_pad_ms / 1000.0
         print(f"  Padding start by {leading_pad_ms}ms...")
         padded_video = work_dir / "video_only_lead_padded.mp4"
-        padded_audio = work_dir / "audio_only_lead_padded.mp3"
+        padded_audio = work_dir / "audio_only_lead_padded.wav"
         _ffmpeg(
             "-i", str(video_only),
             "-vf", f"tpad=start_mode=clone:start_duration={pad_s}",
@@ -395,7 +374,7 @@ def assemble_reel(
         _ffmpeg(
             "-i", str(audio_only),
             "-af", f"adelay={leading_pad_ms}:all=1",
-            "-c:a", "libmp3lame", "-q:a", "2",
+            "-c:a", "pcm_s16le",
             str(padded_audio),
             label="pad audio start",
         )
@@ -407,7 +386,7 @@ def assemble_reel(
         pad_s = trailing_pad_ms / 1000.0
         print(f"  Padding end by {trailing_pad_ms}ms...")
         padded_video = work_dir / "video_only_padded.mp4"
-        padded_audio = work_dir / "audio_only_padded.mp3"
+        padded_audio = work_dir / "audio_only_padded.wav"
         _ffmpeg(
             "-i", str(video_only),
             "-vf", f"tpad=stop_mode=clone:stop_duration={pad_s}",
@@ -418,7 +397,7 @@ def assemble_reel(
         _ffmpeg(
             "-i", str(audio_only),
             "-af", f"apad=pad_dur={pad_s}",
-            "-c:a", "libmp3lame", "-q:a", "2",
+            "-c:a", "pcm_s16le",
             str(padded_audio),
             label="pad audio",
         )

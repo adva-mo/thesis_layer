@@ -11,7 +11,7 @@ Caching: if transcript.json already exists, exits immediately without API call.
 Usage:
     # Dry-run:
     python3 scripts/transcribe_reel.py \\
-        --audio output/club-place-dubai-hills/audio/reel1/audio_only.mp3 \\
+        --audio output/club-place-dubai-hills/audio/reel1/audio_only.wav \\
         --output output/club-place-dubai-hills/audio/reel1/transcript.json
 
     # Paid:

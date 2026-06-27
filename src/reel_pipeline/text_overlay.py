@@ -4,13 +4,13 @@ Composited onto a video clip via FFmpeg.
 """
 
 import re
-import subprocess
-import sys
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
+
+from .render_utils import visual_hebrew as _visual_hebrew, Y_RATIO_BOTTOM, strip_spans, parse_span_colors
 
 
 FONT_PATH = Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf")
@@ -25,7 +25,7 @@ class ScreenTextSpan:
     suppress_sub: bool = False  # if True, subtitle layer is suppressed while this span is active
 
 # Bottom edge of subtitle block — block grows upward from this Y position
-TEXT_Y_RATIO = 0.75
+TEXT_Y_RATIO = Y_RATIO_BOTTOM
 
 # Text style
 FONT_SIZE      = 72
@@ -57,14 +57,6 @@ def _draw_shadow(draw, xy, text, font, shadow_color, offset):
     draw.text((x + offset, y + offset), text, font=font, fill=shadow_color)
 
 
-def _visual_hebrew(text: str) -> str:
-    """Convert logical RTL order to visual order for PIL rendering."""
-    try:
-        from bidi.algorithm import get_display
-        return get_display(text)
-    except ImportError:
-        return text
-
 
 def _render_text_overlay(
     text: str,
@@ -73,16 +65,21 @@ def _render_text_overlay(
     font_path: Path,
     font_size: int,
     y_ratio: float = TEXT_Y_RATIO,
+    text_color: tuple = TEXT_COLOR,
 ) -> Image.Image:
     """Return a transparent RGBA image with the text rendered.
 
-    Literal \\n in text forces a hard line break. Long lines are word-wrapped
-    automatically to fit within the canvas (up to 3 lines). Font size shrinks
-    in steps of 4 only if 3 wrapped lines still overflow.
+    Supports inline {#RRGGBB}word{/#} color spans. Literal \\n forces a hard
+    line break. Long lines are word-wrapped automatically (up to 3 lines).
+    Font size shrinks in steps of 4 only if 3 wrapped lines still overflow.
     """
     MAX_LINES = 3
     MIN_FONT  = 40
     max_usable = width - BAR_PADDING_X * 2
+
+    # Extract per-word colors from inline markup, then strip for layout
+    word_colors = parse_span_colors(text)
+    plain = strip_spans(text) if word_colors else text
 
     tmp = Image.new("RGBA", (1, 1))
     draw_tmp = ImageDraw.Draw(tmp)
@@ -116,7 +113,7 @@ def _render_text_overlay(
         return result
 
     # Split on both literal \n (blueprint escape) and actual newline (captured by parser)
-    groups = [g.strip() for g in re.split(r'\\n|\n', text) if g.strip()]
+    groups = [g.strip() for g in re.split(r'\\n|\n', plain) if g.strip()]
 
     font = ImageFont.truetype(str(font_path), font_size)
     wrapped = _wrap_groups(groups, font)
@@ -142,7 +139,21 @@ def _render_text_overlay(
         text_x = (width - tw) // 2
         text_y = block_top + BAR_PADDING_Y + i * (line_h + line_gap)
         _draw_halo(draw, (text_x, text_y), visual, font, SHADOW_COLOR, SHADOW_OFFSET)
-        draw.text((text_x, text_y), visual, font=font, fill=TEXT_COLOR)
+        draw.text((text_x, text_y), visual, font=font, fill=text_color)
+
+    # Overdraw words that carry inline color spans
+    if word_colors:
+        for i, (visual, tw) in enumerate(zip(visuals, widths)):
+            text_x = (width - tw) // 2
+            text_y = block_top + BAR_PADDING_Y + i * (line_h + line_gap)
+            for word, color in word_colors.items():
+                idx = visual.find(word)
+                if idx < 0:
+                    continue
+                prefix_advance = draw.textbbox((0, 0), visual[:idx], font=font)[2]
+                wx = text_x + prefix_advance
+                _draw_halo(draw, (wx, text_y), word, font, SHADOW_COLOR, SHADOW_OFFSET)
+                draw.text((wx, text_y), word, font=font, fill=color)
 
     return overlay
 
@@ -155,6 +166,7 @@ def build_screen_text_spans(
     default_font_size: int = FONT_SIZE,
     width: int = 1080,
     height: int = 1920,
+    text_color: tuple = TEXT_COLOR,
 ) -> list[ScreenTextSpan]:
     """Pre-render screen text entries as RGBA PIL images with time windows.
 
@@ -170,46 +182,8 @@ def build_screen_text_spans(
             font_path,
             entry.get("font_size", default_font_size),
             y_ratio=entry.get("y_ratio", TEXT_Y_RATIO),
+            text_color=text_color,
         )
         spans.append(ScreenTextSpan(img, entry["start"], entry["end"],
                                     suppress_sub=entry.get("suppress_sub", False)))
     return spans
-
-
-def add_screen_text(
-    clip_path: Path,
-    text: str,
-    output_path: Path,
-    font_path: Path = FONT_PATH,
-    font_size: int = FONT_SIZE,
-    width: int = 1080,
-    height: int = 1920,
-    y_ratio: float = TEXT_Y_RATIO,
-) -> Path:
-    """Composite Hebrew screen text onto every frame of clip_path → output_path."""
-    overlay_img = _render_text_overlay(text, width, height, font_path, font_size, y_ratio)
-
-    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
-        overlay_path = Path(tmp.name)
-        overlay_img.save(overlay_path, format="PNG")
-
-    try:
-        cmd = [
-            "ffmpeg", "-y",
-            "-i", str(clip_path),
-            "-i", str(overlay_path),
-            "-filter_complex", "[0:v][1:v]overlay=0:0",
-            "-c:v", "libx264",
-            "-preset", "ultrafast",
-            "-pix_fmt", "yuv420p",
-            "-an",
-            str(output_path),
-        ]
-        result = subprocess.run(cmd, capture_output=True)
-        if result.returncode != 0:
-            print(f"  ✗ text overlay failed:\n{result.stderr.decode()[-600:]}")
-            sys.exit(1)
-    finally:
-        overlay_path.unlink(missing_ok=True)
-
-    return output_path

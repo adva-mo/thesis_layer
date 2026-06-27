@@ -14,6 +14,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+from .render_utils import visual_hebrew as _visual, strip_spans as _strip_spans, parse_spans as _parse_spans
 from .text_overlay import FONT_PATH
 
 # ── Visual constants ──────────────────────────────────────────────
@@ -69,16 +70,6 @@ def detect_type(visual: str) -> str:
         f"  Got: {visual!r}\n"
         f"  Valid keywords: {', '.join(_VALID_KEYWORDS)}"
     )
-
-
-# ── RTL helper ────────────────────────────────────────────────────
-
-def _visual(text: str) -> str:
-    try:
-        from bidi.algorithm import get_display
-        return get_display(text)
-    except ImportError:
-        return text
 
 
 # ── Renderers ─────────────────────────────────────────────────────
@@ -192,7 +183,7 @@ def render_stacked_text_card(lines: list[str], font_path: Path,
         font = ImageFont.truetype(str(font_path), font_size)
         widths = []
         for l in lines:
-            bb = draw.textbbox((0, 0), _visual(l.strip()), font=font)
+            bb = draw.textbbox((0, 0), _visual(_strip_spans(l).strip()), font=font)
             widths.append(bb[2] - bb[0])
         if max(widths, default=0) <= STACKED_MAX_USABLE_W or font_size <= STACKED_FONT_MIN:
             break
@@ -208,11 +199,30 @@ def render_stacked_text_card(lines: list[str], font_path: Path,
     for i in range(STACKED_LINES):
         if i >= len(lines):
             break
-        visual_text = _visual(lines[i].strip())
-        bbox = draw.textbbox((0, 0), visual_text, font=font)
-        tx = (width - (bbox[2] - bbox[0])) // 2 - bbox[0]
-        ty = grid_top + i * (line_h + line_gap) - bbox[1]
-        draw.text((tx, ty), visual_text, font=font, fill=TEXT_WHITE)
+        ty_base = grid_top + i * (line_h + line_gap)
+        spans = _parse_spans(lines[i], TEXT_WHITE)
+
+        if len(spans) == 1:
+            visual_text = _visual(spans[0][0].strip())
+            bbox = draw.textbbox((0, 0), visual_text, font=font)
+            tx = (width - (bbox[2] - bbox[0])) // 2 - bbox[0]
+            draw.text((tx, ty_base - bbox[1]), visual_text, font=font, fill=spans[0][1])
+        else:
+            # Multi-color spans: reverse logical order for RTL visual placement
+            # (last logical span appears leftmost on screen in RTL).
+            # Preserve inner whitespace — bidi moves trailing spaces to visual-start,
+            # which creates the gap between spans. Stripping removes that gap.
+            visual_spans = [(s, c) for s, c in reversed(spans) if s.strip()]
+            total_w = sum(
+                (bb := draw.textbbox((0, 0), _visual(s), font=font))[2] - bb[0]
+                for s, _ in visual_spans
+            )
+            x = (width - total_w) // 2
+            for span_text, span_color in visual_spans:
+                vis = _visual(span_text)
+                bbox = draw.textbbox((0, 0), vis, font=font)
+                draw.text((x - bbox[0], ty_base - bbox[1]), vis, font=font, fill=span_color)
+                x += bbox[2] - bbox[0]
 
     return img
 
@@ -269,6 +279,32 @@ def validate_generated_scene(visual: str) -> None:
 
 # ── Public API ────────────────────────────────────────────────────
 
+def _render_graphic_image(
+    visual: str,
+    font_path: Path,
+    width: int,
+    height: int,
+    transparent_bg: bool,
+) -> Image.Image:
+    """Dispatch visual description to the correct renderer and return a PIL image.
+
+    CTA cards always use a dark background regardless of transparent_bg —
+    the plain dark outro is an intentional brand choice, not a rendering default.
+    """
+    graphic_type = detect_type(visual)
+    bg = (0, 0, 0, 0) if transparent_bg else BG_COLOR
+
+    if graphic_type == "timeline":
+        return render_timeline(_parse_timeline_items(visual), font_path, width, height, bg=bg)
+    if graphic_type == "stacked_text_card":
+        return render_stacked_text_card(_parse_stacked_items(visual), font_path, width, height, bg=bg)
+    if graphic_type == "text_card":
+        return render_text_card(visual, font_path, width, height, bg=bg)
+    if graphic_type == "cta_card":
+        return render_cta_card(width, height)
+    raise AssertionError(f"Unreachable: detect_type returned {graphic_type!r} for {visual!r}")
+
+
 def generate_graphic_png(
     visual: str,
     output_png: Path,
@@ -281,25 +317,8 @@ def generate_graphic_png(
 
     Used by the compositing path: the PNG is overlaid on a blurred real-asset
     background clip via FFmpeg rather than being rendered on a dark background.
-    CTA cards always use a dark background regardless of transparent_bg.
     """
-    graphic_type = detect_type(visual)
-    bg = (0, 0, 0, 0) if transparent_bg else BG_COLOR
-
-    if graphic_type == "timeline":
-        items = _parse_timeline_items(visual)
-        img = render_timeline(items, font_path, width, height, bg=bg)
-    elif graphic_type == "stacked_text_card":
-        items = _parse_stacked_items(visual)
-        img = render_stacked_text_card(items, font_path, width, height, bg=bg)
-    elif graphic_type == "text_card":
-        img = render_text_card(visual, font_path, width, height, bg=bg)
-    elif graphic_type == "cta_card":
-        img = render_cta_card(width, height)
-    else:
-        raise AssertionError(f"Unreachable: detect_type returned {graphic_type!r} for {visual!r}")
-
-    img.save(output_png, "PNG")
+    _render_graphic_image(visual, font_path, width, height, transparent_bg).save(output_png, "PNG")
     return output_png
 
 
@@ -316,27 +335,11 @@ def generate_graphic_clip(
 
     When transparent_bg=True the graphic renders with a fully transparent
     background so it can be composited over a real-asset base layer.
-    CTA cards always use a dark background regardless of this flag.
     """
     from .local_clip import image_to_clip
 
-    graphic_type = detect_type(visual)
-    bg = (0, 0, 0, 0) if transparent_bg else BG_COLOR
+    img = _render_graphic_image(visual, font_path, width, height, transparent_bg)
 
-    if graphic_type == "timeline":
-        items = _parse_timeline_items(visual)
-        img = render_timeline(items, font_path, width, height, bg=bg)
-    elif graphic_type == "stacked_text_card":
-        items = _parse_stacked_items(visual)
-        img = render_stacked_text_card(items, font_path, width, height, bg=bg)
-    elif graphic_type == "text_card":
-        img = render_text_card(visual, font_path, width, height, bg=bg)
-    elif graphic_type == "cta_card":
-        img = render_cta_card(width, height)   # always dark — intentional branded outro
-    else:
-        raise AssertionError(f"Unreachable: detect_type returned {graphic_type!r} for {visual!r}")
-
-    # Save to temp PNG, convert to video clip, clean up
     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
         tmp_path = Path(tmp.name)
         img.save(tmp_path, "PNG")   # keep RGBA when transparent_bg so overlay is clean

@@ -39,18 +39,35 @@ class Scene:
     visual_intent: str             # [VISUAL_INTENT:] or [VISUAL:] fallback
     motion_style: Optional[str]    # [MOTION_STYLE:]
     text_card: Optional[str]       # [TEXT_CARD:] or [SCREEN:] fallback
-    asset_type: str                # "image" | "video" | "generated" — what the assembler uses
     asset_path: Optional[Path]     # resolved asset; None when generated
     critical: bool = False         # True when VEP Critical column is "yes"
     beat: Optional[str] = None          # [BEAT:] — narrative beat for transition logic
     photo_type: Optional[str] = None    # [PHOTO_TYPE:] — Ken Burns parameter set override
     kling_avoid: Optional[str] = None   # [KLING_AVOID:] — sent as negative_prompt to Kling API (scene-specific; base is in fal_kling.BASE_NEGATIVE_PROMPT)
-    reuse_source: Optional[str] = None  # [REUSE_SOURCE: HH-HHs] — reuse the Kling clip from this timestamp instead of generating a new one
+    clip_filename: Optional[str] = None  # [CLIP: vNNN_slug.mp4] — canonical clip filename for this kling scene
+    reuse_source: Optional[str] = None  # [REUSE_SOURCE: vNNN_slug.mp4 | HH-HHs(legacy)] — reuse an existing clip
     text_position: Optional[str] = None # [TEXT_POSITION: center|bottom] — overrides beat-based y_ratio default
     text_font_size: Optional[int] = None  # [FONT_SIZE: N] — overrides default font size for TEXT_CARD
     text_timing: Optional[list[tuple[str, float, float, str | None, int | None]]] = None  # [TEXT_TIMING: text @ s-e [top|center|bottom] [size:N] | ...]
     plain_bg: bool = False              # [PLAIN_BG: yes] — skip blur bg for generated scenes
     freeze_last_frame: bool = False     # [FREEZE_LAST_FRAME: yes] — hold last frame of prev scene
+
+    @property
+    def asset_type(self) -> str:
+        """Computed from asset_path — never stored separately so it can't drift."""
+        if self.asset_path is None:
+            return "generated"
+        return "video" if self.asset_path.suffix.lower() in (".mp4", ".mov") else "image"
+
+    def effective_beat(self, total_scenes: int) -> str | None:
+        """Explicit [BEAT:] tag, or inferred from scene position when absent."""
+        if self.beat:
+            return self.beat
+        if self.index == 1:
+            return "hook"
+        if self.index == total_scenes:
+            return "cta"
+        return None
 
 
 def _parse_timestamp(ts: str) -> tuple[float, float]:
@@ -196,22 +213,28 @@ def parse_reel_file(
     # skip_asset_check — only for non-visual pipeline steps (e.g. align.py) that
     # need scene metadata but do not render video. render.py, kling_batch.py, and
     # subtitle.py must never pass True — the asset check is their production gate.
+    content_override: Optional[str] = None,
+    # content_override — pre-extracted section content (e.g. from --revision N in render.py).
+    # When set, skips the reel-splitting step and uses this string directly as the reel body.
 ) -> list[Scene]:
-    content = md_path.read_text(encoding="utf-8")
+    if content_override is not None:
+        full_reel_body = content_override
+    else:
+        content = md_path.read_text(encoding="utf-8")
 
-    reel_splits = re.split(r"^## (Reel \d+ — .+?)$", content, flags=re.MULTILINE)
+        reel_splits = re.split(r"^## (Reel \d+ — .+?)$", content, flags=re.MULTILINE)
 
-    target_heading_idx = None
-    for i in range(1, len(reel_splits), 2):
-        num_match = re.match(r"Reel (\d+)", reel_splits[i])
-        if num_match and int(num_match.group(1)) == reel_number:
-            target_heading_idx = i
-            break
+        target_heading_idx = None
+        for i in range(1, len(reel_splits), 2):
+            num_match = re.match(r"Reel (\d+)", reel_splits[i])
+            if num_match and int(num_match.group(1)) == reel_number:
+                target_heading_idx = i
+                break
 
-    if target_heading_idx is None:
-        raise ValueError(f"Reel {reel_number} not found in {md_path}")
+        if target_heading_idx is None:
+            raise ValueError(f"Reel {reel_number} not found in {md_path}")
 
-    full_reel_body = reel_splits[target_heading_idx + 1]
+        full_reel_body = reel_splits[target_heading_idx + 1]
     script_body = re.split(r"^### Caption", full_reel_body, maxsplit=1, flags=re.MULTILINE)[0]
 
     source_mapping, render_mapping, critical_keys = _parse_vep_table(full_reel_body, assets_dir, repo_root)
@@ -228,7 +251,7 @@ def parse_reel_file(
         if not vi_match:
             vi_match = re.search(r"\[VISUAL:\s*(.*?)\]", block, re.DOTALL)
         has_freeze      = bool(re.search(r"\[FREEZE_LAST_FRAME:\s*yes\s*\]", block, re.IGNORECASE))
-        has_reuse       = bool(re.search(r"\[REUSE_SOURCE:\s*[\d:–—\-]+s\s*\]", block))
+        has_reuse       = bool(re.search(r"\[REUSE_SOURCE:\s*[^\]]+\]", block))
         has_visual_type = bool(re.search(r"\[VISUAL_TYPE:\s*\w+\s*\]", block, re.IGNORECASE))
         if not has_visual_type and not vi_match and not has_freeze and not has_reuse:
             continue
@@ -254,7 +277,10 @@ def parse_reel_file(
         ka_match = re.search(r"\[KLING_AVOID:\s*(.*?)\]", block, re.DOTALL)
         kling_avoid = ka_match.group(1).strip() if ka_match else None
 
-        rs_match = re.search(r"\[REUSE_SOURCE:\s*([\d:–—\-]+s)\s*\]", block)
+        cl_match = re.search(r"\[CLIP:\s*([^\]]+)\]", block)
+        clip_filename = cl_match.group(1).strip() if cl_match else None
+
+        rs_match = re.search(r"\[REUSE_SOURCE:\s*([^\]]+)\]", block)
         reuse_source = rs_match.group(1).strip() if rs_match else None
 
         tp_match = re.search(r"\[TEXT_POSITION:\s*(\w+)\s*\]", block)
@@ -320,15 +346,13 @@ def parse_reel_file(
 
         ts_key = _ts_key(start_s, end_s)
 
-        # Asset resolution — visual_type drives the path, not string inference
+        # Asset resolution — visual_type drives the path, not string inference.
+        # asset_type is a computed property on Scene; only asset_path is resolved here.
         if visual_type in ("generated", "timeline"):
-            asset_type: str = "generated"
             asset_path: Optional[Path] = None
 
         elif visual_type == "static":
-            p = source_mapping.get(ts_key)
-            asset_type = "image" if p else "generated"
-            asset_path = p
+            asset_path = source_mapping.get(ts_key)
 
         elif visual_type == "kling":
             if reuse_source and not assets_dir:
@@ -337,16 +361,12 @@ def parse_reel_file(
                     f"REUSE_SOURCE set but assets_dir is None — reuse clip cannot be resolved.",
                     stacklevel=2,
                 )
-                asset_type, asset_path = "generated", None
+                asset_path = None
             elif reuse_source and assets_dir:
-                # REUSE_SOURCE: resolve the source scene's expected clip path
-                try:
-                    _rs = re.sub(r"[–—]", "-", reuse_source).replace("s", "")
-                    _rs_parts = _rs.split("-")
-                    _rs_start, _rs_end = int(float(_rs_parts[0])), int(float(_rs_parts[1]))
-                    reuse_clip = assets_dir / "canonical" / f"kling_r{reel_number}_{_rs_start:02d}-{_rs_end:02d}s.mp4"
+                if reuse_source.endswith(".mp4"):
+                    # vNNN_slug.mp4 — direct canonical lookup
+                    reuse_clip = assets_dir / "canonical" / reuse_source
                     if reuse_clip.exists():
-                        asset_type = "video"
                         asset_path = reuse_clip
                     else:
                         warnings.warn(
@@ -355,29 +375,63 @@ def parse_reel_file(
                             f"run kling_batch.py first so the source clip exists before rendering.",
                             stacklevel=2,
                         )
-                        asset_type, asset_path = "generated", None
-                except (ValueError, IndexError):
-                    asset_type, asset_path = "generated", None
+                        asset_path = None
+                else:
+                    # LEGACY: timestamp-based REUSE_SOURCE (e.g. "5-10s" → kling_rN_XX-XXs.mp4)
+                    # TODO: remove once all active blueprints use [REUSE_SOURCE: vNNN_slug.mp4]
+                    try:
+                        _rs = re.sub(r"[–—]", "-", reuse_source).replace("s", "")
+                        _rs_parts = _rs.split("-")
+                        _rs_start, _rs_end = int(float(_rs_parts[0])), int(float(_rs_parts[1]))
+                        reuse_clip = assets_dir / "canonical" / f"kling_r{reel_number}_{_rs_start:02d}-{_rs_end:02d}s.mp4"
+                        if reuse_clip.exists():
+                            asset_path = reuse_clip
+                        else:
+                            warnings.warn(
+                                f"Reel {reel_number}, scene at {ts_match.group(1)}: "
+                                f"REUSE_SOURCE clip not found ({reuse_clip.name}) — "
+                                f"run kling_batch.py first so the source clip exists before rendering.",
+                                stacklevel=2,
+                            )
+                            asset_path = None
+                    except (ValueError, IndexError):
+                        asset_path = None
+            elif clip_filename:
+                # [CLIP: vNNN_slug.mp4] — resolve in priority order:
+                # Rule 1: canonical/ folder — the correct location for all new clips
+                _clip_path: Optional[Path] = None
+                if assets_dir:
+                    p1 = assets_dir / "canonical" / clip_filename
+                    if p1.exists():
+                        _clip_path = p1
+                if _clip_path is None:
+                    # Rule 2 (LEGACY): path relative to blueprint file (old scenes/scene_NN_kling.mp4 pattern)
+                    # TODO: delete this branch once all active blueprints use [CLIP: vNNN_slug.mp4]
+                    p2 = md_path.parent / clip_filename
+                    if p2.exists():
+                        _clip_path = p2
+                if _clip_path is not None:
+                    asset_path = _clip_path
+                else:
+                    # Clip not yet generated — fall back to source image so kling_batch.py
+                    # can find the input asset. Render pipeline picks this up as Ken Burns fallback.
+                    asset_path = source_mapping.get(ts_key)
             elif ts_key in render_mapping:
                 # Render clip first (post-kling_batch), fall back to source image (pre-kling_batch)
-                asset_type, asset_path = "video", render_mapping[ts_key]
+                asset_path = render_mapping[ts_key]
             elif ts_key in source_mapping:
-                asset_type, asset_path = "image", source_mapping[ts_key]
+                asset_path = source_mapping[ts_key]
             else:
-                asset_type, asset_path = "generated", None
+                asset_path = None
 
         else:
             # Legacy: no [VISUAL_TYPE:] present — preserve old behaviour exactly
             if ts_key in render_mapping:
-                asset_type, asset_path = "video", render_mapping[ts_key]
+                asset_path = render_mapping[ts_key]
             elif ts_key in source_mapping:
-                p = source_mapping[ts_key]
-                asset_type = _asset_type_from_path(p)
-                asset_path = p
+                asset_path = source_mapping[ts_key]
             else:
-                asset_type, asset_path = _resolve_asset_from_text(visual_intent, assets_dir)
-                if asset_path is None:
-                    asset_type = "generated"
+                _, asset_path = _resolve_asset_from_text(visual_intent, assets_dir)
 
         scenes.append(Scene(
             index=len(scenes) + 1,
@@ -387,12 +441,12 @@ def parse_reel_file(
             visual_intent=visual_intent,
             motion_style=motion_style,
             text_card=text_card,
-            asset_type=asset_type,
             asset_path=asset_path,
             critical=ts_key in critical_keys,
             beat=beat,
             photo_type=photo_type,
             kling_avoid=kling_avoid,
+            clip_filename=clip_filename,
             reuse_source=reuse_source,
             text_position=text_position,
             text_font_size=text_font_size,
