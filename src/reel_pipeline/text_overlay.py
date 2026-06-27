@@ -25,7 +25,7 @@ class ScreenTextSpan:
     suppress_sub: bool = False  # if True, subtitle layer is suppressed while this span is active
 
 # Bottom edge of subtitle block — block grows upward from this Y position
-TEXT_Y_RATIO = 0.75
+TEXT_Y_RATIO = 0.55
 
 # Text style
 FONT_SIZE      = 72
@@ -73,6 +73,8 @@ def _render_text_overlay(
     font_path: Path,
     font_size: int,
     y_ratio: float = TEXT_Y_RATIO,
+    text_color: tuple = TEXT_COLOR,
+    highlight_words: dict | None = None,
 ) -> Image.Image:
     """Return a transparent RGBA image with the text rendered.
 
@@ -142,7 +144,21 @@ def _render_text_overlay(
         text_x = (width - tw) // 2
         text_y = block_top + BAR_PADDING_Y + i * (line_h + line_gap)
         _draw_halo(draw, (text_x, text_y), visual, font, SHADOW_COLOR, SHADOW_OFFSET)
-        draw.text((text_x, text_y), visual, font=font, fill=TEXT_COLOR)
+        draw.text((text_x, text_y), visual, font=font, fill=text_color)
+
+    # Overdraw highlighted words in specified colors
+    if highlight_words:
+        for i, (visual, tw) in enumerate(zip(visuals, widths)):
+            text_x = (width - tw) // 2
+            text_y = block_top + BAR_PADDING_Y + i * (line_h + line_gap)
+            for word, color in highlight_words.items():
+                idx = visual.find(word)
+                if idx < 0:
+                    continue
+                prefix_advance = draw.textbbox((0, 0), visual[:idx], font=font)[2]
+                wx = text_x + prefix_advance
+                _draw_halo(draw, (wx, text_y), word, font, SHADOW_COLOR, SHADOW_OFFSET)
+                draw.text((wx, text_y), word, font=font, fill=color)
 
     return overlay
 
@@ -155,6 +171,7 @@ def build_screen_text_spans(
     default_font_size: int = FONT_SIZE,
     width: int = 1080,
     height: int = 1920,
+    text_color: tuple = TEXT_COLOR,
 ) -> list[ScreenTextSpan]:
     """Pre-render screen text entries as RGBA PIL images with time windows.
 
@@ -163,6 +180,9 @@ def build_screen_text_spans(
     """
     spans = []
     for entry in entries:
+        hw_raw = entry.get("highlight_words", {})
+        hw = {word: (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16), 255)
+              for word, h in ((w, c.lstrip("#")) for w, c in hw_raw.items())} if hw_raw else None
         img = _render_text_overlay(
             entry["text"],
             width,
@@ -170,6 +190,8 @@ def build_screen_text_spans(
             font_path,
             entry.get("font_size", default_font_size),
             y_ratio=entry.get("y_ratio", TEXT_Y_RATIO),
+            text_color=text_color,
+            highlight_words=hw,
         )
         spans.append(ScreenTextSpan(img, entry["start"], entry["end"],
                                     suppress_sub=entry.get("suppress_sub", False)))

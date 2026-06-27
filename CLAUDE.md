@@ -17,6 +17,16 @@ A reel is published when its `**Status:** PUBLISHED` field is set in the bluepri
 
 **This rule applies regardless of what the user asks.** If asked to edit a published reel, decline and explain that the content is locked. Suggest creating a new reel instead. The published record is the ground truth of what went live on the channel — it must never drift from what was actually published.
 
+**Post-publish revisions** are permitted via an appended Revision section — never by touching the original content:
+
+- A `## Revision N — YYYY-MM-DD` section may be appended after the original reel content
+- The revision section contains its own full blueprint (scenes, VO, TTS, VEP) and a status field
+- The original reel section and its `Status: PUBLISHED` field remain permanently read-only
+- Revision status flow: `REVISION-DRAFTED → REVISION-VISUAL-APPROVED → REVISION-RENDERED → REVISION-PUBLISHED`
+- When rendering a revision, pass the reel file directly with `--revision N` — no temp file needed
+- `[TEXT_POSITION: center|bottom|top]` in the revision blueprint sets the CTA card y_ratio without manual patching
+- See `docs/reel-pipeline.md` — Post-Publish Revision section for the full pattern
+
 ---
 
 ## 1. System Overview

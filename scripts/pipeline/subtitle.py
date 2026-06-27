@@ -38,9 +38,17 @@ from reel_pipeline.subtitles import (
     DEFAULT_MAX_WORDS,
     DEFAULT_MODE,
     FONT_SIZE_SUBTITLE,
+    HIGHLIGHT_COLOR,
+    DIM_COLOR,
     apply_subtitles,
 )
-from reel_pipeline.text_overlay import FONT_PATH, build_screen_text_spans
+from reel_pipeline.text_overlay import FONT_PATH, TEXT_COLOR, build_screen_text_spans
+
+
+def _parse_hex(value: str) -> tuple:
+    """Parse '#RRGGBB' or 'RRGGBB' into an (R, G, B, 255) tuple."""
+    h = value.lstrip('#')
+    return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16), 255)
 
 
 def _parse_segment(s: str) -> tuple[float, float]:
@@ -84,11 +92,20 @@ def main():
                         help="Path to screen_text.json (optional — auto-discovered from transcript dir if present)")
     parser.add_argument("--layers", default="both", choices=["subs", "screen", "both"],
                         help="Which layers to composite: subs, screen, or both (default: both)")
+    parser.add_argument("--highlight-color", default=None, metavar="HEX",
+                        help="Active subtitle word color as hex (e.g. #C9A84C). Default: white")
+    parser.add_argument("--dim-color",       default=None, metavar="HEX",
+                        help="Inactive subtitle word color as hex. Default: light gray")
+    parser.add_argument("--text-color",      default=None, metavar="HEX",
+                        help="Screen text card color as hex. Default: white")
     args = parser.parse_args()
 
     video_path      = Path(args.video)
     transcript_path = Path(args.transcript)
     font_path       = Path(args.font)
+    highlight_color = _parse_hex(args.highlight_color) if args.highlight_color else HIGHLIGHT_COLOR
+    dim_color       = _parse_hex(args.dim_color)       if args.dim_color       else DIM_COLOR
+    text_color      = _parse_hex(args.text_color)      if args.text_color      else TEXT_COLOR
 
     for p, name in [(video_path, "--video"), (transcript_path, "--transcript")]:
         if not p.exists():
@@ -117,6 +134,7 @@ def main():
             data["entries"],
             font_path=font_path,
             default_font_size=args.font_size,
+            text_color=text_color,
         )
     elif layers in ("screen", "both"):
         print(f"Warning: --layers {layers} requested but no screen_text.json found — screen layer will be empty.")
@@ -151,6 +169,8 @@ def main():
         leading_pad_s=leading_pad_ms / 1000.0,
         screen_text_spans=screen_text_spans,
         layers=layers,
+        highlight_color=highlight_color,
+        dim_color=dim_color,
     )
 
     size_mb = output_path.stat().st_size / (1024 * 1024)

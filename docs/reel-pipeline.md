@@ -78,6 +78,74 @@ SCRIPTED → RETENTION → NATURALIZER → APPROVED → VISUAL-DIRECTED → VISU
 
 ---
 
+## Post-Publish Revision
+
+When a published reel needs changes (visual upgrade, VO tweak, CTA update), append a Revision section to the reel's `.md` file. Never touch the original content.
+
+**Revision status flow:**
+```
+REVISION-DRAFTED → REVISION-VISUAL-APPROVED → REVISION-RENDERED → REVISION-PUBLISHED
+```
+
+Skips SCRIPTED/RETENTION/NATURALIZER — those already ran on the original. Spend gates still apply at REVISION-VISUAL-APPROVED (Kling, VO calls).
+
+**Revision section format** (append to bottom of `reel_NN.md`):
+
+```markdown
+---
+
+## Revision N — YYYY-MM-DD
+
+**Reason:** [why]
+**Status:** REVISION-DRAFTED
+**Re-published:** [date, once live]
+
+### Changes
+| Type | Description |
+|---|---|
+| VO | ... |
+| Visual | ... |
+
+### Render Recipe
+\`\`\`bash
+python scripts/pipeline/render.py \
+  --blueprint output/[slug]/[lang]/reels/reel_NN/_revN_blueprint.md \
+  --audio-dir output/[slug]/[lang]/reels/reel_NN/audio \
+  --assets-dir assets/[slug] \
+  --output output/[slug]/[lang]/reels/reel_NN/reel_NN_vN_raw.mp4 \
+  --reel N --render \
+  [--clip-override "S:path/to/clip.mp4"]
+
+python scripts/pipeline/subtitle.py \
+  --video reel_NN_vN_raw.mp4 \
+  --transcript audio/transcript.json \
+  --layers both [--highlight-color "#C9A84C"]
+
+ffmpeg -y -i reel_NN_vN_raw_subtitled.mp4 \
+  -filter_complex "[0:v]setpts=PTS/SPEED[v];[0:a]atempo=SPEED[a]" \
+  -map "[v]" -map "[a]" -c:v libx264 -pix_fmt yuv420p -c:a aac \
+  reel_NN_vN_raw_final.mp4
+\`\`\`
+
+### Blueprint
+
+[full blueprint — scenes, VO/TTS, VEP — same format as original]
+
+Use `[TEXT_POSITION: center|bottom|top]` on TEXT_CARD scenes to set y_ratio without post-render patching.
+Use `[FREEZE_LAST_FRAME: yes]` on a scene to hold the last frame of the previous clip (no Ken Burns).
+Use `{#RRGGBB}text{/#}` inline in stacked text card lines for per-span color.
+```
+
+**Workflow:**
+1. Append revision section to `reel_NN.md` with `Status: REVISION-DRAFTED`
+2. Extract the blueprint block to a temp file `_revN_blueprint.md` for rendering
+3. Run render → subtitle → speed commands from the Render Recipe
+4. Delete the temp blueprint file after render (it lives in the revision section)
+5. Set `Status: REVISION-RENDERED` once output is confirmed
+6. Post; set `Status: REVISION-PUBLISHED` and fill in Re-published date
+
+---
+
 ## .env (required secrets)
 
 ```

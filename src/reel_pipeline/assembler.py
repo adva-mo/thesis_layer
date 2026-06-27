@@ -316,14 +316,17 @@ def assemble_reel(
             else:
                 _yr = 0.55 if is_hook else 0.75
             print(f"    Text:     {scene.text_card!r} → screen_text.json")
-            screen_text_entries.append({
+            _entry: dict = {
                 "text": scene.text_card,
                 "start": round(scene_start_s, 4),
                 "end": round(scene_start_s + duration, 4),
                 "y_ratio": _yr,
                 "font_size": _fs,
                 "suppress_sub": True,
-            })
+            }
+            if scene.text_highlight:
+                _entry["highlight_words"] = scene.text_highlight
+            screen_text_entries.append(_entry)
 
         final_clip = work_dir / f"scene_{scene.index:02d}_final.mp4"
         base_clip.rename(final_clip)
@@ -364,17 +367,21 @@ def assemble_reel(
         )
 
     # ── Concatenate audio segments ────────────────────────────────
+    # Decode to PCM via filter_complex aconcat — avoids MP3 encoder-delay
+    # artifacts (clicks/pops) that appear at segment boundaries when using
+    # the concat demuxer with -c copy on MP3 files.
     print("  Concatenating audio segments...")
-    audio_list = work_dir / "concat_audio.txt"
-    audio_list.write_text(
-        "\n".join(f"file '{p.resolve()}'" for p in audio_files),
-        encoding="utf-8",
-    )
-    audio_only = work_dir / "audio_only.mp3"
+    n = len(audio_files)
+    inputs = []
+    for p in audio_files:
+        inputs += ["-i", str(p)]
+    fc = "".join(f"[{i}:a]" for i in range(n)) + f"concat=n={n}:v=0:a=1[out]"
+    audio_only = work_dir / "audio_only.wav"
     _ffmpeg(
-        "-f", "concat", "-safe", "0",
-        "-i", str(audio_list),
-        "-c", "copy",
+        *inputs,
+        "-filter_complex", fc,
+        "-map", "[out]",
+        "-c:a", "pcm_s16le",
         str(audio_only),
         label="concat audio",
     )
@@ -384,7 +391,7 @@ def assemble_reel(
         pad_s = leading_pad_ms / 1000.0
         print(f"  Padding start by {leading_pad_ms}ms...")
         padded_video = work_dir / "video_only_lead_padded.mp4"
-        padded_audio = work_dir / "audio_only_lead_padded.mp3"
+        padded_audio = work_dir / "audio_only_lead_padded.wav"
         _ffmpeg(
             "-i", str(video_only),
             "-vf", f"tpad=start_mode=clone:start_duration={pad_s}",
@@ -395,7 +402,7 @@ def assemble_reel(
         _ffmpeg(
             "-i", str(audio_only),
             "-af", f"adelay={leading_pad_ms}:all=1",
-            "-c:a", "libmp3lame", "-q:a", "2",
+            "-c:a", "pcm_s16le",
             str(padded_audio),
             label="pad audio start",
         )
@@ -407,7 +414,7 @@ def assemble_reel(
         pad_s = trailing_pad_ms / 1000.0
         print(f"  Padding end by {trailing_pad_ms}ms...")
         padded_video = work_dir / "video_only_padded.mp4"
-        padded_audio = work_dir / "audio_only_padded.mp3"
+        padded_audio = work_dir / "audio_only_padded.wav"
         _ffmpeg(
             "-i", str(video_only),
             "-vf", f"tpad=stop_mode=clone:stop_duration={pad_s}",
@@ -418,7 +425,7 @@ def assemble_reel(
         _ffmpeg(
             "-i", str(audio_only),
             "-af", f"apad=pad_dur={pad_s}",
-            "-c:a", "libmp3lame", "-q:a", "2",
+            "-c:a", "pcm_s16le",
             str(padded_audio),
             label="pad audio",
         )

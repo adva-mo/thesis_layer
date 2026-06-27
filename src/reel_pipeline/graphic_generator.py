@@ -73,6 +73,28 @@ def detect_type(visual: str) -> str:
 
 # ── RTL helper ────────────────────────────────────────────────────
 
+_SPAN_RE = re.compile(r'\{#([0-9A-Fa-f]{6})\}(.+?)\{/#\}', re.DOTALL)
+
+def _strip_spans(text: str) -> str:
+    """Remove {#RRGGBB}...{/#} markup, returning plain text for measurement."""
+    return _SPAN_RE.sub(r'\2', text)
+
+def _parse_spans(text: str, default_color: tuple) -> list[tuple[str, tuple]]:
+    """Parse {#RRGGBB}text{/#} markup into (fragment, color) tuples."""
+    if not _SPAN_RE.search(text):
+        return [(text, default_color)]
+    spans, last = [], 0
+    for m in _SPAN_RE.finditer(text):
+        if m.start() > last:
+            spans.append((text[last:m.start()], default_color))
+        h = m.group(1)
+        color = (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16), 255)
+        spans.append((m.group(2), color))
+        last = m.end()
+    if last < len(text):
+        spans.append((text[last:], default_color))
+    return spans
+
 def _visual(text: str) -> str:
     try:
         from bidi.algorithm import get_display
@@ -192,7 +214,7 @@ def render_stacked_text_card(lines: list[str], font_path: Path,
         font = ImageFont.truetype(str(font_path), font_size)
         widths = []
         for l in lines:
-            bb = draw.textbbox((0, 0), _visual(l.strip()), font=font)
+            bb = draw.textbbox((0, 0), _visual(_strip_spans(l).strip()), font=font)
             widths.append(bb[2] - bb[0])
         if max(widths, default=0) <= STACKED_MAX_USABLE_W or font_size <= STACKED_FONT_MIN:
             break
@@ -208,11 +230,31 @@ def render_stacked_text_card(lines: list[str], font_path: Path,
     for i in range(STACKED_LINES):
         if i >= len(lines):
             break
-        visual_text = _visual(lines[i].strip())
-        bbox = draw.textbbox((0, 0), visual_text, font=font)
-        tx = (width - (bbox[2] - bbox[0])) // 2 - bbox[0]
-        ty = grid_top + i * (line_h + line_gap) - bbox[1]
-        draw.text((tx, ty), visual_text, font=font, fill=TEXT_WHITE)
+        ty_base = grid_top + i * (line_h + line_gap)
+        spans = _parse_spans(lines[i], TEXT_WHITE)
+
+        if len(spans) == 1:
+            visual_text = _visual(spans[0][0].strip())
+            bbox = draw.textbbox((0, 0), visual_text, font=font)
+            tx = (width - (bbox[2] - bbox[0])) // 2 - bbox[0]
+            draw.text((tx, ty_base - bbox[1]), visual_text, font=font, fill=spans[0][1])
+        else:
+            # Multi-color spans: reverse logical order for RTL visual placement
+            # (last logical span appears leftmost on screen in RTL).
+            # Preserve inner whitespace — bidi moves trailing spaces to visual-start,
+            # which creates the gap between spans. Stripping removes that gap.
+            visual_spans = [(s, c) for s, c in reversed(spans) if s.strip()]
+            total_w = sum(
+                draw.textbbox((0, 0), _visual(s), font=font)[2] -
+                draw.textbbox((0, 0), _visual(s), font=font)[0]
+                for s, _ in visual_spans
+            )
+            x = (width - total_w) // 2
+            for span_text, span_color in visual_spans:
+                vis = _visual(span_text)
+                bbox = draw.textbbox((0, 0), vis, font=font)
+                draw.text((x - bbox[0], ty_base - bbox[1]), vis, font=font, fill=span_color)
+                x += bbox[2] - bbox[0]
 
     return img
 

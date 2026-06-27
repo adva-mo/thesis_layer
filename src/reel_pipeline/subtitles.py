@@ -18,7 +18,7 @@ from typing import Literal, Optional
 from PIL import Image, ImageDraw, ImageFont
 
 
-from .text_overlay import FONT_PATH, TEXT_Y_RATIO, BAR_PADDING_X, BAR_PADDING_Y, BAR_RADIUS, SHADOW_OFFSET, ScreenTextSpan, _draw_halo, _draw_shadow
+from .text_overlay import FONT_PATH, BAR_PADDING_X, BAR_PADDING_Y, BAR_RADIUS, SHADOW_OFFSET, ScreenTextSpan, _draw_halo, _draw_shadow
 
 # ── Defaults ──────────────────────────────────────────────────────
 
@@ -28,7 +28,8 @@ DEFAULT_MAX_DUR     = 4.5
 DEFAULT_PAUSE_THR   = 0.40   # seconds between words to trigger phrase split
 DEFAULT_MAX_CHARS   = 35     # total chars (incl. spaces) per phrase — prevents wide overflow
 
-FONT_SIZE_SUBTITLE  = 86
+FONT_SIZE_SUBTITLE  = 68
+SUBTITLE_Y_RATIO    = 0.88   # subtitle bottom anchor; text cards use TEXT_Y_RATIO=0.75 (higher, dominant)
 
 HIGHLIGHT_COLOR     = (255, 255, 255, 255)   # active word — full white
 DIM_COLOR           = (210, 210, 210, 255)   # inactive words — slightly dimmed
@@ -159,7 +160,7 @@ def _render_lines(
     bar_w = max(total_ws, default=0) + BAR_PADDING_X * 2
     bar_h = line_h * reserved + LINE_GAP * (reserved - 1) + BAR_PADDING_Y * 2
     bar_x = (width - bar_w) // 2
-    bar_y = int(height * TEXT_Y_RATIO) - bar_h
+    bar_y = int(height * SUBTITLE_Y_RATIO) - bar_h
     top_offset = reserved - n_lines  # push lines into the bottom slots
 
     for li, (met, total_w, vis, script) in enumerate(zip(metrics, total_ws, vis_lines, line_scripts)):
@@ -301,7 +302,7 @@ def _render_uniform(text: str, color, font, width: int, height: int) -> Image.Im
     bar_w = text_w + BAR_PADDING_X * 2
     bar_h = line_h * MIN_RESERVED_LINES + LINE_GAP * (MIN_RESERVED_LINES - 1) + BAR_PADDING_Y * 2
     bar_x = (width - bar_w) // 2
-    bar_y = int(height * TEXT_Y_RATIO) - bar_h
+    bar_y = int(height * SUBTITLE_Y_RATIO) - bar_h
 
     draw_x = bar_x + BAR_PADDING_X - bbox[0]
     draw_y = bar_y + BAR_PADDING_Y + (MIN_RESERVED_LINES - 1) * (line_h + LINE_GAP)
@@ -377,7 +378,7 @@ def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, heigh
     bar_w = total_w + BAR_PADDING_X * 2
     bar_h = line_h * MIN_RESERVED_LINES + LINE_GAP * (MIN_RESERVED_LINES - 1) + BAR_PADDING_Y * 2
     bar_x = (width - bar_w) // 2
-    bar_y = int(height * TEXT_Y_RATIO) - bar_h
+    bar_y = int(height * SUBTITLE_Y_RATIO) - bar_h
 
     x = bar_x + BAR_PADDING_X
     # Bottom-anchored: single line sits in the last slot of the reserved block.
@@ -651,7 +652,12 @@ def apply_subtitles(
     leading_pad_s: float = 0.0,
     screen_text_spans: list[ScreenTextSpan] | None = None,
     layers: str = "both",
+    highlight_color: tuple = HIGHLIGHT_COLOR,
+    dim_color: tuple = DIM_COLOR,
 ) -> Path:
+    _g = globals()
+    _orig_h, _orig_d = _g['HIGHLIGHT_COLOR'], _g['DIM_COLOR']
+    _g['HIGHLIGHT_COLOR'], _g['DIM_COLOR'] = highlight_color, dim_color
     from .fal_wizper import load_transcript
 
     apply_subs = layers in ("subs", "both")
@@ -707,10 +713,13 @@ def apply_subtitles(
 
     # Subtract the leading pad so timestamps stay locked to the VO audio.
     # time_offset = -P makes the frame→transcript lookup: t = frame_time - P.
-    return _apply_timed_overlays(
-        video_path, spans, output_path,
-        time_offset=-leading_pad_s,
-        screen_text_spans=screen_text_spans,
-        apply_subs=apply_subs,
-        apply_screen=apply_screen,
-    )
+    try:
+        return _apply_timed_overlays(
+            video_path, spans, output_path,
+            time_offset=-leading_pad_s,
+            screen_text_spans=screen_text_spans,
+            apply_subs=apply_subs,
+            apply_screen=apply_screen,
+        )
+    finally:
+        _g['HIGHLIGHT_COLOR'], _g['DIM_COLOR'] = _orig_h, _orig_d

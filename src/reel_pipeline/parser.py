@@ -51,6 +51,7 @@ class Scene:
     text_timing: Optional[list[tuple[str, float, float, str | None, int | None]]] = None  # [TEXT_TIMING: text @ s-e [top|center|bottom] [size:N] | ...]
     plain_bg: bool = False              # [PLAIN_BG: yes] — skip blur bg for generated scenes
     freeze_last_frame: bool = False     # [FREEZE_LAST_FRAME: yes] — hold last frame of prev scene
+    text_highlight: Optional[dict] = None  # [TEXT_HIGHLIGHT: WORD:#RRGGBB,...] — per-word colors for TEXT_CARD overlay
 
 
 def _parse_timestamp(ts: str) -> tuple[float, float]:
@@ -196,22 +197,28 @@ def parse_reel_file(
     # skip_asset_check — only for non-visual pipeline steps (e.g. align.py) that
     # need scene metadata but do not render video. render.py, kling_batch.py, and
     # subtitle.py must never pass True — the asset check is their production gate.
+    content_override: Optional[str] = None,
+    # content_override — pre-extracted section content (e.g. from --revision N in render.py).
+    # When set, skips the reel-splitting step and uses this string directly as the reel body.
 ) -> list[Scene]:
-    content = md_path.read_text(encoding="utf-8")
+    if content_override is not None:
+        full_reel_body = content_override
+    else:
+        content = md_path.read_text(encoding="utf-8")
 
-    reel_splits = re.split(r"^## (Reel \d+ — .+?)$", content, flags=re.MULTILINE)
+        reel_splits = re.split(r"^## (Reel \d+ — .+?)$", content, flags=re.MULTILINE)
 
-    target_heading_idx = None
-    for i in range(1, len(reel_splits), 2):
-        num_match = re.match(r"Reel (\d+)", reel_splits[i])
-        if num_match and int(num_match.group(1)) == reel_number:
-            target_heading_idx = i
-            break
+        target_heading_idx = None
+        for i in range(1, len(reel_splits), 2):
+            num_match = re.match(r"Reel (\d+)", reel_splits[i])
+            if num_match and int(num_match.group(1)) == reel_number:
+                target_heading_idx = i
+                break
 
-    if target_heading_idx is None:
-        raise ValueError(f"Reel {reel_number} not found in {md_path}")
+        if target_heading_idx is None:
+            raise ValueError(f"Reel {reel_number} not found in {md_path}")
 
-    full_reel_body = reel_splits[target_heading_idx + 1]
+        full_reel_body = reel_splits[target_heading_idx + 1]
     script_body = re.split(r"^### Caption", full_reel_body, maxsplit=1, flags=re.MULTILINE)[0]
 
     source_mapping, render_mapping, critical_keys = _parse_vep_table(full_reel_body, assets_dir, repo_root)
@@ -259,6 +266,16 @@ def parse_reel_file(
 
         tp_match = re.search(r"\[TEXT_POSITION:\s*(\w+)\s*\]", block)
         text_position = tp_match.group(1).strip().lower() if tp_match else None
+
+        th_match = re.search(r"\[TEXT_HIGHLIGHT:\s*(.*?)\]", block)
+        text_highlight = None
+        if th_match:
+            text_highlight = {}
+            for pair in th_match.group(1).split(","):
+                pair = pair.strip()
+                if ":" in pair:
+                    word, color = pair.split(":", 1)
+                    text_highlight[word.strip()] = color.strip()
 
         fs_match = re.search(r"\[FONT_SIZE:\s*(\d+)\s*\]", block)
         text_font_size = int(fs_match.group(1)) if fs_match else None
@@ -399,6 +416,7 @@ def parse_reel_file(
             text_timing=text_timing or None,
             plain_bg=plain_bg,
             freeze_last_frame=freeze_last_frame,
+            text_highlight=text_highlight,
         ))
 
     for s in scenes:

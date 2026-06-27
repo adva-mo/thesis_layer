@@ -20,6 +20,7 @@ Usage:
 
 import argparse
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -72,11 +73,11 @@ def print_dry_run(scenes, audio_dir, output_path, clip_overrides):
             clip_dur = get_clip_duration(scene.asset_path)
             action = "stretch" if clip_dur < dur else "trim"
             vsource = f"video: {scene.asset_path.name} ({clip_dur:.1f}s→{dur:.1f}s, {action})"
+        elif scene.visual_type == "kling":
+            asset_name = scene.asset_path.name if scene.asset_path else "(no source asset)"
+            vsource = f"KLING FALLBACK (no clip) — {asset_name}"
         elif scene.asset_type == "image":
-            if scene.visual_type == "kling":
-                vsource = f"KLING FALLBACK (no clip) — {scene.asset_path.name}"
-            else:  # static image, or legacy blueprint (visual_type=None) — both render as Ken Burns
-                vsource = f"image (Ken Burns): {scene.asset_path.name}"
+            vsource = f"image (Ken Burns): {scene.asset_path.name}"
         elif scene.freeze_last_frame:
             vsource = "freeze last frame"
         else:
@@ -110,6 +111,8 @@ def main():
     parser.add_argument("--font",          default=str(FONT_PATH), help="Path to .ttf font for Hebrew text")
     parser.add_argument("--clip-override", action="append", default=[], metavar="SCENE:PATH",
                         help="Override visual for scene N with a pre-rendered clip, e.g. 2:reels/reel_01/scene02_timeline.mp4")
+    parser.add_argument("--revision", type=int, default=None,
+                        help="Render revision N from the reel file's '## Revision N' section (no temp file needed)")
     parser.add_argument("--leading-pad-ms", type=int, default=0, metavar="MS",
                         help="Freeze first frame + pad audio by N ms at start of video")
     parser.add_argument("--trailing-pad-ms", type=int, default=300, metavar="MS",
@@ -134,7 +137,25 @@ def main():
     if not font_path.exists():
         print(f"Warning: font not found at {font_path} — text overlays may fail")
 
-    scenes = parse_reel_file(blueprint, reel_number=args.reel, assets_dir=assets_dir, repo_root=REPO_ROOT)
+    content_override = None
+    if args.revision is not None:
+        full_text = blueprint.read_text(encoding="utf-8")
+        rev_match = re.search(rf"^## Revision {args.revision}[ —–-]", full_text, re.MULTILINE)
+        if not rev_match:
+            print(f"Error: Revision {args.revision} not found in {blueprint}")
+            sys.exit(1)
+        rev_start = rev_match.start()
+        next_h2 = re.search(r"^## ", full_text[rev_start + 1:], re.MULTILINE)
+        rev_end = rev_start + 1 + next_h2.start() if next_h2 else len(full_text)
+        rev_section = full_text[rev_start:rev_end]
+        bp_match = re.search(r"^### Blueprint", rev_section, re.MULTILINE)
+        if not bp_match:
+            print(f"Error: No '### Blueprint' subsection found in Revision {args.revision} of {blueprint}")
+            sys.exit(1)
+        content_override = rev_section[bp_match.start():]
+
+    scenes = parse_reel_file(blueprint, reel_number=args.reel, assets_dir=assets_dir, repo_root=REPO_ROOT,
+                             content_override=content_override)
 
     if not scenes:
         print(f"No scenes found for Reel {args.reel}.")
