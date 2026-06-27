@@ -75,15 +75,18 @@ def validate_vdo(vdo: dict, reel_visual_types: "set[str]") -> None:
     for vtype in reel_visual_types:
         if vtype not in VISUAL_DECISION_SCHEMA:
             continue
-        schema_keys = set(VISUAL_DECISION_SCHEMA[vtype].keys())
+        type_schema = VISUAL_DECISION_SCHEMA[vtype]
+        unlocked_keys = {k for k, s in type_schema.items() if not s["locked"]}
+        if not unlocked_keys:
+            continue  # type has only locked slots — no agent decisions required
         vdo_entry = vdo.get(vtype)
         if vdo_entry is None:
             raise ValueError(f"VDO missing entry for schema-covered visual type '{vtype}'")
         vdo_keys = set(vdo_entry.keys())
-        extra = vdo_keys - schema_keys
+        extra = vdo_keys - set(type_schema.keys())
         if extra:
             raise ValueError(f"VDO has extra keys for '{vtype}': {sorted(extra)}")
-        missing = schema_keys - vdo_keys
+        missing = unlocked_keys - vdo_keys
         if missing:
             raise ValueError(f"VDO missing keys for '{vtype}': {sorted(missing)}")
         for key, val in vdo_entry.items():

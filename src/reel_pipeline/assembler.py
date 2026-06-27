@@ -183,7 +183,11 @@ def assemble_reel(
     # ── Load and validate visual-direction.json (VDO) ────────────────────────
     vdo_path = output_path.parent / "visual-direction.json"
     vdo: Optional[dict] = None
-    schema_covered = {t for t in reel_generated_types if t in VISUAL_DECISION_SCHEMA}
+    schema_covered = {
+        t for t in reel_generated_types
+        if t in VISUAL_DECISION_SCHEMA
+        and any(not VISUAL_DECISION_SCHEMA[t][k]["locked"] for k in VISUAL_DECISION_SCHEMA[t])
+    }
 
     if vdo_path.exists():
         vdo = json.loads(vdo_path.read_text(encoding="utf-8"))
