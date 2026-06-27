@@ -109,7 +109,8 @@ Skips SCRIPTED/RETENTION/NATURALIZER — those already ran on the original. Spen
 ### Render Recipe
 \`\`\`bash
 python scripts/pipeline/render.py \
-  --blueprint output/[slug]/[lang]/reels/reel_NN/_revN_blueprint.md \
+  --blueprint output/[slug]/[lang]/reels/reel_NN/reel_NN.md \
+  --revision N \
   --audio-dir output/[slug]/[lang]/reels/reel_NN/audio \
   --assets-dir assets/[slug] \
   --output output/[slug]/[lang]/reels/reel_NN/reel_NN_vN_raw.mp4 \
@@ -138,11 +139,9 @@ Use `{#RRGGBB}text{/#}` inline in stacked text card lines for per-span color.
 
 **Workflow:**
 1. Append revision section to `reel_NN.md` with `Status: REVISION-DRAFTED`
-2. Extract the blueprint block to a temp file `_revN_blueprint.md` for rendering
-3. Run render → subtitle → speed commands from the Render Recipe
-4. Delete the temp blueprint file after render (it lives in the revision section)
-5. Set `Status: REVISION-RENDERED` once output is confirmed
-6. Post; set `Status: REVISION-PUBLISHED` and fill in Re-published date
+2. Run render → subtitle → speed commands from the Render Recipe (`--revision N` reads the blueprint section in memory — no temp file)
+3. Set `Status: REVISION-RENDERED` once output is confirmed
+4. Post; set `Status: REVISION-PUBLISHED` and fill in Re-published date
 
 ---
 
