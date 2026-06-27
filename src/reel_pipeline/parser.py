@@ -51,7 +51,6 @@ class Scene:
     text_timing: Optional[list[tuple[str, float, float, str | None, int | None]]] = None  # [TEXT_TIMING: text @ s-e [top|center|bottom] [size:N] | ...]
     plain_bg: bool = False              # [PLAIN_BG: yes] — skip blur bg for generated scenes
     freeze_last_frame: bool = False     # [FREEZE_LAST_FRAME: yes] — hold last frame of prev scene
-    text_highlight: Optional[dict] = None  # [TEXT_HIGHLIGHT: WORD:#RRGGBB,...] — per-word colors for TEXT_CARD overlay
 
 
 def _parse_timestamp(ts: str) -> tuple[float, float]:
@@ -267,16 +266,6 @@ def parse_reel_file(
         tp_match = re.search(r"\[TEXT_POSITION:\s*(\w+)\s*\]", block)
         text_position = tp_match.group(1).strip().lower() if tp_match else None
 
-        th_match = re.search(r"\[TEXT_HIGHLIGHT:\s*(.*?)\]", block)
-        text_highlight = None
-        if th_match:
-            text_highlight = {}
-            for pair in th_match.group(1).split(","):
-                pair = pair.strip()
-                if ":" in pair:
-                    word, color = pair.split(":", 1)
-                    text_highlight[word.strip()] = color.strip()
-
         fs_match = re.search(r"\[FONT_SIZE:\s*(\d+)\s*\]", block)
         text_font_size = int(fs_match.group(1)) if fs_match else None
 
@@ -416,7 +405,6 @@ def parse_reel_file(
             text_timing=text_timing or None,
             plain_bg=plain_bg,
             freeze_last_frame=freeze_last_frame,
-            text_highlight=text_highlight,
         ))
 
     for s in scenes:

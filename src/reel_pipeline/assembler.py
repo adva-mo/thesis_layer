@@ -310,8 +310,6 @@ def assemble_reel(
                 "font_size": _fs,
                 "suppress_sub": True,
             }
-            if scene.text_highlight:
-                _entry["highlight_words"] = scene.text_highlight
             screen_text_entries.append(_entry)
 
         final_clip = work_dir / f"scene_{scene.index:02d}_final.mp4"

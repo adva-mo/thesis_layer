@@ -14,7 +14,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-from .render_utils import visual_hebrew as _visual
+from .render_utils import visual_hebrew as _visual, strip_spans as _strip_spans, parse_spans as _parse_spans
 from .text_overlay import FONT_PATH
 
 # ── Visual constants ──────────────────────────────────────────────
@@ -73,27 +73,6 @@ def detect_type(visual: str) -> str:
 
 
 # ── RTL helper ────────────────────────────────────────────────────
-
-_SPAN_RE = re.compile(r'\{#([0-9A-Fa-f]{6})\}(.+?)\{/#\}', re.DOTALL)
-
-def _strip_spans(text: str) -> str:
-    """Remove {#RRGGBB}...{/#} markup, returning plain text for measurement."""
-    return _SPAN_RE.sub(r'\2', text)
-
-def _parse_spans(text: str, default_color: tuple) -> list[tuple[str, tuple]]:
-    """Parse {#RRGGBB}text{/#} markup into (fragment, color) tuples."""
-    if not _SPAN_RE.search(text):
-        return [(text, default_color)]
-    spans, last = [], 0
-    for m in _SPAN_RE.finditer(text):
-        if m.start() > last:
-            spans.append((text[last:m.start()], default_color))
-        h = m.group(1)
-        color = (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16), 255)
-        spans.append((m.group(2), color))
-        last = m.end()
-    if last < len(text):
-        spans.append((text[last:], default_color))
     return spans
 
 # ── Renderers ─────────────────────────────────────────────────────

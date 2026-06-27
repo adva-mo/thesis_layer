@@ -10,7 +10,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-from .render_utils import visual_hebrew as _visual_hebrew, Y_RATIO_CENTER
+from .render_utils import visual_hebrew as _visual_hebrew, Y_RATIO_CENTER, strip_spans, parse_span_colors
 
 
 FONT_PATH = Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf")
@@ -66,17 +66,20 @@ def _render_text_overlay(
     font_size: int,
     y_ratio: float = TEXT_Y_RATIO,
     text_color: tuple = TEXT_COLOR,
-    highlight_words: dict | None = None,
 ) -> Image.Image:
     """Return a transparent RGBA image with the text rendered.
 
-    Literal \\n in text forces a hard line break. Long lines are word-wrapped
-    automatically to fit within the canvas (up to 3 lines). Font size shrinks
-    in steps of 4 only if 3 wrapped lines still overflow.
+    Supports inline {#RRGGBB}word{/#} color spans. Literal \\n forces a hard
+    line break. Long lines are word-wrapped automatically (up to 3 lines).
+    Font size shrinks in steps of 4 only if 3 wrapped lines still overflow.
     """
     MAX_LINES = 3
     MIN_FONT  = 40
     max_usable = width - BAR_PADDING_X * 2
+
+    # Extract per-word colors from inline markup, then strip for layout
+    word_colors = parse_span_colors(text)
+    plain = strip_spans(text) if word_colors else text
 
     tmp = Image.new("RGBA", (1, 1))
     draw_tmp = ImageDraw.Draw(tmp)
@@ -110,7 +113,7 @@ def _render_text_overlay(
         return result
 
     # Split on both literal \n (blueprint escape) and actual newline (captured by parser)
-    groups = [g.strip() for g in re.split(r'\\n|\n', text) if g.strip()]
+    groups = [g.strip() for g in re.split(r'\\n|\n', plain) if g.strip()]
 
     font = ImageFont.truetype(str(font_path), font_size)
     wrapped = _wrap_groups(groups, font)
@@ -138,12 +141,12 @@ def _render_text_overlay(
         _draw_halo(draw, (text_x, text_y), visual, font, SHADOW_COLOR, SHADOW_OFFSET)
         draw.text((text_x, text_y), visual, font=font, fill=text_color)
 
-    # Overdraw highlighted words in specified colors
-    if highlight_words:
+    # Overdraw words that carry inline color spans
+    if word_colors:
         for i, (visual, tw) in enumerate(zip(visuals, widths)):
             text_x = (width - tw) // 2
             text_y = block_top + BAR_PADDING_Y + i * (line_h + line_gap)
-            for word, color in highlight_words.items():
+            for word, color in word_colors.items():
                 idx = visual.find(word)
                 if idx < 0:
                     continue
@@ -172,9 +175,6 @@ def build_screen_text_spans(
     """
     spans = []
     for entry in entries:
-        hw_raw = entry.get("highlight_words", {})
-        hw = {word: (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16), 255)
-              for word, h in ((w, c.lstrip("#")) for w, c in hw_raw.items())} if hw_raw else None
         img = _render_text_overlay(
             entry["text"],
             width,
@@ -183,7 +183,6 @@ def build_screen_text_spans(
             entry.get("font_size", default_font_size),
             y_ratio=entry.get("y_ratio", TEXT_Y_RATIO),
             text_color=text_color,
-            highlight_words=hw,
         )
         spans.append(ScreenTextSpan(img, entry["start"], entry["end"],
                                     suppress_sub=entry.get("suppress_sub", False)))
