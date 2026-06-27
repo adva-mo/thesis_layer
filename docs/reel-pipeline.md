@@ -826,14 +826,60 @@ python3 scripts/pipeline/subtitle.py \
 
 ---
 
+## Visual Decision Layer
+
+The visual director agent produces one `visual-direction.json` sidecar per reel. The assembler loads it before rendering and validates it against the schema in `config/brand-settings.json`. Any violation is a hard error — no silent fallback for schema-covered types.
+
+**File location:** `output/[slug]/[lang]/reels/reel_NN/visual-direction.json`
+
+### Agent contract
+
+Include only visual types that are **both** present in the reel **and** defined in `visual_decision_schema`. Types outside the schema are not included — their renderers use hardcoded constants.
+
+For each included type, provide **exactly** the keys defined in its schema entry — no extra keys, no omitted keys.
+
+| Slot definition | Agent obligation |
+|---|---|
+| `locked: true` | Optional in VDO; if included, value must match the schema value exactly |
+| `locked: false, value: null` | Required; choose any name from `color_system` — null is not permitted |
+| `locked: false, value: "token"` | Required; keep the suggested token or choose another from `color_system` |
+
+**Alpha is schema-controlled, not VDO-controlled.** For slots with an `"alpha"` field in the schema (e.g. timeline `box_fill`, `box_border`, `arrow`), the VDO supplies only the palette name (hue). The alpha in the schema is applied at render time, preserving the intended transparency regardless of which color the agent chooses.
+
+### Current schema coverage
+
+See `config/brand-settings.json` → `visual_decision_schema` for the authoritative key list. Types currently covered: `text_card`, `stacked_text_card`, `timeline`, `cta_card`.
+
+### Example
+
+```json
+{
+  "stacked_text_card": {
+    "background": "slate",
+    "text_color": "platinum"
+  },
+  "timeline": {
+    "text_color": "platinum",
+    "box_fill": "slate",
+    "box_border": "platinum",
+    "arrow": "platinum"
+  }
+}
+```
+
+*(cta_card not present in this reel — not included. `background` for both types is locked in the schema — the agent omits it from the VDO; the assembler resolves it from the schema directly.)*
+
+---
+
 ## src/reel_pipeline/ Module Reference
 
 | File | Purpose |
 |------|---------|
+| `brand.py` | **Brand constants loader** — reads `config/brand-settings.json`; exposes named RGBA palette constants, subtitle/screen-text colors, `resolve_visual()` (slot resolution with alpha support), `validate_vdo()` (hard-error on contract violations) |
 | `motion.py` | **Motion Language System** — single source of truth for all motion constants: easing functions, `CARD_ENTRY` animation timing, `MOTION_VOCAB` (9 tokens), `BEAT_MOTION_MAP`, `KEN_BURNS_PARAMS`, `resolve_motion_style()`, `get_transition()` |
-| `assembler.py` | Core reel assembly — combines clips + audio into MP4; routes image scenes to Ken Burns, Kling fallbacks to blur-fill composite, optional xfade transitions |
+| `assembler.py` | Core reel assembly — combines clips + audio into MP4; loads and validates `visual-direction.json`; routes image scenes to Ken Burns, Kling fallbacks to blur-fill composite, optional xfade transitions |
 | `parser.py` | Parses reel `.md` blueprints into `Scene` objects; handles `[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`, `[BEAT:]`, `[PHOTO_TYPE:]`, `[TEXT_CARD:]`, VEP table; legacy blueprints without `[VISUAL_TYPE:]` emit a deprecation warning and fall back to asset-type inference |
-| `graphic_generator.py` | PIL renderers for generated scenes (timeline, text_card, cta_card) |
+| `graphic_generator.py` | PIL renderers for generated scenes (timeline, text_card, cta_card); resolves colors through `brand.resolve_visual()` when a VDO is present |
 | `subtitles.py` | Subtitle grouping, BiDi rendering, PIL frame compositing |
 | `text_overlay.py` | `[SCREEN:]` text overlay (constants shared with subtitles) |
 | `local_clip.py` | Image→clip (Ken Burns + blur-fill composite via PIL AFFINE), clip resize, audio duration |
