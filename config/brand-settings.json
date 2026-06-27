@@ -1,0 +1,39 @@
+{
+  "brand": {
+    "name": "Thesis Layer",
+    "positioning": "Investment Intelligence & Research Engine"
+  },
+  "color_system": {
+    "charcoal": "#0B0F14",
+    "slate": "#121821",
+    "platinum": "#F5F7FA",
+    "signal_blue": "#4DA3FF",
+    "data_mint": "#2ED3B7",
+    "investment_gold": "#C9A84C"
+  },
+  "reels": {
+    "hooks": {
+      "text_card": {
+        "background": "charcoal"
+      }
+    },
+    "subtitles": {
+      "base_color": "platinum",
+      "active_word_color": "investment_gold"
+    },
+    "screen_text": {
+      "base_color": "platinum",
+      "highlight_color": "investment_gold"
+    }
+  },
+  "carousels": {
+    "background": "platinum"
+  },
+  "typography": {
+    "primary_font": null,
+    "secondary_font": null,
+    "reels": {
+      "subtitle_font": "Arial Bold"
+    }
+  }
+}

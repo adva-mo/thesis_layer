@@ -18,6 +18,7 @@ from typing import Literal, Optional
 from PIL import Image, ImageDraw, ImageFont
 
 
+from .brand import SUBTITLE_ACTIVE_COLOR, SUBTITLE_BASE_COLOR
 from .render_utils import visual_hebrew as _visual_hebrew, Y_RATIO_SUB
 from .text_overlay import FONT_PATH, BAR_PADDING_X, BAR_PADDING_Y, BAR_RADIUS, SHADOW_OFFSET, ScreenTextSpan, _draw_halo, _draw_shadow
 
@@ -32,8 +33,8 @@ DEFAULT_MAX_CHARS   = 35     # total chars (incl. spaces) per phrase — prevent
 FONT_SIZE_SUBTITLE  = 68
 SUBTITLE_Y_RATIO    = Y_RATIO_SUB   # subtitle bottom anchor; text cards use TEXT_Y_RATIO=0.55 (higher, dominant)
 
-HIGHLIGHT_COLOR     = (255, 255, 255, 255)   # active word — full white
-DIM_COLOR           = (210, 210, 210, 255)   # inactive words — slightly dimmed
+HIGHLIGHT_COLOR     = SUBTITLE_ACTIVE_COLOR   # active word — investment_gold
+DIM_COLOR           = SUBTITLE_BASE_COLOR     # inactive words — platinum
 SHADOW_COLOR        = (0, 0, 0, 200)         # drop shadow color
 SHADOW_DROP_OFFSET  = 3                      # directional drop shadow — all words
 

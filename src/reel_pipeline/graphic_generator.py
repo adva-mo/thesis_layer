@@ -14,12 +14,13 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+from .brand import HOOK_BG_COLOR
 from .render_utils import visual_hebrew as _visual, strip_spans as _strip_spans, parse_spans as _parse_spans
 from .text_overlay import FONT_PATH
 
 # ── Visual constants ──────────────────────────────────────────────
 
-BG_COLOR        = (13, 13, 13, 255)          # #0d0d0d
+BG_COLOR        = HOOK_BG_COLOR               # charcoal — from brand settings
 BOX_FILL        = (255, 255, 255, 12)         # very subtle white
 BOX_BORDER      = (255, 255, 255, 80)         # dim white
 TEXT_WHITE      = (255, 255, 255, 255)
