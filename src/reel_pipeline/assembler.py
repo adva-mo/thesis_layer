@@ -272,7 +272,7 @@ def assemble_reel(
         scene_start_s = running_time
         if scene.text_timing:
             beat = scene.effective_beat(len(scenes))
-            beat_default_yr = Y_RATIO_CENTER
+            beat_default_yr = Y_RATIO_CENTER if beat == "hook" else Y_RATIO_BOTTOM
             print(f"    Text:     {len(scene.text_timing)} timed entries → screen_text.json")
             for entry in scene.text_timing:
                 text, rel_start, rel_end, position = entry[0], entry[1], entry[2], entry[3]
