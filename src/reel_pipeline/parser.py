@@ -58,6 +58,16 @@ class Scene:
             return "generated"
         return "video" if self.asset_path.suffix.lower() in (".mp4", ".mov") else "image"
 
+    def effective_beat(self, total_scenes: int) -> str | None:
+        """Explicit [BEAT:] tag, or inferred from scene position when absent."""
+        if self.beat:
+            return self.beat
+        if self.index == 1:
+            return "hook"
+        if self.index == total_scenes:
+            return "cta"
+        return None
+
 
 def _parse_timestamp(ts: str) -> tuple[float, float]:
     """'15–28s' or '15-28s' → (15.0, 28.0)"""

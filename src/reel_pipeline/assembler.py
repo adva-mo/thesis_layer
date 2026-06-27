@@ -32,17 +32,6 @@ def _find_audio(audio_dir: Path, scene_index: int) -> Optional[Path]:
     return matches[-1] if matches else None
 
 
-def _resolve_beat(scene: Scene, total_scenes: int) -> str | None:
-    """Infer beat from explicit tag or scene position when [BEAT:] is absent."""
-    if scene.beat:
-        return scene.beat
-    if scene.index == 1:
-        return "hook"
-    if scene.index == total_scenes:
-        return "cta"
-    return None
-
-
 def _render_generated_over_real(
     visual_intent: str,
     real_asset: Path,
@@ -122,7 +111,7 @@ def _concat_with_transitions(
     scene_video_starts = [0.0]   # actual video start time per scene after xfade overlap
 
     for i in range(n - 1):
-        to_beat = _resolve_beat(scenes[i + 1], total)
+        to_beat = scenes[i + 1].effective_beat(total)
         from_type = scenes[i].visual_type or "generated"
         to_type   = scenes[i + 1].visual_type or "generated"
         xf_name, xf_dur = get_transition(from_type, to_type, to_beat)
@@ -282,7 +271,7 @@ def assemble_reel(
         # Text overlays are deferred to subtitle.py — no ffmpeg re-encode here.
         scene_start_s = running_time
         if scene.text_timing:
-            beat = _resolve_beat(scene, len(scenes))
+            beat = scene.effective_beat(len(scenes))
             beat_default_yr = Y_RATIO_CENTER
             print(f"    Text:     {len(scene.text_timing)} timed entries → screen_text.json")
             for entry in scene.text_timing:
@@ -297,7 +286,7 @@ def assemble_reel(
                     "font_size": entry_fs,
                 })
         elif scene.text_card:
-            beat = _resolve_beat(scene, len(scenes))
+            beat = scene.effective_beat(len(scenes))
             is_hook = beat == "hook"
             _fs = scene.text_font_size if scene.text_font_size is not None else (96 if is_hook else font_size)
             _yr = _POS_MAP.get(scene.text_position, Y_RATIO_CENTER if is_hook else Y_RATIO_BOTTOM)
