@@ -20,13 +20,14 @@ from PIL import Image, ImageDraw, ImageFont
 REPO_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from reel_pipeline.graphic_generator import _visual
+from reel_pipeline.brand import CHARCOAL, FONT_PATH
 from reel_pipeline.motion import CARD_ENTRY, ease_out_cubic
+from reel_pipeline.render_utils import visual_hebrew
 
-# ── Visual constants (mirror graphic_generator.py) ────────────────
+# ── Visual constants ──────────────────────────────────────────────
 WIDTH, HEIGHT = 1080, 1920
 FPS           = 30
-BG_COLOR      = (13, 13, 13)
+BG_COLOR      = CHARCOAL[:3]           # RGB for Image.new("RGB", ...)
 BOX_FILL      = (255, 255, 255, 12)
 BOX_BORDER    = (255, 255, 255, 80)
 TEXT_WHITE    = (255, 255, 255, 255)
@@ -38,7 +39,6 @@ BOX_W      = 560
 BOX_H      = 96
 BOX_RADIUS = 16
 ARROW_GAP  = 52
-FONT_PATH  = Path("/System/Library/Fonts/Supplemental/Arial Unicode.ttf")
 
 ITEMS = ["הבטחה", "שנים", "מציאות"]
 
@@ -86,7 +86,7 @@ def render_frame(t: float, font_text: ImageFont.FreeTypeFont,
 
         # Text
         draw = ImageDraw.Draw(base)
-        visual_text = _visual(item.strip())
+        visual_text = visual_hebrew(item.strip())
         bbox = draw.textbbox((0, 0), visual_text, font=font_text)
         tx = box_x + (BOX_W - (bbox[2] - bbox[0])) // 2 - bbox[0]
         ty = y + (BOX_H - (bbox[3] - bbox[1])) // 2 - bbox[1]

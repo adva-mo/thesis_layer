@@ -10,10 +10,8 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+from .brand import FONT_PATH, SCREEN_TEXT_BASE_COLOR
 from .render_utils import visual_hebrew as _visual_hebrew, Y_RATIO_BOTTOM, strip_spans, parse_span_colors
-
-
-FONT_PATH = Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf")
 
 
 @dataclass
@@ -29,7 +27,7 @@ TEXT_Y_RATIO = Y_RATIO_BOTTOM
 
 # Text style
 FONT_SIZE      = 72
-TEXT_COLOR     = (255, 255, 255, 255)
+TEXT_COLOR     = SCREEN_TEXT_BASE_COLOR
 BAR_PADDING_X  = 40
 BAR_PADDING_Y  = 20
 BAR_RADIUS     = 0   # exported for subtitles.py; box removed from this renderer

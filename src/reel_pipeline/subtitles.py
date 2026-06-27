@@ -18,6 +18,7 @@ from typing import Literal, Optional
 from PIL import Image, ImageDraw, ImageFont
 
 
+from .brand import SUBTITLE_ACTIVE_COLOR, SUBTITLE_BASE_COLOR
 from .render_utils import visual_hebrew as _visual_hebrew, Y_RATIO_SUB
 from .text_overlay import FONT_PATH, BAR_PADDING_X, BAR_PADDING_Y, BAR_RADIUS, SHADOW_OFFSET, ScreenTextSpan, _draw_halo, _draw_shadow
 
@@ -32,8 +33,8 @@ DEFAULT_MAX_CHARS   = 35     # total chars (incl. spaces) per phrase — prevent
 FONT_SIZE_SUBTITLE  = 68
 SUBTITLE_Y_RATIO    = Y_RATIO_SUB   # subtitle bottom anchor; text cards use TEXT_Y_RATIO=0.55 (higher, dominant)
 
-HIGHLIGHT_COLOR     = (255, 255, 255, 255)   # active word — full white
-DIM_COLOR           = (210, 210, 210, 255)   # inactive words — slightly dimmed
+ACTIVE_COLOR     = SUBTITLE_ACTIVE_COLOR   # active word — investment_gold
+BASE_COLOR           = SUBTITLE_BASE_COLOR     # inactive words — platinum
 SHADOW_COLOR        = (0, 0, 0, 200)         # drop shadow color
 SHADOW_DROP_OFFSET  = 3                      # directional drop shadow — all words
 
@@ -118,8 +119,8 @@ def _render_lines(
     width: int,
     height: int,
     highlight_all: bool = False,
-    highlight_color: tuple = HIGHLIGHT_COLOR,
-    dim_color: tuple = DIM_COLOR,
+    highlight_color: tuple = ACTIVE_COLOR,
+    dim_color: tuple = BASE_COLOR,
 ) -> 'Image.Image':
     """
     Render 1–MAX_LINES subtitle lines. Each line uses its own script direction.
@@ -307,7 +308,7 @@ def _render_uniform(text: str, color, font, width: int, height: int) -> Image.Im
 
 
 def _render_highlighted(phrase: Phrase, active_idx: int, font, width: int, height: int,
-                        highlight_color: tuple = HIGHLIGHT_COLOR, dim_color: tuple = DIM_COLOR) -> Image.Image:
+                        highlight_color: tuple = ACTIVE_COLOR, dim_color: tuple = BASE_COLOR) -> Image.Image:
     """
     Render phrase with active word highlighted, others dimmed.
     Mixed Hebrew/English phrases are split onto two stacked lines (one script per line).
@@ -409,8 +410,8 @@ def build_spans(
     font,
     width: int,
     height: int,
-    highlight_color: tuple = HIGHLIGHT_COLOR,
-    dim_color: tuple = DIM_COLOR,
+    highlight_color: tuple = ACTIVE_COLOR,
+    dim_color: tuple = BASE_COLOR,
 ) -> list[SubtitleSpan]:
     spans: list[SubtitleSpan] = []
 
@@ -578,7 +579,7 @@ def _apply_timed_overlays(
 
 
 def build_scene_spans(chunks, scene_starts, font, width, height,
-                      highlight_color: tuple = HIGHLIGHT_COLOR, dim_color: tuple = DIM_COLOR):
+                      highlight_color: tuple = ACTIVE_COLOR, dim_color: tuple = BASE_COLOR):
     """
     Scene-aware subtitles: all scene words appear at once from the scene start.
     Active word is highlighted as it is spoken.
@@ -657,8 +658,8 @@ def apply_subtitles(
     leading_pad_s: float = 0.0,
     screen_text_spans: list[ScreenTextSpan] | None = None,
     layers: str = "both",
-    highlight_color: tuple = HIGHLIGHT_COLOR,
-    dim_color: tuple = DIM_COLOR,
+    highlight_color: tuple = ACTIVE_COLOR,
+    dim_color: tuple = BASE_COLOR,
 ) -> Path:
     from .fal_wizper import load_transcript
 
