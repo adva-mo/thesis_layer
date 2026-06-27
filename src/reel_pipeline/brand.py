@@ -9,7 +9,17 @@ import json
 from pathlib import Path
 
 _REPO_ROOT = Path(__file__).parent.parent.parent
-_settings = json.loads((_REPO_ROOT / "config" / "brand-settings.json").read_text(encoding="utf-8"))
+_BRAND_CONFIG = _REPO_ROOT / "config" / "brand-settings.json"
+
+try:
+    _settings = json.loads(_BRAND_CONFIG.read_text(encoding="utf-8"))
+except FileNotFoundError:
+    raise FileNotFoundError(
+        f"Brand config not found: {_BRAND_CONFIG}\n"
+        f"Ensure config/brand-settings.json exists before importing pipeline modules."
+    ) from None
+except json.JSONDecodeError as e:
+    raise ValueError(f"Brand config is not valid JSON ({_BRAND_CONFIG}): {e}") from None
 
 
 def _hex_rgba(hex_str: str, alpha: int = 255) -> tuple:
@@ -59,7 +69,7 @@ def resolve_visual(visual_type: str, key: str, vdo: "dict | None") -> "tuple | N
     if slot is None:
         return None
     if slot["locked"]:
-        return _color(slot["value"])
+        return _color(slot["value"]) if slot["value"] is not None else None
     if vdo is None:
         return None
     val = vdo.get(visual_type, {}).get(key)

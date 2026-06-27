@@ -306,9 +306,9 @@ def _render_graphic_image(
 
     graphic_type = detect_type(visual)
     resolved_bg = _rv("background")
-    bg = (0, 0, 0, 0) if transparent_bg else (resolved_bg or BG_COLOR)
 
     if graphic_type == "timeline":
+        bg = (0, 0, 0, 0) if transparent_bg else (resolved_bg or BG_COLOR)
         return render_timeline(
             _parse_timeline_items(visual), font_path, width, height,
             bg=bg,
@@ -317,19 +317,22 @@ def _render_graphic_image(
             arrow=_rv("arrow") or ARROW_COLOR,
         )
     if graphic_type == "stacked_text_card":
+        bg = (0, 0, 0, 0) if transparent_bg else (resolved_bg or STACKED_BG_COLOR)
         return render_stacked_text_card(
             _parse_stacked_items(visual), font_path, width, height,
             bg=bg,
             text_color=_rv("text_color") or TEXT_WHITE,
         )
     if graphic_type == "text_card":
+        bg = (0, 0, 0, 0) if transparent_bg else (resolved_bg or BG_COLOR)
         return render_text_card(
             visual, font_path, width, height,
             bg=bg,
             text_color=_rv("text_color") or TEXT_WHITE,
         )
     if graphic_type == "cta_card":
-        return render_cta_card(width, height, bg=resolved_bg or BG_COLOR)
+        bg = (0, 0, 0, 0) if transparent_bg else (resolved_bg or BG_COLOR)
+        return render_cta_card(width, height, bg=bg)
     raise AssertionError(f"Unreachable: detect_type returned {graphic_type!r} for {visual!r}")
 
 
