@@ -18,6 +18,7 @@ from typing import Literal, Optional
 from PIL import Image, ImageDraw, ImageFont
 
 
+from .render_utils import visual_hebrew as _visual_hebrew, Y_RATIO_SUB
 from .text_overlay import FONT_PATH, BAR_PADDING_X, BAR_PADDING_Y, BAR_RADIUS, SHADOW_OFFSET, ScreenTextSpan, _draw_halo, _draw_shadow
 
 # ── Defaults ──────────────────────────────────────────────────────
@@ -29,7 +30,7 @@ DEFAULT_PAUSE_THR   = 0.40   # seconds between words to trigger phrase split
 DEFAULT_MAX_CHARS   = 35     # total chars (incl. spaces) per phrase — prevents wide overflow
 
 FONT_SIZE_SUBTITLE  = 68
-SUBTITLE_Y_RATIO    = 0.88   # subtitle bottom anchor; text cards use TEXT_Y_RATIO=0.75 (higher, dominant)
+SUBTITLE_Y_RATIO    = Y_RATIO_SUB   # subtitle bottom anchor; text cards use TEXT_Y_RATIO=0.55 (higher, dominant)
 
 HIGHLIGHT_COLOR     = (255, 255, 255, 255)   # active word — full white
 DIM_COLOR           = (210, 210, 210, 255)   # inactive words — slightly dimmed
@@ -279,14 +280,6 @@ def group_into_phrases(
 
 
 # ── Rendering ────────────────────────────────────────────────────
-
-def _visual_hebrew(text: str) -> str:
-    try:
-        from bidi.algorithm import get_display
-        return get_display(text, base_dir='R')
-    except ImportError:
-        return text
-
 
 def _render_uniform(text: str, color, font, width: int, height: int) -> Image.Image:
     """Render a phrase as uniform-color text on a dark pill (phrase mode)."""

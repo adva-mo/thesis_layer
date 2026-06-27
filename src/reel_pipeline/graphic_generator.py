@@ -14,6 +14,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+from .render_utils import visual_hebrew as _visual
 from .text_overlay import FONT_PATH
 
 # ── Visual constants ──────────────────────────────────────────────
@@ -94,14 +95,6 @@ def _parse_spans(text: str, default_color: tuple) -> list[tuple[str, tuple]]:
     if last < len(text):
         spans.append((text[last:], default_color))
     return spans
-
-def _visual(text: str) -> str:
-    try:
-        from bidi.algorithm import get_display
-        return get_display(text)
-    except ImportError:
-        return text
-
 
 # ── Renderers ─────────────────────────────────────────────────────
 

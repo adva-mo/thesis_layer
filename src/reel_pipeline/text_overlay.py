@@ -12,6 +12,8 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+from .render_utils import visual_hebrew as _visual_hebrew, Y_RATIO_CENTER
+
 
 FONT_PATH = Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf")
 
@@ -25,7 +27,7 @@ class ScreenTextSpan:
     suppress_sub: bool = False  # if True, subtitle layer is suppressed while this span is active
 
 # Bottom edge of subtitle block — block grows upward from this Y position
-TEXT_Y_RATIO = 0.55
+TEXT_Y_RATIO = Y_RATIO_CENTER
 
 # Text style
 FONT_SIZE      = 72
@@ -56,14 +58,6 @@ def _draw_shadow(draw, xy, text, font, shadow_color, offset):
     x, y = xy
     draw.text((x + offset, y + offset), text, font=font, fill=shadow_color)
 
-
-def _visual_hebrew(text: str) -> str:
-    """Convert logical RTL order to visual order for PIL rendering."""
-    try:
-        from bidi.algorithm import get_display
-        return get_display(text)
-    except ImportError:
-        return text
 
 
 def _render_text_overlay(

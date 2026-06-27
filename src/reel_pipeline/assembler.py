@@ -2,7 +2,6 @@
 Assemble scene clips + audio segments into a final 9:16 MP4.
 """
 
-import subprocess
 import sys
 from pathlib import Path
 from typing import Optional
@@ -17,7 +16,10 @@ from .local_clip import (
 )
 from .motion import get_transition
 from .parser import Scene
+from .render_utils import ffmpeg as _ffmpeg, Y_RATIO_TOP, Y_RATIO_CENTER, Y_RATIO_BOTTOM
 from .text_overlay import FONT_PATH, FONT_SIZE, TEXT_Y_RATIO
+
+_POS_MAP = {"top": Y_RATIO_TOP, "center": Y_RATIO_CENTER, "bottom": Y_RATIO_BOTTOM}
 
 
 def _find_audio(audio_dir: Path, scene_index: int) -> Optional[Path]:
@@ -28,14 +30,6 @@ def _find_audio(audio_dir: Path, scene_index: int) -> Optional[Path]:
     pattern = f"seg{scene_index:02d}_*.mp3"
     matches = sorted(audio_dir.glob(pattern))
     return matches[-1] if matches else None
-
-
-def _ffmpeg(*args: str, label: str = "ffmpeg") -> None:
-    cmd = ["ffmpeg", "-y"] + list(args)
-    result = subprocess.run(cmd, capture_output=True)
-    if result.returncode != 0:
-        print(f"  ✗ {label} failed:\n{result.stderr.decode()[-800:]}")
-        sys.exit(1)
 
 
 def _resolve_beat(scene: Scene, total_scenes: int) -> str | None:
@@ -289,13 +283,12 @@ def assemble_reel(
         scene_start_s = running_time
         if scene.text_timing:
             beat = _resolve_beat(scene, len(scenes))
-            beat_default_yr = 0.55 if beat == "hook" else TEXT_Y_RATIO
-            _pos_map = {"top": 0.30, "center": 0.55, "bottom": 0.75}
+            beat_default_yr = Y_RATIO_CENTER
             print(f"    Text:     {len(scene.text_timing)} timed entries → screen_text.json")
             for entry in scene.text_timing:
                 text, rel_start, rel_end, position = entry[0], entry[1], entry[2], entry[3]
                 entry_fs = entry[4] if len(entry) > 4 and entry[4] is not None else font_size
-                _yr = _pos_map.get(position, beat_default_yr) if position else beat_default_yr
+                _yr = _POS_MAP.get(position, beat_default_yr) if position else beat_default_yr
                 screen_text_entries.append({
                     "text": text,
                     "start": round(scene_start_s + rel_start, 4),
@@ -307,14 +300,7 @@ def assemble_reel(
             beat = _resolve_beat(scene, len(scenes))
             is_hook = beat == "hook"
             _fs = scene.text_font_size if scene.text_font_size is not None else (96 if is_hook else font_size)
-            if scene.text_position == "bottom":
-                _yr = 0.75
-            elif scene.text_position == "center":
-                _yr = 0.55
-            elif scene.text_position == "top":
-                _yr = 0.30
-            else:
-                _yr = 0.55 if is_hook else 0.75
+            _yr = _POS_MAP.get(scene.text_position, Y_RATIO_CENTER if is_hook else Y_RATIO_BOTTOM)
             print(f"    Text:     {scene.text_card!r} → screen_text.json")
             _entry: dict = {
                 "text": scene.text_card,

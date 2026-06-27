@@ -9,19 +9,12 @@ from pathlib import Path
 from PIL import Image as PILImage, ImageFilter
 
 from .motion import KEN_BURNS_PARAMS, asset_type_from_filename
+from .render_utils import ffmpeg as _ffmpeg
 
 
 WIDTH  = 1080
 HEIGHT = 1920
 FPS    = 30
-
-
-def _ffmpeg(*args: str, label: str = "ffmpeg") -> None:
-    cmd = ["ffmpeg", "-y"] + list(args)
-    result = subprocess.run(cmd, capture_output=True)
-    if result.returncode != 0:
-        print(f"  ✗ {label} failed:\n{result.stderr.decode()[-800:]}")
-        sys.exit(1)
 
 
 def _probe_duration(path: Path) -> float:
