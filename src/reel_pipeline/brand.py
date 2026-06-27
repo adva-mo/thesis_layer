@@ -56,6 +56,28 @@ HOOK_BG_COLOR = _color(_settings["reels"]["hooks"]["text_card"]["background"])
 VISUAL_DECISION_SCHEMA: dict = _settings.get("visual_decision_schema", {})
 
 
+def _validate_locked_slots() -> None:
+    palette = set(_settings["color_system"].keys())
+    for vtype, slots in VISUAL_DECISION_SCHEMA.items():
+        for key, slot in slots.items():
+            if slot.get("locked") and slot.get("value") is not None:
+                if slot["value"] not in palette:
+                    raise ValueError(
+                        f"brand-settings.json: locked slot {vtype}.{key}='{slot['value']}' "
+                        f"is not in color_system — fix the config before importing pipeline modules"
+                    )
+_validate_locked_slots()
+
+
+def schema_requires_vdo(types: "set[str]") -> "set[str]":
+    """Return the subset of types that are schema-covered and have at least one unlocked slot."""
+    return {
+        t for t in types
+        if t in VISUAL_DECISION_SCHEMA
+        and any(not VISUAL_DECISION_SCHEMA[t][k]["locked"] for k in VISUAL_DECISION_SCHEMA[t])
+    }
+
+
 def resolve_visual(visual_type: str, key: str, vdo: "dict | None") -> "tuple | None":
     """Resolve a visual slot to an RGBA tuple, or None if not schema-covered.
 
@@ -82,13 +104,9 @@ def validate_vdo(vdo: dict, reel_visual_types: "set[str]") -> None:
     Raises ValueError with a descriptive message on any contract violation.
     """
     palette = set(_settings["color_system"].keys())
-    for vtype in reel_visual_types:
-        if vtype not in VISUAL_DECISION_SCHEMA:
-            continue
+    for vtype in schema_requires_vdo(reel_visual_types):
         type_schema = VISUAL_DECISION_SCHEMA[vtype]
         unlocked_keys = {k for k, s in type_schema.items() if not s["locked"]}
-        if not unlocked_keys:
-            continue  # type has only locked slots — no agent decisions required
         vdo_entry = vdo.get(vtype)
         if vdo_entry is None:
             raise ValueError(f"VDO missing entry for schema-covered visual type '{vtype}'")

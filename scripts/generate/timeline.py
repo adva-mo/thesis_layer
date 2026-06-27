@@ -21,8 +21,8 @@ REPO_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from reel_pipeline.brand import CHARCOAL, FONT_PATH
-from reel_pipeline.graphic_generator import _visual
 from reel_pipeline.motion import CARD_ENTRY, ease_out_cubic
+from reel_pipeline.render_utils import visual_hebrew
 
 # ── Visual constants ──────────────────────────────────────────────
 WIDTH, HEIGHT = 1080, 1920
@@ -86,7 +86,7 @@ def render_frame(t: float, font_text: ImageFont.FreeTypeFont,
 
         # Text
         draw = ImageDraw.Draw(base)
-        visual_text = _visual(item.strip())
+        visual_text = visual_hebrew(item.strip())
         bbox = draw.textbbox((0, 0), visual_text, font=font_text)
         tx = box_x + (BOX_W - (bbox[2] - bbox[0])) // 2 - bbox[0]
         ty = y + (BOX_H - (bbox[3] - bbox[1])) // 2 - bbox[1]

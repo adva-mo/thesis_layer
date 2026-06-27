@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from .brand import VISUAL_DECISION_SCHEMA, validate_vdo
+from .brand import schema_requires_vdo, validate_vdo
 from .graphic_generator import detect_type, generate_graphic_clip, generate_graphic_png, validate_generated_scene
 from .local_clip import (
     color_card_to_clip,
@@ -183,11 +183,7 @@ def assemble_reel(
     # ── Load and validate visual-direction.json (VDO) ────────────────────────
     vdo_path = output_path.parent / "visual-direction.json"
     vdo: Optional[dict] = None
-    schema_covered = {
-        t for t in reel_generated_types
-        if t in VISUAL_DECISION_SCHEMA
-        and any(not VISUAL_DECISION_SCHEMA[t][k]["locked"] for k in VISUAL_DECISION_SCHEMA[t])
-    }
+    schema_covered = schema_requires_vdo(reel_generated_types)
 
     if vdo_path.exists():
         vdo = json.loads(vdo_path.read_text(encoding="utf-8"))

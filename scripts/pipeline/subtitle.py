@@ -38,8 +38,8 @@ from reel_pipeline.subtitles import (
     DEFAULT_MAX_WORDS,
     DEFAULT_MODE,
     FONT_SIZE_SUBTITLE,
-    HIGHLIGHT_COLOR,
-    DIM_COLOR,
+    ACTIVE_COLOR,
+    BASE_COLOR,
     apply_subtitles,
 )
 from reel_pipeline.text_overlay import FONT_PATH, TEXT_COLOR, build_screen_text_spans
@@ -93,9 +93,9 @@ def main():
     parser.add_argument("--layers", default="both", choices=["subs", "screen", "both"],
                         help="Which layers to composite: subs, screen, or both (default: both)")
     parser.add_argument("--highlight-color", default=None, metavar="HEX",
-                        help="Active subtitle word color as hex (e.g. #C9A84C). Default: white")
+                        help="Active subtitle word color as hex (e.g. #C9A84C). Default: investment_gold")
     parser.add_argument("--dim-color",       default=None, metavar="HEX",
-                        help="Inactive subtitle word color as hex. Default: light gray")
+                        help="Inactive subtitle word color as hex. Default: platinum")
     parser.add_argument("--text-color",      default=None, metavar="HEX",
                         help="Screen text card color as hex. Default: white")
     args = parser.parse_args()
@@ -103,8 +103,8 @@ def main():
     video_path      = Path(args.video)
     transcript_path = Path(args.transcript)
     font_path       = Path(args.font)
-    highlight_color = _parse_hex(args.highlight_color) if args.highlight_color else HIGHLIGHT_COLOR
-    dim_color       = _parse_hex(args.dim_color)       if args.dim_color       else DIM_COLOR
+    highlight_color = _parse_hex(args.highlight_color) if args.highlight_color else ACTIVE_COLOR
+    dim_color       = _parse_hex(args.dim_color)       if args.dim_color       else BASE_COLOR
     text_color      = _parse_hex(args.text_color)      if args.text_color      else TEXT_COLOR
 
     for p, name in [(video_path, "--video"), (transcript_path, "--transcript")]:
