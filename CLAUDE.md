@@ -46,7 +46,7 @@ See `market.md` for business context, target audience, languages, and market-spe
 **User-scripted reels** (you provide the script, system produces it): see `agency/production/directed-reel-workflow.md`.
 **Reel creative strategy** (plan a reel, choose a format, review a hook or script): skill `reel-strategist`.
 
-Claude is the engine. The templates are scaffolds. This file is the law.
+Claude is the engine. The agency departments are the scaffolds. This file is the law.
 
 ---
 
