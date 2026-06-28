@@ -149,7 +149,7 @@ Do not proceed to Step 2.4b on a script still flagged `revise`.
 
 ---
 
-### Step 2.4b — Retention Optimization Layer
+### Step 2.4b — Retention Optimization Layer [Copy Editor]
 
 Reference: `templates/reels/retention-layer.md`
 
@@ -163,7 +163,7 @@ Runs on the pre-flight-approved script (Status: SCRIPTED). Compresses scaffoldin
 
 ---
 
-### Step 2.4c — Naturalizer for Reel VO
+### Step 2.4c — Naturalizer for Reel VO [Copy Editor]
 
 Reference: `templates/languages/hebrew-naturalizer.md`
 
