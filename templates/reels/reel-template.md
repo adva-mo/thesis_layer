@@ -552,7 +552,9 @@ Visual pacing:
 
 ---
 
-## Per-Reel Header Block
+## Creative Brief (Per-Reel Header Block)
+
+**Owner:** Creative Director. Produced in Phase 1 (before the Copywriter writes); evaluated against in Phase 2 (Creative Review). New creative concepts — attention patterns, visual grammar, etc. — become additional fields here, not new roles or artifacts.
 
 Every generated reel section must open with this metadata block immediately after the `## Reel N` heading. Set `**Status:** SCRIPTED` at generation time — do not leave it blank or omit it.
 

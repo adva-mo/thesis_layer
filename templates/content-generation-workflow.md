@@ -73,7 +73,7 @@ Save to `output/[project-slug]/[language]/hooks/` — see CLAUDE.md §12 for nam
 
 ---
 
-### Step 1.5 — Select Opening Hook for Each Reel
+### Step 1.5 — Select Opening Hook for Each Reel [Creative Director — Phase 1: Creative Brief]
 
 Reference: `templates/hooks/hook-selection.md`
 
@@ -118,7 +118,7 @@ Save to `output/[project-slug]/[language]/reels/` — see CLAUDE.md §12.
 
 ---
 
-### Step 2.4a — Pre-Flight Verification & Refine
+### Step 2.4a — Pre-Flight Verification & Refine [Creative Director — Phase 2: Creative Review]
 
 Both `templates/reels/reel-preflight.md` and `templates/reels/cadence-rules.md` are already in session context from Step 2 — no re-read needed.
 
