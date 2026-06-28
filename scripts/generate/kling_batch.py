@@ -36,6 +36,7 @@ REPO_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from reel_pipeline import config, fal_kling
+from reel_pipeline.cost_tracking import project_slug, today_str, write_cost_line
 from reel_pipeline.motion import resolve_motion_style
 from reel_pipeline.parser import parse_reel_file, read_reel_status
 
@@ -161,7 +162,6 @@ def _append_cost_entry(blueprint: Path, reel_n: int, model: str, billed: list[tu
     """Append one cost line to output/history/costs per CLAUDE.md §17."""
     if not billed:
         return
-    from reel_pipeline.cost_tracking import project_slug, today_str, write_cost_line
     total = sum(_clip_cost(dur, model) for dur, _ in billed)
     dur_str = "+".join(f"{dur}s" for dur, _ in billed)
     slug = project_slug(blueprint, REPO_ROOT)

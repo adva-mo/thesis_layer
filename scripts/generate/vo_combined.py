@@ -22,6 +22,12 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 from reel_pipeline.parser import read_reel_status  # noqa: E402
+from reel_pipeline.cost_tracking import (  # noqa: E402
+    ELEVENLABS_RATE_PER_1K_CHARS,
+    project_slug,
+    today_str,
+    write_cost_line,
+)
 
 SEPARATOR = "\n\n"
 
@@ -215,8 +221,7 @@ def _cut(combined_tmp, start, end, out_path, atempo):
 
 def _append_cost_entry(blueprint: Path, reel_n: int, char_count: int) -> None:
     """Append one cost line to output/history/costs per CLAUDE.md §17."""
-    from reel_pipeline.cost_tracking import project_slug, today_str, write_cost_line
-    cost = char_count / 1000 * 0.10
+    cost = char_count / 1000 * ELEVENLABS_RATE_PER_1K_CHARS
     slug = project_slug(blueprint, REPO_ROOT)
     line = (f"{today_str()} - {slug} reel_{reel_n:02d}"
             f" - {cost:.2f} 11labs ({char_count} chars, 1 call)\n")
