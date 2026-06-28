@@ -77,9 +77,7 @@ These files are referenced throughout the system from multiple templates. Readin
 
 ## 2. Brand Identity
 
-The brand is an intelligent real estate intelligence source, not an agency. A curated intelligence layer between raw market data and investor decisions — analytical, trustworthy, beginner-friendly, never salesy or hype-driven.
-
-For full brand positioning, visual identity, and voice calibration table, see `assets/branding/brand-guidelines.md`.
+See `assets/branding/brand-guidelines.md` — brand positioning, visual identity, and voice.
 
 ---
 

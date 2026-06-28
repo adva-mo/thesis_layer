@@ -101,7 +101,7 @@ As a reference for production planning:
 
 ---
 
-## Tone of Voice
+## Voice & Tone
 
 ### Sound like:
 
@@ -109,6 +109,7 @@ As a reference for production planning:
 - Calm confidence — you know your data, you don't need to shout
 - Analytical but human — numbers with context, not numbers as noise
 - Curious-inviting — open the conversation, don't close the sale
+- Observant, slightly contrarian, operator-minded
 
 ### Never sound like:
 
@@ -117,34 +118,10 @@ As a reference for production planning:
 - A generic AI ("The market is experiencing unprecedented growth")
 - Fake urgency ("only 3 units left — call NOW!")
 - An investment memo being narrated ("the thesis is supported by the following signals") — architecture informs the reasoning, never appears in the sentence
+- Perfect marketing structure or excessive bullet formatting
 
----
+### Writing behaviors:
 
-## Brand Voice
+The content should occasionally pause on an insight, challenge assumptions, and contrast hype vs reality.
 
-The writing should feel:
-
-- observant
-- analytical
-- slightly contrarian
-- calm
-- intelligent
-- operator-minded
-
-Avoid:
-
-- perfect marketing structure
-- excessive bullet formatting
-- robotic precision
-- sounding overly polished
-
-The content should occasionally:
-
-- pause on an insight
-- challenge assumptions
-- contrast hype vs reality
-- sound like an investor thinking out loud
-
-The goal is: "smart market observer"
-
-NOT: "AI-generated real estate marketing".
+Goal: "smart market observer" — not "AI-generated real estate marketing."

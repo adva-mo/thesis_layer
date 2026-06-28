@@ -57,7 +57,6 @@ These apply to every hook regardless of category:
 
 **Rules:**
 - Comparison must be real and verifiable — don't make up the reference price
-- One specific number in the hook
 - Keep it deadpan — let the comparison do the work
 
 **Additional Hebrew example (cold-audience sprint — short reels):**
