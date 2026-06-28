@@ -88,9 +88,9 @@ Run reel-preflight.md against each script. If flagged `revise`, fix per reel-pre
 
 | | |
 |---|---|
-| **Owner** | Copy Editor |
+| **Owner** | Retention Specialist |
 | **Inputs** | SCRIPTED reel scripts |
-| **Load** | `agency/editorial/retention-layer.md` |
+| **Load** | `agency/creative/retention-specialist.md` |
 | **Output** | Timing-compressed scripts; status → RETENTION |
 | **Next** | Step 2.4c |
 

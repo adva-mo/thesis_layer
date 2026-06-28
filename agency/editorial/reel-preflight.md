@@ -235,7 +235,7 @@ Recommendation: [revise / approved]
 
 ## When to Run This
 
-Step 2.4a in the content generation workflow. After scripting, before the Retention Optimization Layer (Step 2.4b). If `Recommendation: revise`, fix the script and re-run before moving on to retention optimization or asset collection or VO generation. Do not generate paid assets (Kling clips, ElevenLabs VO) against a script that hasn't passed this gate.
+Step 2.4a in the content generation workflow. After scripting, before the Retention Specialist (Step 2.4b). If `Recommendation: revise`, fix the script and re-run before moving on to retention optimization or asset collection or VO generation. Do not generate paid assets (Kling clips, ElevenLabs VO) against a script that hasn't passed this gate.
 
 **Max 2 reviews per reel.** If still `revise` after the 2nd pass, stop and escalate to the user instead of re-running again — a 3rd failure usually signals a thesis or format mismatch, not a wording fix.
 
@@ -247,7 +247,7 @@ Step 2.4a in the content generation workflow. After scripting, before the Retent
 
 Every reel's metadata block carries a separate `**Status:**` field with this progression: `SCRIPTED` → `RETENTION` → `NATURALIZER` → `APPROVED`.
 
-Set it to `SCRIPTED` once preflight returns `Recommendation: approved`. Then proceed to Step 2.4b (Retention Optimization Layer) and Step 2.4c (Naturalizer for Reel VO). The user reviews and approves the `NATURALIZER` script — not the pre-retention version.
+Set it to `SCRIPTED` once preflight returns `Recommendation: approved`. Then proceed to Step 2.4b (Retention Specialist) and Step 2.4c (Naturalizer for Reel VO). The user reviews and approves the `NATURALIZER` script — not the pre-retention version.
 
 **Do not flip status to `APPROVED`, and do not run any paid API call (`vo_combined.py --confirm-paid-api-call`, `kling_batch.py`/`kling.py --confirm-paid-api-call`) until the user explicitly approves the naturalizer-signed script in conversation.** Once they do, update the field to `**Status:** APPROVED` before proceeding to VO/Kling generation.
 

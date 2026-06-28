@@ -121,7 +121,23 @@ The implementation of this lifecycle is `agency/production/content-generation-wo
 
 ---
 
-## Workflow Role
+## Workflow Roles
+
+---
+
+### Retention Specialist
+
+**Current state:** Workflow Role — cold-audience retention craft, extracted from the Copy Editor and promoted to a named role. Lives in the creative department: the discipline is psychological, not editorial.
+
+**Discipline:** Stop-scrolling performance craft for short-form reels. Owns timing compression, scaffolding removal, open-loop mechanics, pattern interrupt, oscillation, and brand frame integrity. Receives the Copywriter's script after pre-flight and upgrades it for cold-audience completion rate.
+
+**Does not own:** Hook selection or format (Creative Director), script content and investment claims (Copywriter), language naturalness and TTS compliance (Copy Editor).
+
+**Role definition:** `agency/creative/retention-specialist.md`
+
+**Runs at:** Step 2.4b in `agency/production/content-generation-workflow.md`
+
+**Promotion criteria:** Promoted to Organizational Role when retention complexity grows — for example, if platform-specific retention strategies diverge, or if independent ownership demonstrably improves completion rates.
 
 ---
 
