@@ -211,6 +211,27 @@ def _cut(combined_tmp, start, end, out_path, atempo):
         if raw_tmp and Path(raw_tmp).exists():
             os.unlink(raw_tmp)
 
+# ── Cost tracking ─────────────────────────────────────────────────
+
+def _append_cost_entry(blueprint: Path, reel_n: int, char_count: int) -> None:
+    """Append one cost line to output/history/costs per CLAUDE.md §17."""
+    from datetime import date
+    cost = char_count / 1000 * 0.10
+    try:
+        bp_rel = blueprint.resolve().relative_to(REPO_ROOT)
+        slug = bp_rel.parts[1] if len(bp_rel.parts) > 1 and bp_rel.parts[0] == "output" else blueprint.stem
+    except ValueError:
+        slug = blueprint.stem
+    today = date.today()
+    line = (f"{today.day}/{today.month}/{today.year} - {slug} reel_{reel_n:02d}"
+            f" - {cost:.2f} 11labs ({char_count} chars, 1 call)\n")
+    costs_path = REPO_ROOT / "output" / "history" / "costs"
+    costs_path.parent.mkdir(parents=True, exist_ok=True)
+    with costs_path.open("a") as f:
+        f.write(line)
+    print(f"  ✓ Cost logged → output/history/costs  ({line.strip()})")
+
+
 # ── Main ──────────────────────────────────────────────────────────
 
 def main():
@@ -327,6 +348,7 @@ def main():
     total_s = char_ends[-1] if char_ends else 0
     print(f"  ✓ API call complete — combined audio {total_s:.1f}s  ({len(audio_bytes)//1024} KB)")
     print(f"  ✓ Saved combined_raw.mp3 + alignment.json\n")
+    _append_cost_entry(md_path, args.reel, len(combined))
 
     # ── Split ─────────────────────────────────────────────────────
     with tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as tmp:
