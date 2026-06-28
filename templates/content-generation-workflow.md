@@ -75,7 +75,7 @@ Save to `output/[project-slug]/[language]/hooks/` — see CLAUDE.md §12 for nam
 
 ### Step 1.5 — Select Opening Hook for Each Reel [Creative Director — Phase 1: Creative Brief]
 
-Reference: `templates/hooks/hook-selection.md`
+Role definition: `templates/creative-direction.md` · Reference: `templates/hooks/hook-selection.md`
 
 Before scripting any reel:
 
@@ -120,7 +120,7 @@ Save to `output/[project-slug]/[language]/reels/` — see CLAUDE.md §12.
 
 ### Step 2.4a — Pre-Flight Verification & Refine [Creative Director — Phase 2: Creative Review]
 
-Both `templates/reels/reel-preflight.md` and `templates/reels/cadence-rules.md` are already in session context from Step 2 — no re-read needed.
+Role definition: `templates/creative-direction.md` · Both `templates/reels/reel-preflight.md` and `templates/reels/cadence-rules.md` are already in session context from Step 2 — no re-read needed.
 
 This is a verification pass, not the first exposure to the bar — Step 2 already drafted against `cadence-rules.md` and `reel-preflight.md`. This step catches what slipped through, it doesn't introduce new requirements.
 
@@ -151,7 +151,7 @@ Do not proceed to Step 2.4b on a script still flagged `revise`.
 
 ### Step 2.4b — Retention Optimization Layer [Copy Editor]
 
-Reference: `templates/reels/retention-layer.md`
+Role definition: `templates/copy-editor.md` · Reference: `templates/reels/retention-layer.md`
 
 Runs on the pre-flight-approved script (Status: SCRIPTED). Compresses scaffolding without touching facts, certainty labels, or Brand Frames.
 
@@ -165,7 +165,7 @@ Runs on the pre-flight-approved script (Status: SCRIPTED). Compresses scaffoldin
 
 ### Step 2.4c — Naturalizer for Reel VO [Copy Editor]
 
-Reference: `templates/languages/hebrew-naturalizer.md`
+Role definition: `templates/copy-editor.md` · Reference: `templates/languages/hebrew-naturalizer.md`
 
 Applies to reel VO text only. Runs after retention optimization, before user approval — so the user reviews and approves the final polished Hebrew, not an intermediate.
 

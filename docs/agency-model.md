@@ -54,6 +54,8 @@ Operational workflows and automated infrastructure are not modeled as roles.
 
 **Does not own:** Writing the copy, editorial compression, Hebrew naturalness, visual specification, asset sourcing
 
+**Role definition:** `templates/creative-direction.md`
+
 **Current implementation:**
 - Phase 1 — `templates/hooks/hook-selection.md`, `templates/reels/reel-formats.md`
 - Phase 2 — `templates/reels/reel-preflight.md` (creative review checks)
@@ -100,6 +102,8 @@ Operational workflows and automated infrastructure are not modeled as roles.
 **Discipline:** Editorial judgment about timing, compression, and language quality. Compression methods, timing rules, and language register are a coherent body of expertise — not just a checklist. A different editor would make meaningfully different cuts.
 
 **Does not own:** Content decisions, hook or format selection, visual direction
+
+**Role definition:** `templates/copy-editor.md`
 
 **Current implementation:**
 - `templates/reels/reel-preflight.md` (editorial checks — decisions 15, 16)
