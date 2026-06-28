@@ -38,12 +38,12 @@ See `market.md` for business context, target audience, languages, and market-spe
 **How to use this system:**
 
 1. Drop input files into `input/` or paste raw property information into the conversation
-2. Run the extraction workflow (`templates/extraction-workflow.md`) to get a structured PROJECT DATA block
-3. Run the content generation workflow (`templates/content-generation-workflow.md`) using that data — content type specs, counts, and quality rules are all there
+2. Run the extraction workflow (`agency/research/extraction-workflow.md`) to get a structured PROJECT DATA block
+3. Run the content generation workflow (`agency/production/content-generation-workflow.md`) using that data — content type specs, counts, and quality rules are all there
 4. Save outputs to the correct folders with correct filenames
 
-**Reel format selection** (which narrative structure to use for a reel): see `templates/reels/reel-formats.md`.
-**User-scripted reels** (you provide the script, system produces it): see `templates/reels/directed-reel-workflow.md`.
+**Reel format selection** (which narrative structure to use for a reel): see `agency/creative/reel-formats.md`.
+**User-scripted reels** (you provide the script, system produces it): see `agency/production/directed-reel-workflow.md`.
 **Reel creative strategy** (plan a reel, choose a format, review a hook or script): skill `reel-strategist`.
 
 Claude is the engine. The templates are scaffolds. This file is the law.
@@ -66,8 +66,8 @@ If a project is already active (e.g., resuming work), also read:
 
 If the session involves reel generation (rendering, scripting, or pipeline work), also read:
 
-6. `templates/reels/reel-template.md` — **script format spec** (required before writing any scene: VISUAL_TYPE values, VISUAL_INTENT keyword contract for generated scenes, MOTION_STYLE tokens, VEP table format, TTS rules)
-7. `templates/reels/reel-formats.md` — **format library** (all 11 format definitions: beat patterns, scaffolds, account stage fit, goal types — required before selecting a format or writing a script)
+6. `agency/production/templates/reel-template.md` — **script format spec** (required before writing any scene: VISUAL_TYPE values, VISUAL_INTENT keyword contract for generated scenes, MOTION_STYLE tokens, VEP table format, TTS rules)
+7. `agency/creative/reel-formats.md` — **format library** (all 11 format definitions: beat patterns, scaffolds, account stage fit, goal types — required before selecting a format or writing a script)
 8. `docs/reel-pipeline.md` — full technical reference for the reel generation pipeline (scripts, workflow, commands)
 9. `output/history/hook-log.md` — hook history for all projects (create if missing)
 
@@ -121,13 +121,13 @@ Check `market.md` — Languages section for the primary language setting.
 For domain terms (glossary), see `primary_language.md` — Domain Terms (only if primary language is not English).
 
 **Primary language naturalizer:**
-If a file exists at `templates/languages/[primary-language]-naturalizer.md`, apply it to every public-facing primary language output before saving. Skip for Analysis Mode outputs and English content. Current file: `templates/languages/hebrew-naturalizer.md`. The naturalizer is a language-quality pass only — it runs after content decisions are finalized. Run it on every Hebrew content file before considering the file done, including ad-hoc generation outside the formal workflow. No Hebrew file is complete without a naturalizer sign-off.
+If a file exists at `agency/editorial/[primary-language]-naturalizer.md`, apply it to every public-facing primary language output before saving. Skip for Analysis Mode outputs and English content. Current file: `agency/editorial/hebrew-naturalizer.md`. The naturalizer is a language-quality pass only — it runs after content decisions are finalized. Run it on every Hebrew content file before considering the file done, including ad-hoc generation outside the formal workflow. No Hebrew file is complete without a naturalizer sign-off.
 
 ---
 
 ## 6. Hook Writing Rules
 
-Every hook must serve one psychological function. Choose from the 10 categories in `templates/hooks/hook-template.md`. Do not blend more than two.
+Every hook must serve one psychological function. Choose from the 10 categories in `agency/production/templates/hook-template.md`. Do not blend more than two.
 
 - First 3 words must create tension, curiosity, or surprise
 - Max 2 sentences for social media hooks
@@ -135,7 +135,7 @@ Every hook must serve one psychological function. Choose from the 10 categories 
 - One specific number per hook (price, %, timeframe, or ratio) when possible
 - Test: if the hook could work for any project, rewrite it to be specific
 
-For hook selection logic (which hook opens which reel, diversity rules, brand/performance balance, rhetorical freshness), see `templates/hooks/hook-selection.md`.
+For hook selection logic (which hook opens which reel, diversity rules, brand/performance balance, rhetorical freshness), see `agency/creative/hook-selection.md`.
 
 ---
 
@@ -188,7 +188,7 @@ PDFs are educational lead magnets. They build trust and generate inbound.
 - No specific property recommendations (unless it's a project-specific PDF)
 - Cite data sources if used (e.g., DLD, CBRE, Bayut)
 - See `market.md` — PDF Audience Framing for publication reference and reader profile
-- Before placing images in a PDF, run the Image Selection step in `templates/pdf/beginner-guide-template.md`
+- Before placing images in a PDF, run the Image Selection step in `agency/production/templates/beginner-guide-template.md`
 - For rendering instructions (HTML authoring, PDF generation command, stylesheet), see `docs/pdf-pipeline.md`
 - **Logo:** When generating PDF HTML, include `<img src="../../../../assets/branding/logo-wide.png" class="pdf-logo" alt="" />` as the first element inside `<body>`, before any section content.
 
@@ -198,7 +198,7 @@ PDFs are educational lead magnets. They build trust and generate inbound.
 
 Extract data before generating any content. Use the 8-field PROJECT DATA schema, mark missing fields `[MISSING]`, and never hallucinate values.
 
-See `templates/extraction-workflow.md` for the full schema, input handling rules, and edge case reference.
+See `agency/research/extraction-workflow.md` for the full schema, input handling rules, and edge case reference.
 
 ---
 
@@ -282,13 +282,13 @@ Risk, caveats, and downside are required for credibility. But content must never
 ## 14. Project Positioning Layer
 
 Before generating content, determine the project's primary positioning angle.
-See `templates/positioning-framework.md` for categories, decision logic, and content mapping.
+See `agency/research/positioning-framework.md` for categories, decision logic, and content mapping.
 
 ## 16. Asset Collection
 
-After generating reel scripts (Step 2 in `templates/content-generation-workflow.md`), append a Visual Evidence Plan to each reel and execute automated asset collection.
+After generating reel scripts (Step 2 in `agency/production/content-generation-workflow.md`), append a Visual Evidence Plan to each reel and execute automated asset collection.
 
-See `templates/asset-collection.md` for full execution rules, source priority matrix, and criticality thresholds.
+See `agency/art/asset-collection.md` for full execution rules, source priority matrix, and criticality thresholds.
 
 **Folder structure per project:**
 

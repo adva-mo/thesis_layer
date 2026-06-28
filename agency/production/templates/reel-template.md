@@ -786,7 +786,7 @@ Anti-collect: [3–5 specific things NOT to collect — be explicit about what l
 
 ### After the table
 
-Run `templates/asset-collection.md` against the plan.
+Run `agency/art/asset-collection.md` against the plan.
 
 Append the Collection Status Report block immediately after the table.
 

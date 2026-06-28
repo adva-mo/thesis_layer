@@ -1,6 +1,6 @@
 # Reel Pre-Flight
 
-Mandatory quality gate. Run after a reel script is drafted, before Visual Evidence Plan / asset collection / VO generation. Applies on top of `templates/reels/reel-template.md` (formats) and `templates/reels/cadence-rules.md` (current sprint mode) — it does not replace either.
+Mandatory quality gate. Run after a reel script is drafted, before Visual Evidence Plan / asset collection / VO generation. Applies on top of `agency/production/templates/reel-template.md` (formats) and `agency/creative/cadence-rules.md` (current sprint mode) — it does not replace either.
 
 **What this catches:** a script can be analytically correct — sound thesis, accurate numbers, correct risk disclosure — and still be weak for cold-audience retention. Correctness is necessary, not sufficient. This gate checks the part the format scaffolds don't check: whether a cold scroller actually stops, stays, and reaches the payoff.
 

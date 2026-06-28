@@ -1,6 +1,6 @@
 # Asset Collection — Execution Template
 
-Run this after completing Step 2 (reel scripts) in `templates/content-generation-workflow.md`.
+Run this after completing Step 2 (reel scripts) in `agency/production/content-generation-workflow.md`.
 
 Every reel with `[VISUAL:]` tags that require real images must have assets collected before it is ready for editing.
 

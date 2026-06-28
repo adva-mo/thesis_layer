@@ -26,7 +26,7 @@ Operational workflows and automated infrastructure are not modeled as roles.
 
 **Does not own:** Investment framing, thesis classification, content decisions, anything downstream of project-data.md
 
-**Current implementation:** `templates/extraction-workflow.md`  
+**Current implementation:** `agency/research/extraction-workflow.md`  
 **Primary artifact:** `output/[project-slug]/project-data.md`
 
 ---
@@ -37,7 +37,7 @@ Operational workflows and automated infrastructure are not modeled as roles.
 
 **Does not own:** How findings are communicated in content, hook or format selection, copy writing, visual decisions
 
-**Current implementation:** `templates/positioning-framework.md`  
+**Current implementation:** `agency/research/positioning-framework.md`  
 **Primary artifact:** `output/[project-slug]/thesis.md` — write-once; consumed by all downstream roles
 
 ---
@@ -54,11 +54,11 @@ Operational workflows and automated infrastructure are not modeled as roles.
 
 **Does not own:** Writing the copy, editorial compression, Hebrew naturalness, visual specification, asset sourcing
 
-**Role definition:** `templates/creative-direction.md`
+**Role definition:** `agency/creative/creative-direction.md`
 
 **Current implementation:**
-- Phase 1 — `templates/hooks/hook-selection.md`, `templates/reels/reel-formats.md`
-- Phase 2 — `templates/reels/reel-preflight.md` (creative review checks)
+- Phase 1 — `agency/creative/hook-selection.md`, `agency/creative/reel-formats.md`
+- Phase 2 — `agency/editorial/reel-preflight.md` (creative review checks)
 - Brief artifact — Per-Reel Header Block in every reel blueprint
 
 ---
@@ -69,7 +69,7 @@ Operational workflows and automated infrastructure are not modeled as roles.
 
 **Does not own:** Hook selection, format selection, cadence, visual direction, editorial compression, asset sourcing
 
-**Current implementation:** `templates/hooks/hook-template.md` (hook generation), `templates/content-generation-workflow.md` Steps 2–7 (reel scripts, carousel, LinkedIn, WhatsApp, investor summary, CTAs)
+**Current implementation:** `agency/production/templates/hook-template.md` (hook generation), `agency/production/content-generation-workflow.md` Steps 2–7 (reel scripts, carousel, LinkedIn, WhatsApp, investor summary, CTAs)
 
 ---
 
@@ -82,9 +82,9 @@ Operational workflows and automated infrastructure are not modeled as roles.
 **Does not own:** Copy writing, investment framing, hook or format selection, editorial passes
 
 **Current implementation:**
-- Visual specification — `templates/reels/visuals-layer.md`, `config/brand-settings.json`
-- Asset sourcing and validation — `templates/asset-collection.md`
-- Production readiness — `templates/reels/producibility-check.md`
+- Visual specification — `agency/art/visuals-layer.md`, `config/brand-settings.json`
+- Asset sourcing and validation — `agency/art/asset-collection.md`
+- Production readiness — `agency/production/producibility-check.md`
 - Brief artifact — `visual-direction.json` (sidecar per reel)
 
 ---
@@ -103,12 +103,12 @@ Operational workflows and automated infrastructure are not modeled as roles.
 
 **Does not own:** Content decisions, hook or format selection, visual direction
 
-**Role definition:** `templates/copy-editor.md`
+**Role definition:** `agency/editorial/copy-editor.md`
 
 **Current implementation:**
-- `templates/reels/reel-preflight.md` (editorial checks — decisions 15, 16)
-- `templates/reels/retention-layer.md` (timing compression — decisions 15, 16)
-- `templates/languages/hebrew-naturalizer.md` (language naturalness — decisions 17, 18)
+- `agency/editorial/reel-preflight.md` (editorial checks — decisions 15, 16)
+- `agency/editorial/retention-layer.md` (timing compression — decisions 15, 16)
+- `agency/editorial/hebrew-naturalizer.md` (language naturalness — decisions 17, 18)
 
 **Promotion criteria:** Promoted to Organizational Role when editorial complexity grows or when independent ownership demonstrably improves output quality.
 

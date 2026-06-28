@@ -5,7 +5,7 @@ This file is the single source of truth for reel format definitions. Each format
 **What belongs here:** format scaffolds, beat patterns, narrative logic, purpose statements.  
 **What does NOT belong here:** tag vocabulary, TTS rules, pipeline execution. Those live in `reel-template.md` and `docs/reel-pipeline.md`.
 
-For format-to-hook affinity (format → H-family), see `templates/hooks/hook-selection.md` — that file owns the affinity relationship, not this one.
+For format-to-hook affinity (format → H-family), see `agency/creative/hook-selection.md` — that file owns the affinity relationship, not this one.
 
 ---
 

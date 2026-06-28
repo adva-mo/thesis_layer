@@ -2,7 +2,7 @@
 
 Use this workflow when you have a script and want to produce a reel directly — without thesis extraction, hook generation, or the full content pipeline.
 
-For system-generated reels (Claude authors the script from project data), use `templates/content-generation-workflow.md` instead.
+For system-generated reels (Claude authors the script from project data), use `agency/production/content-generation-workflow.md` instead.
 
 ---
 
@@ -13,8 +13,8 @@ For system-generated reels (Claude authors the script from project data), use `t
 
 **Optional:**
 - Rough scene direction — e.g. "aerial shot of coastline", "text on screen: 600K AED". Claude will translate these into `[VISUAL_TYPE:]` / `[VISUAL_INTENT:]` pairs.
-- Target duration — if omitted, the Compress-First Gate in `templates/reels/cadence-rules.md` applies.
-- Format — if you have one in mind, name it. If not, Claude will match your script to the closest format in `templates/reels/reel-formats.md`.
+- Target duration — if omitted, the Compress-First Gate in `agency/creative/cadence-rules.md` applies.
+- Format — if you have one in mind, name it. If not, Claude will match your script to the closest format in `agency/creative/reel-formats.md`.
 
 ---
 
@@ -40,12 +40,12 @@ Apply the tag vocabulary from `reel-template.md § Script Conventions`:
 Fill the Per-Reel Header Block (see `reel-template.md § Creative Brief (Per-Reel Header Block)`). Set `**Status:** DRAFT`.
 
 **5. Timing estimate**
-For each scene, count characters in the `[TTS:]` block and estimate duration. Full formula: `templates/reels/retention-layer.md § Timing Constraint`. Flag any scene that exceeds its beat's natural slot.
+For each scene, count characters in the `[TTS:]` block and estimate duration. Full formula: `agency/editorial/retention-layer.md § Timing Constraint`. Flag any scene that exceeds its beat's natural slot.
 
 **Optional passes (not required — invoke on request):**
 - Timing compression: `retention-layer.md`
-- Language naturalness: `templates/languages/hebrew-naturalizer.md`
-- Full visual direction: `templates/reels/visuals-layer.md`
+- Language naturalness: `agency/editorial/hebrew-naturalizer.md`
+- Full visual direction: `agency/art/visuals-layer.md`
 
 ---
 
@@ -73,7 +73,7 @@ DRAFT means the blueprint is ready for review. APPROVED is the explicit spend au
 
 Before production, run the producibility check against the approved blueprint.
 
-See `templates/reels/producibility-check.md`.
+See `agency/production/producibility-check.md`.
 
 The check must return **READY TO PRODUCE** before any pipeline script is invoked.
 

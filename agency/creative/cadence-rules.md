@@ -3,11 +3,11 @@
 **Authority:** Human-set. Agent-read.  
 **Owner:** Operator — updated when channel state changes. Consumed by: Creative Director.
 
-Runtime file. Tells the reel generation process what we are optimizing for **right now**. This is a routing/selection layer on top of the 5 existing reel formats in `templates/reels/reel-template.md` — it does not introduce a 6th format and does not rewrite the existing 5.
+Runtime file. Tells the reel generation process what we are optimizing for **right now**. This is a routing/selection layer on top of the 5 existing reel formats in `agency/production/templates/reel-template.md` — it does not introduce a 6th format and does not rewrite the existing 5.
 
-Read this alongside `templates/reels/reel-template.md` (formats) and `templates/reels/reel-preflight.md` (quality gate).
+Read this alongside `agency/production/templates/reel-template.md` (formats) and `agency/editorial/reel-preflight.md` (quality gate).
 
-**Scope note:** This file is currently wired to the reel pipeline only. It is read by `templates/content-generation-workflow.md` (Step 2), `templates/reels/reel-preflight.md`, and `docs/reel-pipeline.md`. Hook selection and positioning decisions do not reference it yet. If cadence state becomes relevant cross-system (hook selection, analysis framing, positioning), move this file to `strategy/current-mode.md` and update the referencing files. No move during this sprint.
+**Scope note:** This file is currently wired to the reel pipeline only. It is read by `agency/production/content-generation-workflow.md` (Step 2), `agency/editorial/reel-preflight.md`, and `docs/reel-pipeline.md`. Hook selection and positioning decisions do not reference it yet. If cadence state becomes relevant cross-system (hook selection, analysis framing, positioning), move this file to `strategy/current-mode.md` and update the referencing files. No move during this sprint.
 
 ---
 

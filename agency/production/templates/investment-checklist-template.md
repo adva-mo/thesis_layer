@@ -18,7 +18,7 @@ The checklist is a functional reference tool: scannable, interactive, printable.
 
 When generating a project-specific version of this checklist (i.e., pre-filled or framed around a specific project), prepend a Thesis Card at the top before section 0.
 
-Use the Thesis Card component from `templates/pdf/beginner-guide-template.md`.
+Use the Thesis Card component from `agency/production/templates/beginner-guide-template.md`.
 
 This gives the reader instant project context before they start working through the questions.
 
@@ -28,7 +28,7 @@ Do not add a Thesis Card to the generic (non-project-specific) version.
 
 When generating a project-specific version, you may also add a compact `| Fits | Does Not Fit |` matrix immediately after the Thesis Card. This sets expectations before the reader invests time in the 25 questions.
 
-Use the Fit Matrix component from `templates/pdf/beginner-guide-template.md`.
+Use the Fit Matrix component from `agency/production/templates/beginner-guide-template.md`.
 
 ---
 

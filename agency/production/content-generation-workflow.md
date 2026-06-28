@@ -11,7 +11,7 @@ Before starting:
 - [ ] CLAUDE.md has been read in this session — `market.md`, `docs/voice-examples.md`, and `primary_language.md` loaded at session init
 - [ ] Read `docs/output-conventions.md` — file naming, folder structure, and content block headers for saving outputs
 - [ ] Language confirmed: Hebrew / English / Both
-- [ ] `output/[project-slug]/thesis.md` exists — produced by `templates/positioning-framework.md` after positioning is confirmed
+- [ ] `output/[project-slug]/thesis.md` exists — produced by `agency/research/positioning-framework.md` after positioning is confirmed
 - [ ] `output/[project-slug]/thesis.md` is loaded now — read it once here, do not re-read per step below
 - [ ] `output/[project-slug]/project-data.md` exists — if missing, continue (do not re-run extraction). Note: `project-data.md` is mandatory in `extraction-workflow.md` Step 3 for all future projects sourced from a URL or brochure.
 - For reel sessions: `output/history/hook-log.md` and `docs/reel-pipeline.md` are also loaded at session init (CLAUDE.md §1.5). Do not re-read in Steps 1.5 or 2.
@@ -58,7 +58,7 @@ Run in this order. Each step uses the PROJECT DATA block as input.
 
 ### Step 1 — Generate 10 Hooks
 
-Reference: `templates/hooks/hook-template.md`
+Reference: `agency/production/templates/hook-template.md`
 
 Produce one hook per category (H1–H10). Each hook:
 - Uses the correct formula from the template
@@ -75,7 +75,7 @@ Save to `output/[project-slug]/[language]/hooks/` — see CLAUDE.md §12 for nam
 
 ### Step 1.5 — Select Opening Hook for Each Reel [Creative Director — Phase 1: Creative Brief]
 
-Role definition: `templates/creative-direction.md` · Reference: `templates/hooks/hook-selection.md`
+Role definition: `agency/creative/creative-direction.md` · Reference: `agency/creative/hook-selection.md`
 
 Before scripting any reel:
 
@@ -95,14 +95,14 @@ Before scripting any reel:
 ### Step 2 — Generate 5 Reel Scripts
 
 **Before scripting — read in this order:**
-1. `templates/reels/cadence-rules.md` — sets the length ceiling for this sprint before any format is considered. Run the Compress-First Gate (in that file) now. Do not select a format until the length decision is made.
-2. `templates/reels/reel-template.md` — format spec. §Script Conventions defines every tag the parser requires. Key rule: scenes must be separated by `---`; do NOT use deprecated `[VISUAL:]` or `[SCREEN:]` tags. **Visual fields (`[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`) are NOT written at script time — they are filled by the Visuals Layer (Step 2.5). Script provides `[BEAT:]`, `[VO:]`, `[TTS:]`, and `[TEXT_CARD:]` only when text on screen IS the content.** If reel-template.md was already loaded at session init (CLAUDE.md §1.5), skip re-read — but still run the Compress-First Gate before selecting a format.
-3. `templates/reels/reel-preflight.md` — write every script to already pass this gate on the first draft, not just to satisfy it after the fact.
+1. `agency/creative/cadence-rules.md` — sets the length ceiling for this sprint before any format is considered. Run the Compress-First Gate (in that file) now. Do not select a format until the length decision is made.
+2. `agency/production/templates/reel-template.md` — format spec. §Script Conventions defines every tag the parser requires. Key rule: scenes must be separated by `---`; do NOT use deprecated `[VISUAL:]` or `[SCREEN:]` tags. **Visual fields (`[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`) are NOT written at script time — they are filled by the Visuals Layer (Step 2.5). Script provides `[BEAT:]`, `[VO:]`, `[TTS:]`, and `[TEXT_CARD:]` only when text on screen IS the content.** If reel-template.md was already loaded at session init (CLAUDE.md §1.5), skip re-read — but still run the Compress-First Gate before selecting a format.
+3. `agency/editorial/reel-preflight.md` — write every script to already pass this gate on the first draft, not just to satisfy it after the fact.
 3. Before writing each hook: identify the cadence and apply the Hook-Insight Integrity rule (reel-preflight.md). For **QUESTION cadence** — confirm the thesis contains a defensible answer (verified fact, supported inference, or clearly labeled hypothesis) that fits within the Insight segment. If no defensible answer exists, use **CONTRAST cadence** instead. For **CONTRAST cadence** — confirm the body will explain why the exception matters, not just show that it exists.
 
 Step 2.4a below is a verification pass, not the first time these criteria apply — drafting against them now should mean Step 2.4a mostly confirms rather than rewrites.
 
-Produce 5 reel scripts, one per format (Data Drop, Investment Case, Myth Bust, Area Spotlight, Payment Plan Breakdown). For full format definitions and additional format types (Formats 6–11), see `templates/reels/reel-formats.md`.
+Produce 5 reel scripts, one per format (Data Drop, Investment Case, Myth Bust, Area Spotlight, Payment Plan Breakdown). For full format definitions and additional format types (Formats 6–11), see `agency/creative/reel-formats.md`.
 
 Each script includes:
 - Format name + duration
@@ -120,13 +120,13 @@ Save to `output/[project-slug]/[language]/reels/` — see CLAUDE.md §12.
 
 ### Step 2.4a — Pre-Flight Verification & Refine [Creative Director — Phase 2: Creative Review]
 
-Role definition: `templates/creative-direction.md` · Both `templates/reels/reel-preflight.md` and `templates/reels/cadence-rules.md` are already in session context from Step 2 — no re-read needed.
+Role definition: `agency/creative/creative-direction.md` · Both `agency/editorial/reel-preflight.md` and `agency/creative/cadence-rules.md` are already in session context from Step 2 — no re-read needed.
 
 This is a verification pass, not the first exposure to the bar — Step 2 already drafted against `cadence-rules.md` and `reel-preflight.md`. This step catches what slipped through, it doesn't introduce new requirements.
 
 For each reel scripted in Step 2:
 
-1. Run `templates/reels/reel-preflight.md` against the full script and output the `PRE-FLIGHT REVIEW` block.
+1. Run `agency/editorial/reel-preflight.md` against the full script and output the `PRE-FLIGHT REVIEW` block.
 2. If `Recommendation: revise` — refine the script directly (do not just flag it), using the flagged categories as edit instructions:
 
    | Flag | Fix |
@@ -151,11 +151,11 @@ Do not proceed to Step 2.4b on a script still flagged `revise`.
 
 ### Step 2.4b — Retention Optimization Layer [Copy Editor]
 
-Role definition: `templates/copy-editor.md` · Reference: `templates/reels/retention-layer.md`
+Role definition: `agency/editorial/copy-editor.md` · Reference: `agency/editorial/retention-layer.md`
 
 Runs on the pre-flight-approved script (Status: SCRIPTED). Compresses scaffolding without touching facts, certainty labels, or Brand Frames.
 
-1. Run `templates/reels/retention-layer.md` against the full script. Produce a per-beat diff output.
+1. Run `agency/editorial/retention-layer.md` against the full script. Produce a per-beat diff output.
 2. Run the post-retention integrity check (5 checks: new claims, hook promise, risk placement, ending momentum, brand frames).
 3. If verdict is `revert-beat`: restore the flagged beat and re-run integrity on that beat only.
 4. Set the reel's `**Status:**` field to `RETENTION`. Proceed to Step 2.4c.
@@ -165,11 +165,11 @@ Runs on the pre-flight-approved script (Status: SCRIPTED). Compresses scaffoldin
 
 ### Step 2.4c — Naturalizer for Reel VO [Copy Editor]
 
-Role definition: `templates/copy-editor.md` · Reference: `templates/languages/hebrew-naturalizer.md`
+Role definition: `agency/editorial/copy-editor.md` · Reference: `agency/editorial/hebrew-naturalizer.md`
 
 Applies to reel VO text only. Runs after retention optimization, before user approval — so the user reviews and approves the final polished Hebrew, not an intermediate.
 
-Apply the naturalizer to the retention-optimized VO text for all `[VO:]` blocks in the reel. Apply rules from `templates/languages/hebrew-naturalizer.md` exactly as they apply to other Hebrew content: TTS compliance, register checks, em-dash removal, expansion of abbreviations, VO-specific rules.
+Apply the naturalizer to the retention-optimized VO text for all `[VO:]` blocks in the reel. Apply rules from `agency/editorial/hebrew-naturalizer.md` exactly as they apply to other Hebrew content: TTS compliance, register checks, em-dash removal, expansion of abbreviations, VO-specific rules.
 
 Write the naturalizer sign-off in the reel file:
 - `_Naturalizer applied: [date] — No meaningful language issues._`
@@ -199,13 +199,13 @@ Status progression: `SCRIPTED` → `RETENTION` → `NATURALIZER` → `APPROVED`
 
 ### Step 2.5 — Visuals Layer
 
-Reference: `templates/reels/visuals-layer.md`
+Reference: `agency/art/visuals-layer.md`
 
 Prerequisites: Status = `APPROVED` (user has approved the VO in conversation). No paid API calls have run yet.
 
 For each approved reel:
 
-1. Read `templates/reels/visuals-layer.md`
+1. Read `agency/art/visuals-layer.md`
 2. Inventory canonical assets from `assets/[project-slug]/manifest.md`
 3. Direct the full visual execution — fill `[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`, and `[KLING_AVOID:]` directly in the reel blueprint for every scene
 4. Append the Visual Evidence Plan (VEP) section to the reel file, with one row per scene
@@ -217,18 +217,18 @@ For each approved reel:
 
 Status progression: `APPROVED` → `VISUAL-DIRECTED` (awaiting user sign-off on visuals) → `VISUAL-APPROVED`
 
-Once the user approves the visual plan, run the producibility check before proceeding: `templates/reels/producibility-check.md`. The check must return **READY TO PRODUCE** before asset collection or any paid API call.
+Once the user approves the visual plan, run the producibility check before proceeding: `agency/production/producibility-check.md`. The check must return **READY TO PRODUCE** before asset collection or any paid API call.
 
 ---
 
 ### Step 2.6 — Asset Collection
 
-Reference: `templates/asset-collection.md`
+Reference: `agency/art/asset-collection.md`
 
 Prerequisites: Step 2.5 complete (Visuals Layer has filled all visual fields and produced VEP rows). API keys present in `.env`: `UNSPLASH_ACCESS_KEY`, `GOOGLE_MAPS_KEY`.
 
 For each reel directed in Step 2.5:
-1. Execute `templates/asset-collection.md` against the VEP already in the reel file
+1. Execute `agency/art/asset-collection.md` against the VEP already in the reel file
    - Anti-collect list: copy from `output/[project-slug]/thesis.md` — Anti-Collect Guidance. Do not re-derive per reel.
 2. Save validated assets to `assets/[project-slug]/canonical/`
 3. Move vision-rejected assets to `assets/[project-slug]/raw/rejected/`
@@ -243,7 +243,7 @@ Step 2.6 is skipped for: PDF-only projects, LinkedIn-only outputs, or any projec
 
 ### Step 3 — Generate 1 Carousel
 
-Reference: `templates/carousel/carousel-template.md`
+Reference: `agency/production/templates/carousel-template.md`
 
 Use `thesis.md` already in session context.
 
@@ -264,7 +264,7 @@ Save to `output/[project-slug]/[language]/carousel/` — see CLAUDE.md §12.
 
 ### Step 4 — Generate 1 LinkedIn Post per language
 
-Reference: `templates/linkedin/linkedin-template.md`
+Reference: `agency/production/templates/linkedin-template.md`
 
 Each language gets its own separate file in its own directory. Do not combine languages in one file.
 
@@ -285,7 +285,7 @@ The Pitch Block is the distilled, publication-ready project description. Write i
 
 ### Step 5 — Generate 3 WhatsApp Messages
 
-Reference: `templates/whatsapp/whatsapp-template.md`
+Reference: `agency/production/templates/whatsapp-template.md`
 
 **Before writing:** Read the Pitch Block section from `output/[project-slug]/hebrew/linkedin/[project-slug]-he-linkedin.md`.
 
@@ -325,7 +325,7 @@ Append to each language's LinkedIn file as a separate section. Hebrew CTAs → H
 
 ### Step 8 — Hebrew Naturalizer Pass
 
-Reference: `templates/languages/hebrew-naturalizer.md`
+Reference: `agency/editorial/hebrew-naturalizer.md`
 
 Apply the naturalizer **inline during generation** — not as a separate post-generation re-read pass.
 
@@ -333,7 +333,7 @@ Apply the naturalizer **inline during generation** — not as a separate post-ge
 
 **Does not apply to:** English files, Analysis Mode outputs, or reel VO text (handled at Step 2.4c).
 
-As you write each Hebrew file, apply naturalizer rules from `templates/languages/hebrew-naturalizer.md`. Do not re-read output files after writing — run the check as you draft each section.
+As you write each Hebrew file, apply naturalizer rules from `agency/editorial/hebrew-naturalizer.md`. Do not re-read output files after writing — run the check as you draft each section.
 
 Write the naturalizer sign-off at the bottom of each file:
 - `_Naturalizer applied: [date] — No meaningful language issues._`

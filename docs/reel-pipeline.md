@@ -6,8 +6,8 @@ Read this file at the start of any session involving reel generation.
 
 ## Cadence & Quality Gate (read before scripting)
 
-- `templates/reels/cadence-rules.md` — current optimization mode (short vs long reel guidance, sprint state, audience stage). Read before choosing a reel format/length.
-- `templates/reels/reel-preflight.md` — mandatory quality gate. Run after drafting a script, before the Visual Evidence Plan or any paid asset generation (Kling, ElevenLabs).
+- `agency/creative/cadence-rules.md` — current optimization mode (short vs long reel guidance, sprint state, audience stage). Read before choosing a reel format/length.
+- `agency/editorial/reel-preflight.md` — mandatory quality gate. Run after drafting a script, before the Visual Evidence Plan or any paid asset generation (Kling, ElevenLabs).
 
 ---
 
@@ -30,7 +30,7 @@ assets/[slug]/          ← collected image assets (canonical/)
 
 ```
 1. Write reel script (.md blueprint) — VO + beats only; visual fields left blank
-1.5. Pre-flight gate & refine   → templates/reels/reel-preflight.md (see content-generation-workflow.md Step 2.4 — refine in place, loop until approved)
+1.5. Pre-flight gate & refine   → agency/editorial/reel-preflight.md (see content-generation-workflow.md Step 2.4 — refine in place, loop until approved)
        ↳ Retention layer + Naturalizer run here (Steps 2.4b–2.4c)
        ↳ Status: SCRIPTED → RETENTION → NATURALIZER
        ↳ STOP — present the script to the user for approval
@@ -39,7 +39,7 @@ assets/[slug]/          ← collected image assets (canonical/)
        Preflight "Recommendation: approved" is a content-quality verdict, not user sign-off
        — see reel-preflight.md. vo_combined.py hard-stops on any status other than APPROVED.
 
-1.7. Visuals Layer              → templates/reels/visuals-layer.md
+1.7. Visuals Layer              → agency/art/visuals-layer.md
        ↳ director fills all visual fields + VEP rows directly in the blueprint (no API spend)
        ↳ Status: VISUAL-DIRECTED. STOP — present visual plan to user for approval.
        ↳ User flips Status to VISUAL-APPROVED to authorise Kling spend.
@@ -412,7 +412,7 @@ python3 scripts/generate/kling_batch.py ... --scenes 2,4 --confirm-paid-api-call
 
 ### Multi-clip scenes (segments >11s)
 
-When a scene segment exceeds 11 seconds, apply the editorial check in `templates/reels/reel-template.md` → Multi-Clip Scenes first. Do not start this workflow unless the check passes.
+When a scene segment exceeds 11 seconds, apply the editorial check in `agency/production/templates/reel-template.md` → Multi-Clip Scenes first. Do not start this workflow unless the check passes.
 
 **Step 1 — Plan trim math before generating**
 
@@ -739,12 +739,12 @@ Removes generated MP4s, transcripts, and audio files from `output/` to reset the
 ## TTS Rules
 
 ### VO text rules (Part 1)
-See `templates/reels/reel-template.md` — **TTS Rules → Part 1** (Rules 0, C, D, F).
+See `agency/production/templates/reel-template.md` — **TTS Rules → Part 1** (Rules 0, C, D, F).
 
 ### TTS override block (`[TTS:]`) (Part 2)
 When the ElevenLabs string must differ from the VO text, add `[TTS:]` immediately after `[VO:]`. `vo.py` uses the `[TTS:]` string for the API call; falls back to `[VO:]` if absent.
 
-See `templates/reels/reel-template.md` — **TTS Rules → Part 2** (Rules A, B, E, G).
+See `agency/production/templates/reel-template.md` — **TTS Rules → Part 2** (Rules A, B, E, G).
 
 No automatic text transforms are applied — `[TTS:]` is the exact string sent to ElevenLabs (minus `[PAUSE]` stripping and blank-line normalization).
 

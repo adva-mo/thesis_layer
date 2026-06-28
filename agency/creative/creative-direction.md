@@ -23,13 +23,13 @@ Runs before the Copywriter writes.
 
 **Decisions:** 8 (hook family), 9 (format + cadence)
 
-**Primary output:** the Creative Brief — the per-reel metadata block that records all creative direction decisions for this reel. Defined in `templates/reels/reel-template.md § Creative Brief (Per-Reel Header Block)`.
+**Primary output:** the Creative Brief — the per-reel metadata block that records all creative direction decisions for this reel. Defined in `agency/production/templates/reel-template.md § Creative Brief (Per-Reel Header Block)`.
 
 **Reference tools:**
-- `templates/hooks/hook-selection.md` — hook family selection, affinity matrix, diversity rules
-- `templates/reels/reel-formats.md` — format definitions, beat patterns, account stage fit
+- `agency/creative/hook-selection.md` — hook family selection, affinity matrix, diversity rules
+- `agency/creative/reel-formats.md` — format definitions, beat patterns, account stage fit
 
-**Where it runs in the workflow:** Step 1.5 in `templates/content-generation-workflow.md`
+**Where it runs in the workflow:** Step 1.5 in `agency/production/content-generation-workflow.md`
 
 **Extensibility principle:** As new creative concepts are introduced — attention patterns, visual grammar, cadence variants — they become additional fields in the Creative Brief, not new roles or top-level artifacts. The brief is the extensibility point.
 
@@ -44,9 +44,9 @@ Runs after the Copywriter writes. Evaluates whether the script executes the brie
 **The reviewer is the same authority who set the brief.** The Creative Director reviews their own brief's execution — this is not an external QA function.
 
 **Reference tools:**
-- `templates/reels/reel-preflight.md` — the Creative Review checks are annotated `[Creative Director]` in that document
+- `agency/editorial/reel-preflight.md` — the Creative Review checks are annotated `[Creative Director]` in that document
 
-**Where it runs in the workflow:** Step 2.4a in `templates/content-generation-workflow.md`
+**Where it runs in the workflow:** Step 2.4a in `agency/production/content-generation-workflow.md`
 
 ---
 

@@ -1,6 +1,6 @@
 # Hook Selection — Orchestration Reference
 
-This file governs which hook opens a given reel. It is read at Step 1.5 of the content generation workflow. It does NOT replace `templates/hooks/hook-template.md` — that file governs how hooks are written. This file governs which one is chosen.
+This file governs which hook opens a given reel. It is read at Step 1.5 of the content generation workflow. It does NOT replace `agency/production/templates/hook-template.md` — that file governs how hooks are written. This file governs which one is chosen.
 
 **Priority order: thesis fit → format fit → diversity.**
 Diversity is always a soft preference, never a hard rule. Thesis fit wins.
@@ -54,7 +54,7 @@ Brand hooks build the account voice. Performance hooks drive conversion and rete
 
 ## C. Format-Hook Fit
 
-> This table defines Format → Hook affinity only. For format definitions, beat patterns, and all format types (including Formats 6–11), see `templates/reels/reel-formats.md`.
+> This table defines Format → Hook affinity only. For format definitions, beat patterns, and all format types (including Formats 6–11), see `agency/creative/reel-formats.md`.
 
 | Reel Format | Strongest hook families |
 |-------------|------------------------|

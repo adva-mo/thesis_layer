@@ -39,7 +39,7 @@ Chrome headless CLI (`--print-to-pdf`) adds default headers and footers (file pa
 
 ## Stylesheet
 
-`templates/pdf/style.css` — shared RTL Hebrew styles for all project PDFs.
+`agency/production/templates/pdf-style.css` — shared RTL Hebrew styles for all project PDFs.
 
 Currently embedded inline in each HTML file. If styles diverge across projects, keep per-project overrides inline and use the shared file as the base reference.
 
@@ -61,7 +61,7 @@ Include the brand logo as the first element inside `<body>`, before any `<div cl
 <img src="../../../../assets/branding/logo-wide.png" class="pdf-logo" alt="" />
 ```
 
-The `.pdf-logo` class in `templates/pdf/style.css` overrides the global `img` rule to render the logo at 40px height with no border-radius and no `object-fit: cover`.
+The `.pdf-logo` class in `agency/production/templates/pdf-style.css` overrides the global `img` rule to render the logo at 40px height with no border-radius and no `object-fit: cover`.
 
 The relative path `../../../../assets/branding/logo-wide.png` resolves correctly from `output/[slug]/hebrew/pdfs/`.
 
@@ -89,4 +89,4 @@ Hebrew paragraphs containing multiple inline English phrases produce bidi render
 מאז <span dir="ltr">2018</span> פועל הגולף קורס
 ```
 
-The CSS rule `span[dir="ltr"] { unicode-bidi: isolate; direction: ltr; }` in `templates/pdf/style.css` ensures these spans isolate correctly. Use `isolate`, never `embed` — `embed` leaks bidi context and causes misplacement.
+The CSS rule `span[dir="ltr"] { unicode-bidi: isolate; direction: ltr; }` in `agency/production/templates/pdf-style.css` ensures these spans isolate correctly. Use `isolate`, never `embed` — `embed` leaks bidi context and causes misplacement.
