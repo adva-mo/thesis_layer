@@ -26,6 +26,20 @@ If `[MISSING]` fields exist: decide whether to proceed. Price missing → procee
 
 ---
 
+### Step 0.5 — Attention Angles [Attention Strategist]
+
+| | |
+|---|---|
+| **Owner** | Attention Strategist |
+| **Inputs** | `thesis.md` |
+| **Load** | `agency/creative/attention-strategist.md` |
+| **Output** | `## Attention Angles` section appended to `thesis.md` — 4–5 psychological entry points |
+| **Next** | Step 1 |
+
+Identify which patterns from the library have the strongest natural fit for this thesis. Apply the quality test to each. Append output directly to `thesis.md`.
+
+---
+
 ### Step 1 — Generate Hooks [Copywriter]
 
 | | |
@@ -45,7 +59,7 @@ Produce one hook per category. Each hook uses specific data from PROJECT DATA, i
 | | |
 |---|---|
 | **Owner** | Creative Director (Phase 1) |
-| **Inputs** | Hooks from Step 1, `thesis.md`, `output/history/hook-log.md` |
+| **Inputs** | Hooks from Step 1, `thesis.md` (including `## Attention Angles`), `output/history/hook-log.md` |
 | **Load** | `agency/creative/hook-selection.md`, `agency/creative/cadence-rules.md`, `agency/creative/reel-formats.md` |
 | **Output** | Per-reel Creative Brief — hook family, format, cadence — written into each reel's header block |
 | **Next** | Step 2 |

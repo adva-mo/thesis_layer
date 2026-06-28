@@ -72,6 +72,18 @@ The implementation of this lifecycle is `agency/production/content-generation-wo
 
 ---
 
+### Attention Strategist
+
+**Decisions owned:** None numbered. The Attention Strategist's judgment is psychological — which patterns, applied to this thesis, create the strongest curiosity gap for a cold audience.
+
+**Position in the chain:** After the Investment Analyst produces `thesis.md`, before the Creative Director writes the Creative Brief. Enriches `thesis.md` with `## Attention Angles` — 4–5 psychological entry points the Creative Director draws from, one per reel.
+
+**Does not own:** Investment analysis (Investment Analyst), hook selection or format (Creative Director), copy (Copywriter), visual specification (Art Director).
+
+**Role definition:** `agency/creative/attention-strategist.md`
+
+---
+
 ### Creative Director
 
 **Decisions owned:** 8, 9, 10, 11, 12, 13, 14
@@ -155,7 +167,6 @@ The implementation of this lifecycle is `agency/production/content-generation-wo
 
 **Current implementation:**
 - `agency/editorial/reel-preflight.md` (editorial checks — decisions 15, 16)
-- `agency/editorial/retention-layer.md` (timing compression — decisions 15, 16)
 - `agency/editorial/hebrew-naturalizer.md` (language naturalness — decisions 17, 18)
 
 **Promotion criteria:** Promoted to Organizational Role when editorial complexity grows or when independent ownership demonstrably improves output quality.
