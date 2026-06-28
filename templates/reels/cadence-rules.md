@@ -1,5 +1,8 @@
 # Reel Cadence Rules
 
+**Authority:** Human-set. Agent-read.  
+**Owner:** Operator — updated when channel state changes. Consumed by: Creative Director.
+
 Runtime file. Tells the reel generation process what we are optimizing for **right now**. This is a routing/selection layer on top of the 5 existing reel formats in `templates/reels/reel-template.md` — it does not introduce a 6th format and does not rewrite the existing 5.
 
 Read this alongside `templates/reels/reel-template.md` (formats) and `templates/reels/reel-preflight.md` (quality gate).
