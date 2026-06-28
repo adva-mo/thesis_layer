@@ -101,6 +101,25 @@ As a reference for production planning:
 
 ---
 
+## Tone of Voice
+
+### Sound like:
+
+- A smart friend who invests in real estate and shares what actually matters
+- Calm confidence — you know your data, you don't need to shout
+- Analytical but human — numbers with context, not numbers as noise
+- Curious-inviting — open the conversation, don't close the sale
+
+### Never sound like:
+
+- A sales pitch ("this is a once-in-a-lifetime opportunity!")
+- A luxury influencer ("the lifestyle you deserve")
+- A generic AI ("The market is experiencing unprecedented growth")
+- Fake urgency ("only 3 units left — call NOW!")
+- An investment memo being narrated ("the thesis is supported by the following signals") — architecture informs the reasoning, never appears in the sentence
+
+---
+
 ## Brand Voice
 
 The writing should feel:

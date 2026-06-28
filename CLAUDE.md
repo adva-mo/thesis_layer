@@ -85,28 +85,11 @@ For full brand positioning, visual identity, and voice calibration table, see `a
 
 ## 3. Tone of Voice
 
-### Sound like:
+See `assets/branding/brand-guidelines.md` — Tone of Voice section.
 
-- A smart friend who invests in real estate and shares what actually matters
-- Calm confidence — you know your data, you don't need to shout
-- Analytical but human — numbers with context, not numbers as noise
-- Curious-inviting — open the conversation, don't close the sale
+Calibration test: see `market.md` — Calibration Test section.
 
-### Never sound like:
-
-- A sales pitch ("this is a once-in-a-lifetime opportunity!")
-- A luxury influencer ("the lifestyle you deserve")
-- A generic AI ("The market is experiencing unprecedented growth")
-- Fake urgency ("only 3 units left — call NOW!")
-- An investment memo being narrated ("the thesis is supported by the following signals") — architecture informs the reasoning, never appears in the sentence
-
-### Calibration test:
-
-See `market.md` — Calibration Test section.
-
-### Voice examples:
-
-Before generating any content, read `docs/voice-examples.md`. Use one example per output as a voice calibration reference — for tone, pacing, and reasoning style only. Do not imitate examples directly or repeat their sentence formulas.
+Before generating any content, use one example from `docs/voice-examples.md` as a voice calibration reference — tone, pacing, and reasoning style only. Do not imitate examples directly or repeat their sentence formulas.
 
 ---
 
@@ -127,13 +110,7 @@ If a file exists at `agency/editorial/[primary-language]-naturalizer.md`, apply 
 
 ## 6. Hook Writing Rules
 
-Every hook must serve one psychological function. Choose from the 10 categories in `agency/production/templates/hook-template.md`. Do not blend more than two.
-
-- First 3 words must create tension, curiosity, or surprise
-- Max 2 sentences for social media hooks
-- Never start with "Are you looking for..." or "Do you want..."
-- One specific number per hook (price, %, timeframe, or ratio) when possible
-- Test: if the hook could work for any project, rewrite it to be specific
+Every hook must serve one psychological function. See `agency/production/templates/hook-template.md` for the 10 categories and cross-cutting rules. Do not blend more than two categories.
 
 For hook selection logic (which hook opens which reel, diversity rules, brand/performance balance, rhetorical freshness), see `agency/creative/hook-selection.md`.
 
@@ -204,14 +181,7 @@ See `agency/research/extraction-workflow.md` for the full schema, input handling
 
 ## 11. Content Repurposing Rules
 
-ONE PROJECT → MANY CONTENT PIECES. Extract once; adapt per format.
-
-**Fixed across all content:** project name, developer, key numbers, location, investment angle.
-**Adapts per format:** hook type (different category each) · depth (hooks = surface, LinkedIn = depth, PDF = full) · tone (WhatsApp = personal, LinkedIn = professional, Reels = fast) · CTA tier (platform-matched).
-
-**Sequence:** extract → LinkedIn post → repurpose body as investor summary → carousel slides as reel talking points → hooks as reel openers + WhatsApp subject lines → investor summary as PDF section.
-
-Do not generate each format from scratch. Always adapt from what's already been generated.
+See `agency/production/content-generation-workflow.md` — Repurposing Strategy section.
 
 ---
 
@@ -288,22 +258,7 @@ See `agency/research/positioning-framework.md` for categories, decision logic, a
 
 After generating reel scripts (Step 2 in `agency/production/content-generation-workflow.md`), append a Visual Evidence Plan to each reel and execute automated asset collection.
 
-See `agency/art/asset-collection.md` for full execution rules, source priority matrix, and criticality thresholds.
-
-**Folder structure per project:**
-
-```
-assets/[project-slug]/
-├── manifest.md
-├── canonical/
-├── raw/
-└── raw/rejected/
-```
-
-- Every `[VISUAL_TYPE:]` tag in a reel must have a matching VEP row before the reel is ready for rendering
-- A reel is not ready for editing if any `prove` or `reinforce` asset is MISSING
-- Reuse canonical assets across reels, carousels, and PDFs via the manifest `used_in` field
-- Vision-rejected assets go to `raw/rejected/` — never deleted
+See `agency/art/asset-collection.md` for full execution rules, folder structure, source priority matrix, and criticality thresholds.
 
 ---
 

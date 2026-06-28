@@ -345,6 +345,19 @@ Do not mark any Hebrew file `status: ready` until the naturalizer sign-off is pr
 
 ---
 
+## Repurposing Strategy
+
+ONE PROJECT → MANY CONTENT PIECES. Extract once; adapt per format.
+
+**Fixed across all content:** project name, developer, key numbers, location, investment angle.
+**Adapts per format:** hook type (different category each) · depth (hooks = surface, LinkedIn = depth, PDF = full) · tone (WhatsApp = personal, LinkedIn = professional, Reels = fast) · CTA tier (platform-matched).
+
+**Sequence:** extract → LinkedIn post → repurpose body as investor summary → carousel slides as reel talking points → hooks as reel openers + WhatsApp subject lines → investor summary as PDF section.
+
+Do not generate each format from scratch. Always adapt from what's already been generated.
+
+---
+
 ## Repurposing Pass (Optional but Recommended)
 
 After completing Steps 1-7, run a quick repurposing pass:

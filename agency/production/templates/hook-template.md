@@ -6,6 +6,18 @@
 
 ---
 
+## Cross-Cutting Rules
+
+These apply to every hook regardless of category:
+
+- First 3 words must create tension, curiosity, or surprise
+- Max 2 sentences for social media hooks
+- Never start with "Are you looking for..." or "Do you want..."
+- One specific number per hook (price, %, timeframe, or ratio) when possible
+- Test: if the hook could work for any project, rewrite it — it must be specific to this one
+
+---
+
 ## H1 — Curiosity Gap
 
 **Psychological lever:** Information asymmetry — reader feels they're getting insider knowledge before others.
