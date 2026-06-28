@@ -84,7 +84,7 @@ The implementation of this lifecycle is `agency/production/content-generation-wo
 
 **Does not own:** Writing the copy, editorial compression, Hebrew naturalness, visual specification, asset sourcing
 
-**Role definition:** `agency/creative/creative-direction.md`
+**Role definition:** `agency/creative/creative-director.md`
 
 **Current implementation:**
 - Phase 1 — `agency/creative/hook-selection.md`, `agency/creative/reel-formats.md`
