@@ -2,443 +2,240 @@
 
 The master production workflow. Run this after you have a confirmed PROJECT DATA block.
 
+For the organizational model and production stage lifecycle, see `docs/agency-model.md`.  
+For output file naming, folder structure, writing rules, and publication checklist, see `docs/output-conventions.md`.
+
 ---
 
 ## Prerequisites
 
 Before starting:
 - [ ] PROJECT DATA block is complete (or has documented `[MISSING]` fields)
-- [ ] CLAUDE.md has been read in this session — `market.md`, `docs/voice-examples.md`, and `primary_language.md` loaded at session init
-- [ ] Read `docs/output-conventions.md` — file naming, folder structure, and content block headers for saving outputs
-- [ ] Language confirmed: Hebrew / English / Both
-- [ ] `output/[project-slug]/thesis.md` exists — produced by `agency/research/positioning-framework.md` after positioning is confirmed
-- [ ] `output/[project-slug]/thesis.md` is loaded now — read it once here, do not re-read per step below
-- [ ] `output/[project-slug]/project-data.md` exists — if missing, continue (do not re-run extraction). Note: `project-data.md` is mandatory in `extraction-workflow.md` Step 3 for all future projects sourced from a URL or brochure.
-- For reel sessions: `output/history/hook-log.md` and `docs/reel-pipeline.md` are also loaded at session init (CLAUDE.md §1.5). Do not re-read in Steps 1.5 or 2.
+- [ ] `market.md`, `docs/voice-examples.md`, and `primary_language.md` loaded at session init
+- [ ] `output/[project-slug]/thesis.md` exists and is loaded — produced by `agency/research/positioning-framework.md`
+- [ ] `output/[project-slug]/project-data.md` exists (if missing, note it; do not re-run extraction)
+- [ ] For reel sessions: `output/history/hook-log.md` and `docs/reel-pipeline.md` loaded at session init (CLAUDE.md §1.5)
 
-If `thesis.md` is missing: run positioning first, produce thesis.md, then return here.
+If `thesis.md` is missing: run positioning first, produce `thesis.md`, then return here.
 
-If `[MISSING]` fields exist, decide whether to continue or stop and get the missing data first. Price missing? Proceed with caution. Developer missing? Stop and find it — it affects credibility.
-
----
-
-## Global Writing Rules
-
-These apply to every content type, every language, every format.
-
-**Do not use "-" or "—" as a mid-sentence separator or thought-break.**
-
-Not allowed:
-המחיר - לא מאומת
-היא — אחד הפרטים החשובים
-תשואה — זה לא מספר אחד
-
-Use "," or ":" instead:
-המחיר: לא מאומת
-היא אחד הפרטים החשובים
-תשואה: זה לא מספר אחד
-
-"-" is allowed only in:
-- Hyphenated terms: re-branding, buy-to-let, off-plan
-- Dates: 12-12-2011, 2025-03-01
-- Markdown list bullets at the start of a line (- item)
-
-"—" is allowed only in:
-- The extraction warning block (metadata, not body content)
-
-If "-" or "—" appears mid-sentence: rewrite.
+If `[MISSING]` fields exist: decide whether to proceed. Price missing → proceed with caution. Developer missing → stop and find it.
 
 ---
 
 ## Production Sequence
 
-Run in this order. Each step uses the PROJECT DATA block as input.
+---
+
+### Step 1 — Generate Hooks [Copywriter]
+
+| | |
+|---|---|
+| **Owner** | Copywriter |
+| **Inputs** | PROJECT DATA block, `thesis.md` |
+| **Load** | `agency/production/templates/hook-template.md` |
+| **Output** | 10 hooks (H1–H10), Hebrew + English, saved to `output/[slug]/[lang]/hooks/` |
+| **Next** | Step 1.5 |
+
+Produce one hook per category. Each hook uses specific data from PROJECT DATA, is labeled `[HOOK TYPE]`, is under 280 characters, and works standalone.
 
 ---
 
-### Step 1 — Generate 10 Hooks
+### Step 1.5 — Creative Brief [Creative Director]
 
-Reference: `agency/production/templates/hook-template.md`
+| | |
+|---|---|
+| **Owner** | Creative Director (Phase 1) |
+| **Inputs** | Hooks from Step 1, `thesis.md`, `output/history/hook-log.md` |
+| **Load** | `agency/creative/hook-selection.md`, `agency/creative/cadence-rules.md`, `agency/creative/reel-formats.md` |
+| **Output** | Per-reel Creative Brief — hook family, format, cadence — written into each reel's header block |
+| **Next** | Step 2 |
 
-Produce one hook per category (H1–H10). Each hook:
-- Uses the correct formula from the template
-- References specific data from PROJECT DATA
-- Is labeled `[HOOK TYPE]`
-- Is under 280 characters
-- Works standalone (no context needed)
-
-Produce both Hebrew and English versions.
-
-Save to `output/[project-slug]/[language]/hooks/` — see CLAUDE.md §12 for naming conventions.
+Apply the 4-step selection rule from hook-selection.md §E for each reel. One reel = one hook family.
 
 ---
 
-### Step 1.5 — Select Opening Hook for Each Reel [Creative Director — Phase 1: Creative Brief]
+### Step 2 — Generate Reel Scripts [Copywriter]
 
-Role definition: `agency/creative/creative-direction.md` · Reference: `agency/creative/hook-selection.md`
+| | |
+|---|---|
+| **Owner** | Copywriter |
+| **Inputs** | Creative Brief (Step 1.5 output), `thesis.md` |
+| **Load** | `agency/creative/cadence-rules.md` (run Compress-First Gate before selecting a format), `agency/production/templates/reel-template.md`, `agency/editorial/reel-preflight.md` |
+| **Output** | Reel blueprints in `output/[slug]/[lang]/reels/` |
+| **Next** | Step 2.4a |
 
-Before scripting any reel:
+Write each script to already pass reel-preflight.md — Step 2.4a is a verification pass, not first exposure to the bar. Use thesis.md Thesis Statement as the source for Insight segments; use thesis.md Risk Register for Reality Check segments. Do not fill visual fields (`[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`) — those are filled by the Art Director at Step 2.5.
 
-1. Use `output/history/hook-log.md` — already in session context for reel sessions (loaded at session init, CLAUDE.md §1.5). Create if missing using the template in hook-selection.md §F.
-2. Apply the 4-step selection rule from hook-selection.md §E for each reel format being produced
-3. From the 10 generated hooks (Step 1), select the hook matching the chosen family for that reel's opening beat
-4. After each reel is scripted, append a row to `output/history/hook-log.md` and recompute the "Next reel recommendation" block for this project in that file. After the reel is retention-reviewed (Step 2.4b), fill in the `brand_frames` column from the post-retention integrity block's "Framework terms named" field.
-
-**Rules:**
-- One reel = one hook family. Do not blend families in the opening beat.
-- Thesis fit takes priority over diversity. Only diversify when a strong-fit alternative exists.
-- Log every reel before moving to the next one.
-- **Channel brand frame drift check:** Before selecting each reel's hook, scan the last 5 PUBLISHED rows in `hook-log.md`. If "Thesis" does not appear in the `brand_frames` column of any of those rows, flag it and prioritize a reel format and hook where naming "Thesis" is natural — but do not force it if the script doesn't support it cleanly.
+After scripting each reel: append a row to `output/history/hook-log.md` and recompute the "Next reel recommendation" block.
 
 ---
 
-### Step 2 — Generate 5 Reel Scripts
+### Step 2.4a — Self Review: Creative [Creative Director]
 
-**Before scripting — read in this order:**
-1. `agency/creative/cadence-rules.md` — sets the length ceiling for this sprint before any format is considered. Run the Compress-First Gate (in that file) now. Do not select a format until the length decision is made.
-2. `agency/production/templates/reel-template.md` — format spec. §Script Conventions defines every tag the parser requires. Key rule: scenes must be separated by `---`; do NOT use deprecated `[VISUAL:]` or `[SCREEN:]` tags. **Visual fields (`[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`) are NOT written at script time — they are filled by the Visuals Layer (Step 2.5). Script provides `[BEAT:]`, `[VO:]`, `[TTS:]`, and `[TEXT_CARD:]` only when text on screen IS the content.** If reel-template.md was already loaded at session init (CLAUDE.md §1.5), skip re-read — but still run the Compress-First Gate before selecting a format.
-3. `agency/editorial/reel-preflight.md` — write every script to already pass this gate on the first draft, not just to satisfy it after the fact.
-3. Before writing each hook: identify the cadence and apply the Hook-Insight Integrity rule (reel-preflight.md). For **QUESTION cadence** — confirm the thesis contains a defensible answer (verified fact, supported inference, or clearly labeled hypothesis) that fits within the Insight segment. If no defensible answer exists, use **CONTRAST cadence** instead. For **CONTRAST cadence** — confirm the body will explain why the exception matters, not just show that it exists.
+| | |
+|---|---|
+| **Owner** | Creative Director (Phase 2) |
+| **Inputs** | Reel scripts from Step 2 |
+| **Load** | Already in session context from Step 2 — no re-read needed |
+| **Output** | PRE-FLIGHT REVIEW block per reel; revisions applied if needed; status → SCRIPTED |
+| **Next** | Step 2.4b |
 
-Step 2.4a below is a verification pass, not the first time these criteria apply — drafting against them now should mean Step 2.4a mostly confirms rather than rewrites.
-
-Produce 5 reel scripts, one per format (Data Drop, Investment Case, Myth Bust, Area Spotlight, Payment Plan Breakdown). For full format definitions and additional format types (Formats 6–11), see `agency/creative/reel-formats.md`.
-
-Each script includes:
-- Format name + duration
-- Hook line (first 3 seconds)
-- Insight segment `[4–15s]`: use thesis.md Thesis Statement as the source — do not re-derive the investment logic, adapt the language for spoken delivery
-- Body (timestamp segments with `[BEAT:]` labels and `[VO:]` lines — no visual tags; those are filled by the Visuals Layer at Step 2.5)
-- Reality check segment `[28–38s]`: draw from thesis.md Risk Register — do not independently re-derive risks
-- Voice style: use thesis.md Voice Style — do not select per-reel
-- Closing CTA (Tier 2): use thesis.md CTA Keyword
-- Caption (2–3 sentences + hashtags)
-
-Save to `output/[project-slug]/[language]/reels/` — see CLAUDE.md §12.
+Run reel-preflight.md against each script. If flagged `revise`, fix per reel-preflight.md §Self Review: Repair and re-run. Cap: 2 attempts — escalate to user with both PRE-FLIGHT REVIEW blocks if still failing after the 2nd pass. Do not proceed to Step 2.4b on a script still flagged `revise`.
 
 ---
 
-### Step 2.4a — Pre-Flight Verification & Refine [Creative Director — Phase 2: Creative Review]
+### Step 2.4b — Self Review: Retention [Copy Editor]
 
-Role definition: `agency/creative/creative-direction.md` · Both `agency/editorial/reel-preflight.md` and `agency/creative/cadence-rules.md` are already in session context from Step 2 — no re-read needed.
+| | |
+|---|---|
+| **Owner** | Copy Editor |
+| **Inputs** | SCRIPTED reel scripts |
+| **Load** | `agency/editorial/retention-layer.md` |
+| **Output** | Timing-compressed scripts; status → RETENTION |
+| **Next** | Step 2.4c |
 
-This is a verification pass, not the first exposure to the bar — Step 2 already drafted against `cadence-rules.md` and `reel-preflight.md`. This step catches what slipped through, it doesn't introduce new requirements.
-
-For each reel scripted in Step 2:
-
-1. Run `agency/editorial/reel-preflight.md` against the full script and output the `PRE-FLIGHT REVIEW` block.
-2. If `Recommendation: revise` — refine the script directly (do not just flag it), using the flagged categories as edit instructions:
-
-   | Flag | Fix |
-   |---|---|
-   | Hook Strength: weak/medium | Rewrite the hook to create curiosity, contradiction, mistake framing, money tension, myth bust, or wrong-question framing (see reel-preflight.md Hook Strength Test). If the current hook family can't be made strong for this thesis, pick a different family from `hook-selection.md`. |
-   | Payoff Timing: delayed | Move the core number/insight earlier; cut setup that precedes it. |
-   | Cognitive Load: high | Cut numbers to the 1–3 budget (reel-template.md — Numbers Must Earn Their Place); reduce to one idea per segment. |
-   | Risk Placement: incorrect | Move risk earlier; the last beat before CTA must be a reframe, thesis return, or investor question (reel-template.md — Final Impression Rule). |
-   | Ending Momentum: weak | Apply one allowed closing mechanism: return to thesis, reframe the risk, surface the investor question, compare tradeoffs, or create curiosity. |
-   | Overexplaining: trim needed | Apply the Q12 compression test ("can one sentence be removed without weakening the thesis?") — remove any sentence where the answer is yes — until clean. |
-   | Cadence Label: mismatch | Read the hook VO and identify its actual rhetorical structure. Either rewrite the hook VO to match the declared cadence, or relabel the cadence to match what was written. Then re-run Hook-Insight Integrity against the correct cadence label. |
-   | Hook-Insight Integrity: fail | Identify which violation triggered the fail (promise deferred to CTA, or claim presented as fact without evidence). If deferred: rewrite the Insight segment to answer the hook before the CTA, or change the hook cadence to CONTRAST. If unsupported fact: relabel the claim as inference ("this may indicate...", "one reading of this is...") or remove it. |
-
-3. Re-run the preflight after refining. Repeat until `Recommendation: approved`.
-4. Set the reel's `**Status:**` field to `SCRIPTED`. Proceed to Step 2.4b. Do not present the script to the user yet — the user reviews the final naturalizer-signed version after Step 2.4c.
-
-**Cap: max 2 preflight reviews per reel.** If the script is still flagged `revise` after the 2nd review, stop refining and escalate to the user with the script, both `PRE-FLIGHT REVIEW` blocks, and the remaining flagged categories — do not keep looping. A script needing a 3rd pass usually means a thesis or format mismatch, not a wording fix.
-
-Do not proceed to Step 2.4b on a script still flagged `revise`.
+Run retention-layer.md against the full script. Produce a per-beat diff. Run the post-retention integrity check (5 checks: new claims, hook promise, risk placement, ending momentum, brand frames). If `revert-beat`: restore the flagged beat and re-run integrity on that beat only. Copy the `Framework terms named` field — you'll add this to hook-log.md when logging the reel.
 
 ---
 
-### Step 2.4b — Retention Optimization Layer [Copy Editor]
+### Step 2.4c — Self Review: Naturalizer [Copy Editor]
 
-Role definition: `agency/editorial/copy-editor.md` · Reference: `agency/editorial/retention-layer.md`
+| | |
+|---|---|
+| **Owner** | Copy Editor |
+| **Inputs** | RETENTION scripts |
+| **Load** | `agency/editorial/hebrew-naturalizer.md` |
+| **Output** | Naturalized VO; naturalizer sign-off written in reel file; status → NATURALIZER |
+| **Next** | Gate 1 |
 
-Runs on the pre-flight-approved script (Status: SCRIPTED). Compresses scaffolding without touching facts, certainty labels, or Brand Frames.
-
-1. Run `agency/editorial/retention-layer.md` against the full script. Produce a per-beat diff output.
-2. Run the post-retention integrity check (5 checks: new claims, hook promise, risk placement, ending momentum, brand frames).
-3. If verdict is `revert-beat`: restore the flagged beat and re-run integrity on that beat only.
-4. Set the reel's `**Status:**` field to `RETENTION`. Proceed to Step 2.4c.
-5. Copy the `Framework terms named` field from the post-retention integrity block — you'll add this to hook-log.md when you log the reel.
-
----
-
-### Step 2.4c — Naturalizer for Reel VO [Copy Editor]
-
-Role definition: `agency/editorial/copy-editor.md` · Reference: `agency/editorial/hebrew-naturalizer.md`
-
-Applies to reel VO text only. Runs after retention optimization, before user approval — so the user reviews and approves the final polished Hebrew, not an intermediate.
-
-Apply the naturalizer to the retention-optimized VO text for all `[VO:]` blocks in the reel. Apply rules from `agency/editorial/hebrew-naturalizer.md` exactly as they apply to other Hebrew content: TTS compliance, register checks, em-dash removal, expansion of abbreviations, VO-specific rules.
-
-Write the naturalizer sign-off in the reel file:
-- `_Naturalizer applied: [date] — No meaningful language issues._`
-- `_Naturalizer applied: [date] — [list of changes made]_`
-
-After naturalizer sign-off: set reel's `**Status:**` field to `NATURALIZER`. **Present the script to the user now, together with the timing confirmation table below.**
-
-### VO Timing Confirmation (present at Gate 1, alongside the script)
-
-Retention guarantees timing fit before this point. This table is a sanity check — in normal flow it shows all ✓. A ⚠ here means an escalation case that retention surfaced and the user already resolved, or a bug.
-
-| Scene | Slot | Est. duration | Status |
-|---|---|---|---|
-| [timestamp] | Ns | ~Xs | ✓ |
-
-**Formula:** `estimated_seconds = len(vo_text_stripped) / (chars_per_second_he × video_speed)`
-= `len(vo_text_stripped) / 9.72`
-(Source: `config/voice-settings.json` → `chars_per_second_he` × `video_speed`. Strip punctuation, quote marks, bracketed tags before counting.)
-
-**If any scene shows ⚠ here:** retention did not complete timing compression — re-run retention before proceeding.
-
-**Do not proceed to Step 2.5 (Visuals Layer) or any paid API call until the user explicitly approves the script.** Once the user approves, update `**Status:**` to `APPROVED` before continuing.
-
-Status progression: `SCRIPTED` → `RETENTION` → `NATURALIZER` → `APPROVED`
+Apply the naturalizer to all `[VO:]` blocks. Write the sign-off. Present the script to the user together with the VO Timing Confirmation table. Formula: `len(vo_text_stripped) / 9.72` (source: `config/voice-settings.json` — `chars_per_second_he × video_speed`). Strip punctuation, quote marks, and bracketed tags before counting. If any scene shows ⚠, retention did not complete timing compression — re-run Step 2.4b before proceeding.
 
 ---
 
-### Step 2.5 — Visuals Layer
-
-Reference: `agency/art/visuals-layer.md`
-
-Prerequisites: Status = `APPROVED` (user has approved the VO in conversation). No paid API calls have run yet.
-
-For each approved reel:
-
-1. Read `agency/art/visuals-layer.md`
-2. Inventory canonical assets from `assets/[project-slug]/manifest.md`
-3. Direct the full visual execution — fill `[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`, and `[KLING_AVOID:]` directly in the reel blueprint for every scene
-4. Append the Visual Evidence Plan (VEP) section to the reel file, with one row per scene
-5. Write Vision Flags for any segments requiring new asset collection
-6. Set the reel's `**Status:**` to `VISUAL-DIRECTED`
-7. **Present the visual plan to the user now.** Show the execution table, arc summary, and VEP rows.
-
-**Do not proceed to Step 2.6 (asset collection) or any paid API call until the user explicitly approves the visual plan.** `VISUAL-DIRECTED` means the plan is ready for review — it is not spend authorization.
-
-Status progression: `APPROVED` → `VISUAL-DIRECTED` (awaiting user sign-off on visuals) → `VISUAL-APPROVED`
-
-Once the user approves the visual plan, run the producibility check before proceeding: `agency/production/producibility-check.md`. The check must return **READY TO PRODUCE** before asset collection or any paid API call.
+> **Gate 1 — Script Approval:** Present the NATURALIZER-status script and VO Timing Confirmation table. Wait for explicit user approval.
+> Status advances to APPROVED. Revision is possible here — if requested, return to Step 2 and re-present. Do not proceed to Step 2.5 or any paid API call until Approved.
 
 ---
 
-### Step 2.6 — Asset Collection
+### Step 2.5 — Visual Direction [Art Director]
 
-Reference: `agency/art/asset-collection.md`
+| | |
+|---|---|
+| **Owner** | Art Director |
+| **Inputs** | APPROVED reel scripts, `assets/[slug]/manifest.md` |
+| **Load** | `agency/art/visuals-layer.md`, `agency/production/producibility-check.md` |
+| **Output** | Visual execution table, VEP rows, `visual-direction.json` written into blueprint; status → VISUAL-DIRECTED |
+| **Next** | Gate 2 |
 
-Prerequisites: Step 2.5 complete (Visuals Layer has filled all visual fields and produced VEP rows). API keys present in `.env`: `UNSPLASH_ACCESS_KEY`, `GOOGLE_MAPS_KEY`.
-
-For each reel directed in Step 2.5:
-1. Execute `agency/art/asset-collection.md` against the VEP already in the reel file
-   - Anti-collect list: copy from `output/[project-slug]/thesis.md` — Anti-Collect Guidance. Do not re-derive per reel.
-2. Save validated assets to `assets/[project-slug]/canonical/`
-3. Move vision-rejected assets to `assets/[project-slug]/raw/rejected/`
-4. Update `assets/[project-slug]/manifest.md`
-5. Append the Collection Status Report to the reel file
-
-If API keys are absent: generate search terms from Vision Flags only. Mark each reel `PARTIAL — AWAITING API KEYS`. Execute collection when keys are available.
-
-Step 2.6 is skipped for: PDF-only projects, LinkedIn-only outputs, or any project with no reel scripts.
+Fill `[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`, and `[KLING_AVOID:]` directly in the blueprint for every scene. Append the VEP section. Write Vision Flags for segments requiring new assets. Present the visual plan to the user: execution table, arc summary, and VEP rows.
 
 ---
 
-### Step 3 — Generate 1 Carousel
-
-Reference: `agency/production/templates/carousel-template.md`
-
-Use `thesis.md` already in session context.
-
-Produce 7 slides. Follow the fixed structure (Hook → Project → Numbers → Area → Audience → Reality Check → CTA).
-
-Slide sourcing:
-- **Slide 2 (Why This Matters):** use thesis.md Thesis Statement as the source — adapt for carousel format, do not re-derive
-- **Slide 3 (Key Numbers):** use thesis.md Key Numbers block verbatim — do not reformat from context
-- **Slide 4 (Investment Thesis):** use thesis.md Thesis Statement — second adaptation, different angle from Slide 2
-- **Slide 6 (Reality Check):** draw from thesis.md Risk Register — do not independently re-derive risks
-- **Slide 7 (CTA):** use thesis.md CTA Keyword
-
-Each slide: slide text (1-3 lines) + visual note in brackets.
-
-Save to `output/[project-slug]/[language]/carousel/` — see CLAUDE.md §12.
+> **Gate 2 — Visual Approval:** Present the VISUAL-DIRECTED visual plan. Wait for explicit user approval.
+> Run `agency/production/producibility-check.md` — must return READY TO PRODUCE before continuing. Status advances to VISUAL-APPROVED. Revision is possible here. Do not proceed to Step 2.6 or any paid API call until VISUAL-APPROVED.
 
 ---
 
-### Step 4 — Generate 1 LinkedIn Post per language
+### Step 2.6 — Asset Collection [Art Director]
 
-Reference: `agency/production/templates/linkedin-template.md`
+| | |
+|---|---|
+| **Owner** | Art Director |
+| **Inputs** | VISUAL-APPROVED blueprints with VEP rows, `thesis.md` Anti-Collect Guidance |
+| **Load** | `agency/art/asset-collection.md` |
+| **Output** | Canonical assets in `assets/[slug]/canonical/`, manifest updated, Collection Status Report appended to reel file |
+| **Next** | **Reel-only run:** continue to `docs/reel-pipeline.md`. **Full content run:** continue to Step 3. |
 
-Each language gets its own separate file in its own directory. Do not combine languages in one file.
+Anti-collect list from `thesis.md` — do not re-derive per reel. Save validated assets to canonical; move rejected assets to `raw/rejected/`. Skip for PDF-only or LinkedIn-only projects.
 
-- Hebrew post → `output/[project-slug]/hebrew/linkedin/[project-slug]-he-linkedin.md`
-- English post → `output/[project-slug]/english/linkedin/[project-slug]-en-linkedin.md`
-
-After writing the Hebrew LinkedIn file (including Investor Summary and CTA Variations), append a **Pitch Block** section:
-
-```
-## Pitch Block
-
-[3–5 sentence natural spoken Hebrew paragraph: project name + developer + location, entry price, payment structure, one-sentence investment angle. Written in WhatsApp register: short, personal, natural. This is the paragraph WhatsApp will adapt — not a LinkedIn section.]
-```
-
-The Pitch Block is the distilled, publication-ready project description. Write it once; WhatsApp adapts it three times.
+If API keys are absent: generate search terms from Vision Flags only, notify the user that collection cannot run, and mark the reel `PARTIAL — AWAITING API KEYS`. Do not proceed silently.
 
 ---
 
-### Step 5 — Generate 3 WhatsApp Messages
+### Step 3 — Generate Carousel [Copywriter]
 
-Reference: `agency/production/templates/whatsapp-template.md`
+| | |
+|---|---|
+| **Owner** | Copywriter |
+| **Inputs** | `thesis.md` |
+| **Load** | `agency/production/templates/carousel-template.md` |
+| **Output** | 7-slide carousel saved to `output/[slug]/[lang]/carousel/` |
+| **Next** | Step 4 |
 
-**Before writing:** Read the Pitch Block section from `output/[project-slug]/hebrew/linkedin/[project-slug]-he-linkedin.md`.
-
-Use the Pitch Block as the core project description in all 3 variants. Adapt only the greeting, relationship framing (cold / warm / re-engagement), and closing question per variant. Do not re-compose the project description from scratch.
-
-Three variants: cold outreach, warm follow-up, re-engagement.
-
-Hebrew-first. Each ends with a question. Max 4 short paragraphs per variant.
-
-Save to `output/[project-slug]/hebrew/whatsapp/` — see CLAUDE.md §12.
+Slide sourcing: Slides 2 and 4 from thesis.md Thesis Statement (different angles). Slide 3 from Key Numbers block verbatim. Slide 6 from Risk Register. Slide 7 uses CTA Keyword.
 
 ---
 
-### Step 6 — Generate 1 Investor Summary
+### Step 4 — Generate LinkedIn Post [Copywriter]
 
-150-200 words. No hype. Pure signal.
+| | |
+|---|---|
+| **Owner** | Copywriter |
+| **Inputs** | `thesis.md` |
+| **Load** | `agency/production/templates/linkedin-template.md` |
+| **Output** | Per-language post saved to `output/[slug]/[lang]/linkedin/[slug]-[lang]-linkedin.md`; Hebrew file includes a **Pitch Block** at the bottom |
+| **Next** | Step 5 |
 
-Structure: Project → Location → Key Numbers → Investment Angle → Honest Risk Note.
-
-Use `thesis.md` already in session context.
-- Key Numbers section: use thesis.md Key Numbers block — do not reformat from context
-- Honest Risk Note: draw from thesis.md Risk Register — include 2–3 of the listed risks
-
-Suitable for emails and PDF lead magnets. Write it once — repurpose everywhere.
-
-Append to each language's LinkedIn file as a separate section at the bottom. Hebrew summary → Hebrew LinkedIn file. English summary → English LinkedIn file.
+Each language gets its own file. Append a Pitch Block to the Hebrew file: 3–5 sentence spoken Hebrew paragraph (project, price, structure, investment angle).
 
 ---
 
-### Step 7 — Generate 3 CTA Variations
+### Step 5 — Generate WhatsApp Messages [Copywriter]
 
-Produce one CTA per tier (Soft / Medium / Direct).
+| | |
+|---|---|
+| **Owner** | Copywriter |
+| **Inputs** | `thesis.md` |
+| **Load** | `agency/production/templates/whatsapp-template.md` |
+| **Output** | 3 variants (cold / warm / re-engagement) saved to `output/[slug]/hebrew/whatsapp/` |
+| **Next** | Step 6 |
 
-Append to each language's LinkedIn file as a separate section. Hebrew CTAs → Hebrew LinkedIn file. English CTAs → English LinkedIn file.
-
----
-
-### Step 8 — Hebrew Naturalizer Pass
-
-Reference: `agency/editorial/hebrew-naturalizer.md`
-
-Apply the naturalizer **inline during generation** — not as a separate post-generation re-read pass.
-
-**Applies to:** every Hebrew public-facing file generated in Steps 1–7, **except reel VO text** — reel VO naturalizer runs at Step 2.4c (before user approval). Step 8 covers hooks, carousel, LinkedIn, WhatsApp, and all non-reel outputs.
-
-**Does not apply to:** English files, Analysis Mode outputs, or reel VO text (handled at Step 2.4c).
-
-As you write each Hebrew file, apply naturalizer rules from `agency/editorial/hebrew-naturalizer.md`. Do not re-read output files after writing — run the check as you draft each section.
-
-Write the naturalizer sign-off at the bottom of each file:
-- `_Naturalizer applied: [date] — No meaningful language issues._`
-- `_Naturalizer applied: [date] — [list of changes made]_`
-
-**The sign-off must reflect an actual pass, not an assumption.**
-
-Do not mark any Hebrew file `status: ready` until the naturalizer sign-off is present and verified.
+Generate each variant independently from `thesis.md`. Adapt the greeting, relationship framing, and closing question per variant.
 
 ---
 
-## Repurposing Strategy
+### Step 6 — Generate Investor Summary [Copywriter]
 
-ONE PROJECT → MANY CONTENT PIECES. Extract once; adapt per format.
+| | |
+|---|---|
+| **Owner** | Copywriter |
+| **Inputs** | `thesis.md` |
+| **Load** | None (thesis.md already in context) |
+| **Output** | 150–200 word summary appended to each language's LinkedIn file |
+| **Next** | Step 7 |
 
-**Fixed across all content:** project name, developer, key numbers, location, investment angle.
-**Adapts per format:** hook type (different category each) · depth (hooks = surface, LinkedIn = depth, PDF = full) · tone (WhatsApp = personal, LinkedIn = professional, Reels = fast) · CTA tier (platform-matched).
-
-**Sequence:** extract → LinkedIn post → repurpose body as investor summary → carousel slides as reel talking points → hooks as reel openers + WhatsApp subject lines → investor summary as PDF section.
-
-Do not generate each format from scratch. Always adapt from what's already been generated.
-
----
-
-## Repurposing Pass (Optional but Recommended)
-
-After completing Steps 1-7, run a quick repurposing pass:
-
-- **Hooks → Reel openers:** Check if any hook from Step 1 is stronger than the reel hook you wrote. If yes, substitute.
-- **LinkedIn body → Investor Summary:** If the LinkedIn body is good, the investor summary should be a condensed version of it — not re-written from scratch.
-- **Carousel slides → Reel talking points:** The carousel body copy can be read as a reel script. Note this in the reel file.
-
-This is where leverage happens. Write once, adapt many times.
+Key Numbers from thesis.md Key Numbers block verbatim. Risk Note from Risk Register (2–3 risks).
 
 ---
 
-## File Header Template
+### Step 7 — Generate CTA Variations [Copywriter]
 
-Every output file must start with this frontmatter:
-
-```markdown
----
-project: [Project Name]
-developer: [Developer]
-language: [he | en]
-content-type: [hooks | reels | carousel | linkedin | whatsapp | summary | pdf]
-date: [YYYY-MM-DD]
-status: draft
----
-```
-
-Change `status` to `ready` only after human review.
+| | |
+|---|---|
+| **Owner** | Copywriter |
+| **Inputs** | `thesis.md` CTA Keyword |
+| **Load** | None |
+| **Output** | 3 CTAs (Soft / Medium / Direct) appended to each language's LinkedIn file |
+| **Next** | Step 8 |
 
 ---
 
-## Extraction Warning Block
+### Step 8 — Hebrew Naturalizer [Copy Editor]
 
-If any PROJECT DATA field was `[MISSING]`, add this block immediately after the frontmatter in every generated file:
+| | |
+|---|---|
+| **Owner** | Copy Editor |
+| **Inputs** | All Hebrew public-facing files from Steps 1–7 |
+| **Load** | `agency/editorial/hebrew-naturalizer.md` |
+| **Output** | Naturalizer sign-off appended to each Hebrew file |
+| **Next** | Done |
 
-```markdown
-> EXTRACTION WARNING: The following fields were missing and may affect content accuracy: [list]. Review and fill in before publishing.
-```
+Verification and sign-off pass. Prevention rules (em-dash, register, TTS patterns) should have been applied inline during Steps 1–7 per `agency/editorial/hebrew-naturalizer.md`. This step catches and fixes anything missed and provides the formal sign-off. No Hebrew file is complete without it.
 
----
-
-## Quality Checklist
-
-**Pipeline note:** All content decisions must be finalized here before the Hebrew Naturalizer runs. The Naturalizer is a language-only pass — it will not catch or fix content issues.
-
-Before marking any file `status: ready`, check:
-
-**Data integrity**
-- [ ] No `[MISSING]` fields in published content
-- [ ] No hallucinated data (prices, returns, percentages)
-- [ ] Every assertion is traceable to the PROJECT DATA block
-- [ ] Extraction warning present if data was partial
-
-**Tone and trust**
-- [ ] No urgency language without a specific, verifiable trigger — banned phrases: "לפני שזה יעלה", "הזדמנות", "כניסה מוקדמת", "לא יחזור", "פספסת", "נגמר מהר"
-- [ ] No scarcity claims unless unit count is confirmed and sourced
-- [ ] No "Dubai is booming" or equivalent clichés
-- [ ] Tone is calm and analytical — not broker-urgent
-- [ ] Final Impression Rule: no content piece ends on unresolved negativity — last emotional note is clarity, curiosity, or informed conviction (CLAUDE.md §13 — Final Impression Rule)
-
-**Naturalizer**
-- [ ] Every Hebrew file has a naturalizer sign-off at the bottom
-- [ ] Sign-off was written after an explicit pass — not assumed during writing
-
-**Structure**
-- [ ] No "-" used as a mid-sentence separator — use "," or ":" instead (see Global Writing Rules)
-- [ ] Each piece has exactly one CTA
-- [ ] CTA tier matches the platform
-- [ ] Investor summary is under 200 words
-- [ ] LinkedIn post is 700-1000 characters
-- [ ] Each hook is under 280 characters
+Applies to: hooks, carousel, LinkedIn, WhatsApp. Does not apply to: English files, Analysis Mode outputs, or reel VO (handled at Step 2.4c).
 
 ---
 
 ## Batch Processing
 
-To generate content for multiple projects:
-
-1. Extract PROJECT DATA for Project A → save extraction block to a `.txt` in `input/`
-2. Extract PROJECT DATA for Project B → same
-3. Run content generation for A, then B
-4. Outputs are isolated by project slug — no cross-contamination
-
-Do not generate multiple projects simultaneously in the same session without clearly labeling which PROJECT DATA block is active.
+To generate content for multiple projects: extract PROJECT DATA for each project and save to `input/` before running content generation. Run generation for one project at a time. Outputs are isolated by project slug — no cross-contamination.

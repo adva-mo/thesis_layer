@@ -16,6 +16,36 @@ Operational workflows and automated infrastructure are not modeled as roles.
 
 ---
 
+## Production Stage Lifecycle
+
+Every production stage — current and future — follows the same lifecycle:
+
+```
+Produce
+↓
+Self Review        ← internal to the role; no user involved
+↓
+Approval Gate      ← ownership temporarily shifts to user
+↓
+Revision (0..N)    ← system response to external feedback; can repeat
+↓
+Approved
+↓
+Hand-off to next role
+```
+
+**Produce** — the role generates its output using its playbooks and reference documents.
+
+**Self Review** — the role evaluates its own output against its quality standards and corrects before presenting. Not a user-facing approval step. It may appear in the workflow as a named internal sub-step when it has a distinct owner, status transition, or required document.
+
+**Approval Gate** — the only user-facing approval moment. The user explicitly approves or requests revision. Revision can follow any gate, for any reason, and loops back into the same stage.
+
+**Hand-off** — once Approved, the next role begins. The previous role's output is locked at that status.
+
+The implementation of this lifecycle is `agency/production/content-generation-workflow.md`.
+
+---
+
 ## Organizational Roles
 
 ---
@@ -68,6 +98,8 @@ Operational workflows and automated infrastructure are not modeled as roles.
 **Decisions owned:** None numbered. The Copywriter's judgment is craft judgment — which words, in what order, create the intended effect within the brief's constraints.
 
 **Does not own:** Hook selection, format selection, cadence, visual direction, editorial compression, asset sourcing
+
+**Role definition:** `agency/creative/copywriter.md`
 
 **Current implementation:** `agency/production/templates/hook-template.md` (hook generation), `agency/production/content-generation-workflow.md` Steps 2–7 (reel scripts, carousel, LinkedIn, WhatsApp, investor summary, CTAs)
 
@@ -137,3 +169,20 @@ Operational workflows and automated infrastructure are not modeled as roles.
 **Pre-production Verification** — Operational workflow. Deterministic checklist. Verifies blueprint completeness before spend. Owned by Art Director (decisions 26–27). Could be fully automated with no quality loss.
 
 **Post-production Pipeline** — Automated infrastructure. ElevenLabs TTS, Kling generation, render.py, subtitle.py. Executes approved blueprints with no organizational decisions.
+
+---
+
+## Extending the System
+
+Any new capability must declare the following before implementation:
+
+| Field | Declare |
+|---|---|
+| **Owner role** | Which existing role owns this, or justify why a new role is needed |
+| **Document type** | Workflow / Playbook / Reference / Checkpoint / Configuration / Record |
+| **Artifact or field** | Which output document or blueprint field this capability writes to |
+| **Invocation point** | Which step in `content-generation-workflow.md` calls this capability |
+| **Downstream consumers** | Which roles or pipeline steps read this capability's output |
+| **Lifecycle stage** | Where in Produce / Self Review / Gate / Revision this capability runs |
+
+A capability that cannot fill all six fields is not ready to implement.
