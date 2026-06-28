@@ -223,7 +223,7 @@ def _append_cost_entry(blueprint: Path, reel_n: int, char_count: int) -> None:
     except ValueError:
         slug = blueprint.stem
     today = date.today()
-    line = (f"{today.day}/{today.month}/{today.year} - {slug} reel_{reel_n:02d}"
+    line = (f"{today.strftime('%d/%m/%Y')} - {slug} reel_{reel_n:02d}"
             f" - {cost:.2f} 11labs ({char_count} chars, 1 call)\n")
     costs_path = REPO_ROOT / "output" / "history" / "costs"
     costs_path.parent.mkdir(parents=True, exist_ok=True)

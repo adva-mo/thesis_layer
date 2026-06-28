@@ -37,7 +37,7 @@ Apply the tag vocabulary from `reel-template.md § Script Conventions`:
 - Visual tags (`[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`) — leave blank unless scene direction was provided; if provided, translate to the nearest valid values
 
 **4. Header block**
-Fill the Per-Reel Header Block (see `reel-template.md § Per-Reel Header Block`). Set `**Status:** DRAFT`.
+Fill the Per-Reel Header Block (see `reel-template.md § Creative Brief (Per-Reel Header Block)`). Set `**Status:** DRAFT`.
 
 **5. Timing estimate**
 For each scene, count characters in the `[TTS:]` block and estimate duration. Full formula: `templates/reels/retention-layer.md § Timing Constraint`. Flag any scene that exceeds its beat's natural slot.
@@ -57,7 +57,7 @@ Directed reels use a simplified status track:
 DRAFT → APPROVED → PUBLISHED
 ```
 
-Optional layers add intermediate states if invoked: `RETENTION`, `NATURALIZER`, `VISUAL-DIRECTED`, `VISUAL-APPROVED`. These follow the same semantics as in the full pipeline — see `reel-template.md § Per-Reel Header Block`.
+Optional layers add intermediate states if invoked: `RETENTION`, `NATURALIZER`, `VISUAL-DIRECTED`, `VISUAL-APPROVED`. These follow the same semantics as in the full pipeline — see `reel-template.md § Creative Brief (Per-Reel Header Block)`.
 
 ---
 
