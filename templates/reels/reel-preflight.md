@@ -23,7 +23,7 @@ Mandatory quality gate. Run after a reel script is drafted, before Visual Eviden
 
 ---
 
-## Scene Type Validation
+## Scene Type Validation [Pre-production Verification]
 
 Run before any other check. This is a structural gate — a scene with a missing or invalid type cannot be safely processed downstream.
 
@@ -49,7 +49,7 @@ A scene type failure is a hard stop — do not proceed to cadence or content che
 
 ---
 
-## Cadence Label Verification
+## Cadence Label Verification [Creative Director]
 
 Read the hook VO text directly. Verify the rhetorical structure matches the cadence label declared in the script metadata. This check runs before Hook-Insight Integrity — a mismatch means the wrong obligation check would be applied.
 
@@ -70,7 +70,7 @@ A cadence mismatch is a hard fail. It means either the label is wrong or the hoo
 
 ---
 
-## Hook-Insight Integrity
+## Hook-Insight Integrity [Creative Director]
 
 Every reel must pass two related tests: epistemological (are claims correctly labeled?) and structural (does the body deliver on what the hook promises?).
 
@@ -117,7 +117,7 @@ Every hook creates a psychological obligation. The reel body must satisfy that c
 
 ---
 
-## Hook Strength Test (objective, not a vibe check)
+## Hook Strength Test [Creative Director] (objective, not a vibe check)
 
 A hook is strong only if it creates **at least one** of:
 
@@ -129,6 +129,22 @@ A hook is strong only if it creates **at least one** of:
 - wrong-question framing
 
 **Analytical or authority-toned hooks are weak if they create none of the above — even when factually accurate.** "X works differently than most projects" is correct but not automatically tension-creating; it only counts as strong if the contrast itself is sharp enough to feel like a contradiction.
+
+---
+
+## Check Ownership
+
+| Check | Owner |
+|---|---|
+| Scene Type Validation | Pre-production Verification |
+| Cadence Label | Creative Director |
+| Hook-Insight Integrity | Creative Director |
+| Hook Strength | Creative Director |
+| Payoff Timing | Creative Director |
+| Risk Placement | Creative Director |
+| Ending Momentum | Creative Director |
+| Cognitive Load | Copy Editor *(Workflow Role)* |
+| Overexplaining | Copy Editor *(Workflow Role)* |
 
 ---
 
