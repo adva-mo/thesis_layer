@@ -23,7 +23,7 @@ Mandatory quality gate. Run after a reel script is drafted, before Visual Eviden
 
 ---
 
-## Scene Type Validation [Pre-production Verification]
+## Scene Type Validation [Copywriter]
 
 Run before any other check. This is a structural gate — a scene with a missing or invalid type cannot be safely processed downstream.
 
@@ -132,11 +132,71 @@ A hook is strong only if it creates **at least one** of:
 
 ---
 
+## Payoff Timing [Creative Director]
+
+The hook creates a question. The insight is the first beat of the answer. Evaluate where the central investment signal first appears.
+
+**GOOD** — the core number or insight arrives within the first 7 seconds of body content (before the midpoint of a 15–25s reel; before second 15 in a longer reel).
+
+**DELAYED** — the viewer sits through more than half the reel before the payoff. Acceptable only if the format is explicitly designed as a slow build (Formats 2, 4) and the thesis complexity justifies it.
+
+---
+
+## Risk Placement [Creative Director]
+
+Two conditions must both hold:
+
+1. **Risk is present.** A reel with no risk disclosure fails. Risk is required for credibility.
+2. **Risk is not the terminal beat.** The last content beat before CTA must be a reframe, a thesis return, or an investor question — never a risk statement.
+
+**CORRECT** — risk appears in the body, and the beat immediately before CTA is one of the five allowed closing mechanisms (see reel-template.md § Final Impression Rule).
+
+**INCORRECT** — risk is the final emotional impression before the CTA, or risk is absent entirely.
+
+---
+
+## Ending Momentum [Creative Director]
+
+The final emotional note must be clarity, curiosity, or informed conviction. Never unresolved doubt, fear, or paralysis.
+
+**Test:** read the last sentence. If the natural viewer response is "this sounds risky" or "maybe I shouldn't" — fail. If the natural response is "interesting — I want to understand the answer" — pass.
+
+**STRONG** — the reel ends on one of the five allowed closing mechanisms: return to thesis, reframe the risk, surface the real investor question, compare tradeoffs, or create curiosity (CLAUDE.md §13 — Final Impression Rule).
+
+**WEAK** — the reel ends on unresolved negativity, anxiety, or paralysis.
+
+---
+
+## Cognitive Load [Copy Editor]
+
+Evaluate the number budget and idea density per segment.
+
+**Number budget:** 1–3 high-leverage numbers per reel. A number earns its place only if removing it weakens the investment logic, timing, or risk profile. Apply the test from reel-template.md § Numbers Must Earn Their Place.
+
+**Idea density:** one core investment idea per segment. Two competing ideas in one scene lose both.
+
+**LOW** — ≤3 numbers, one idea per segment throughout.  
+**MEDIUM** — 3–4 numbers, or one segment carries two ideas that are closely related.  
+**HIGH** — more than 4 numbers, or multiple competing ideas compete for attention in the same segment.
+
+---
+
+## Overexplaining [Copy Editor]
+
+Apply the Q12 compression test to every sentence: *"Can this sentence be removed without weakening the thesis?"*
+
+If yes: remove it. The idea must still land complete — never cut mid-sentence or trim arbitrarily. If a sentence cannot be removed without weakening the thesis, it stays.
+
+**CLEAN** — no sentence survives the Q12 test as removable.  
+**TRIM NEEDED** — at least one sentence can be removed without weakening the thesis. Identify and cut before proceeding.
+
+---
+
 ## Check Ownership
 
 | Check | Owner |
 |---|---|
-| Scene Type Validation | Pre-production Verification |
+| Scene Type Validation | Copywriter |
 | Cadence Label | Creative Director |
 | Hook-Insight Integrity | Creative Director |
 | Hook Strength | Creative Director |

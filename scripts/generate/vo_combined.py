@@ -215,21 +215,12 @@ def _cut(combined_tmp, start, end, out_path, atempo):
 
 def _append_cost_entry(blueprint: Path, reel_n: int, char_count: int) -> None:
     """Append one cost line to output/history/costs per CLAUDE.md §17."""
-    from datetime import date
+    from reel_pipeline.cost_tracking import project_slug, today_str, write_cost_line
     cost = char_count / 1000 * 0.10
-    try:
-        bp_rel = blueprint.resolve().relative_to(REPO_ROOT)
-        slug = bp_rel.parts[1] if len(bp_rel.parts) > 1 and bp_rel.parts[0] == "output" else blueprint.stem
-    except ValueError:
-        slug = blueprint.stem
-    today = date.today()
-    line = (f"{today.strftime('%d/%m/%Y')} - {slug} reel_{reel_n:02d}"
+    slug = project_slug(blueprint, REPO_ROOT)
+    line = (f"{today_str()} - {slug} reel_{reel_n:02d}"
             f" - {cost:.2f} 11labs ({char_count} chars, 1 call)\n")
-    costs_path = REPO_ROOT / "output" / "history" / "costs"
-    costs_path.parent.mkdir(parents=True, exist_ok=True)
-    with costs_path.open("a") as f:
-        f.write(line)
-    print(f"  ✓ Cost logged → output/history/costs  ({line.strip()})")
+    write_cost_line(line, REPO_ROOT)
 
 
 # ── Main ──────────────────────────────────────────────────────────
