@@ -1,6 +1,6 @@
 # Reel Pre-Flight
 
-Mandatory quality gate. Run after a reel script is drafted, before Visual Evidence Plan / asset collection / VO generation. Applies on top of `templates/reels/reel-template.md` (formats) and `templates/reels/cadence-rules.md` (current sprint mode) — it does not replace either.
+Mandatory quality gate. Run after a reel script is drafted, before Visual Evidence Plan / asset collection / VO generation. Applies on top of `agency/production/templates/reel-template.md` (formats) and `agency/creative/cadence-rules.md` (current sprint mode) — it does not replace either.
 
 **What this catches:** a script can be analytically correct — sound thesis, accurate numbers, correct risk disclosure — and still be weak for cold-audience retention. Correctness is necessary, not sufficient. This gate checks the part the format scaffolds don't check: whether a cold scroller actually stops, stays, and reaches the payoff.
 
@@ -23,7 +23,7 @@ Mandatory quality gate. Run after a reel script is drafted, before Visual Eviden
 
 ---
 
-## Scene Type Validation
+## Scene Type Validation [Copywriter]
 
 Run before any other check. This is a structural gate — a scene with a missing or invalid type cannot be safely processed downstream.
 
@@ -49,7 +49,7 @@ A scene type failure is a hard stop — do not proceed to cadence or content che
 
 ---
 
-## Cadence Label Verification
+## Cadence Label Verification [Creative Director]
 
 Read the hook VO text directly. Verify the rhetorical structure matches the cadence label declared in the script metadata. This check runs before Hook-Insight Integrity — a mismatch means the wrong obligation check would be applied.
 
@@ -70,7 +70,7 @@ A cadence mismatch is a hard fail. It means either the label is wrong or the hoo
 
 ---
 
-## Hook-Insight Integrity
+## Hook-Insight Integrity [Creative Director]
 
 Every reel must pass two related tests: epistemological (are claims correctly labeled?) and structural (does the body deliver on what the hook promises?).
 
@@ -117,7 +117,7 @@ Every hook creates a psychological obligation. The reel body must satisfy that c
 
 ---
 
-## Hook Strength Test (objective, not a vibe check)
+## Hook Strength Test [Creative Director] (objective, not a vibe check)
 
 A hook is strong only if it creates **at least one** of:
 
@@ -129,6 +129,82 @@ A hook is strong only if it creates **at least one** of:
 - wrong-question framing
 
 **Analytical or authority-toned hooks are weak if they create none of the above — even when factually accurate.** "X works differently than most projects" is correct but not automatically tension-creating; it only counts as strong if the contrast itself is sharp enough to feel like a contradiction.
+
+---
+
+## Payoff Timing [Creative Director]
+
+The hook creates a question. The insight is the first beat of the answer. Evaluate where the central investment signal first appears.
+
+**GOOD** — the core number or insight arrives within the first 7 seconds of body content (before the midpoint of a 15–25s reel; before second 15 in a longer reel).
+
+**DELAYED** — the viewer sits through more than half the reel before the payoff. Acceptable only if the format is explicitly designed as a slow build (Formats 2, 4) and the thesis complexity justifies it.
+
+---
+
+## Risk Placement [Creative Director]
+
+Two conditions must both hold:
+
+1. **Risk is present.** A reel with no risk disclosure fails. Risk is required for credibility.
+2. **Risk is not the terminal beat.** The last content beat before CTA must be a reframe, a thesis return, or an investor question — never a risk statement.
+
+**CORRECT** — risk appears in the body, and the beat immediately before CTA is one of the five allowed closing mechanisms (see reel-template.md § Final Impression Rule).
+
+**INCORRECT** — risk is the final emotional impression before the CTA, or risk is absent entirely.
+
+---
+
+## Ending Momentum [Creative Director]
+
+The final emotional note must be clarity, curiosity, or informed conviction. Never unresolved doubt, fear, or paralysis.
+
+**Test:** read the last sentence. If the natural viewer response is "this sounds risky" or "maybe I shouldn't" — fail. If the natural response is "interesting — I want to understand the answer" — pass.
+
+**STRONG** — the reel ends on one of the five allowed closing mechanisms: return to thesis, reframe the risk, surface the real investor question, compare tradeoffs, or create curiosity (CLAUDE.md §13 — Final Impression Rule).
+
+**WEAK** — the reel ends on unresolved negativity, anxiety, or paralysis.
+
+---
+
+## Cognitive Load [Copy Editor]
+
+Evaluate the number budget and idea density per segment.
+
+**Number budget:** 1–3 high-leverage numbers per reel. A number earns its place only if removing it weakens the investment logic, timing, or risk profile. Apply the test from reel-template.md § Numbers Must Earn Their Place.
+
+**Idea density:** one core investment idea per segment. Two competing ideas in one scene lose both.
+
+**LOW** — ≤3 numbers, one idea per segment throughout.  
+**MEDIUM** — 3–4 numbers, or one segment carries two ideas that are closely related.  
+**HIGH** — more than 4 numbers, or multiple competing ideas compete for attention in the same segment.
+
+---
+
+## Overexplaining [Copy Editor]
+
+Apply the Q12 compression test to every sentence: *"Can this sentence be removed without weakening the thesis?"*
+
+If yes: remove it. The idea must still land complete — never cut mid-sentence or trim arbitrarily. If a sentence cannot be removed without weakening the thesis, it stays.
+
+**CLEAN** — no sentence survives the Q12 test as removable.  
+**TRIM NEEDED** — at least one sentence can be removed without weakening the thesis. Identify and cut before proceeding.
+
+---
+
+## Check Ownership
+
+| Check | Owner |
+|---|---|
+| Scene Type Validation | Copywriter |
+| Cadence Label | Creative Director |
+| Hook-Insight Integrity | Creative Director |
+| Hook Strength | Creative Director |
+| Payoff Timing | Creative Director |
+| Risk Placement | Creative Director |
+| Ending Momentum | Creative Director |
+| Cognitive Load | Copy Editor *(Workflow Role)* |
+| Overexplaining | Copy Editor *(Workflow Role)* |
 
 ---
 

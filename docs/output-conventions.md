@@ -70,4 +70,4 @@ Label each generated item clearly:
 ## Slide 1 — Hook
 ```
 
-For file frontmatter format and the extraction warning block, see the **File Header Template** and **Extraction Warning Block** sections in `templates/content-generation-workflow.md`.
+For file frontmatter format and the extraction warning block, see the **File Header Template** and **Extraction Warning Block** sections in `agency/production/content-generation-workflow.md`.

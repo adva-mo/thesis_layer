@@ -36,6 +36,7 @@ REPO_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from reel_pipeline import config, fal_kling
+from reel_pipeline.cost_tracking import project_slug, today_str, write_cost_line
 from reel_pipeline.motion import resolve_motion_style
 from reel_pipeline.parser import parse_reel_file, read_reel_status
 
@@ -161,26 +162,13 @@ def _append_cost_entry(blueprint: Path, reel_n: int, model: str, billed: list[tu
     """Append one cost line to output/history/costs per CLAUDE.md §17."""
     if not billed:
         return
-    from datetime import date
     total = sum(_clip_cost(dur, model) for dur, _ in billed)
     dur_str = "+".join(f"{dur}s" for dur, _ in billed)
-
-    try:
-        bp_rel = blueprint.resolve().relative_to(REPO_ROOT)
-        slug = bp_rel.parts[1] if len(bp_rel.parts) > 1 and bp_rel.parts[0] == "output" else blueprint.stem
-    except ValueError:
-        slug = blueprint.stem
-
-    today = date.today()
+    slug = project_slug(blueprint, REPO_ROOT)
     n_clips = len(billed)
-    line = (f"{today.day}/{today.month}/{today.year} - {slug} reel_{reel_n:02d}"
+    line = (f"{today_str()} - {slug} reel_{reel_n:02d}"
             f" - {total:.2f} fal ({n_clips} clip{'s' if n_clips != 1 else ''}: {dur_str})\n")
-
-    costs_path = REPO_ROOT / "output" / "history" / "costs"
-    costs_path.parent.mkdir(parents=True, exist_ok=True)
-    with costs_path.open("a") as f:
-        f.write(line)
-    print(f"  ✓ Cost logged → output/history/costs  ({line.strip()})")
+    write_cost_line(line, REPO_ROOT)
 
 
 def main() -> None:

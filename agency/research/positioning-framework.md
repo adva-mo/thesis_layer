@@ -264,9 +264,26 @@ Before writing content, determine which number best represents the investor's ac
 
 ---
 
+## Positioning Confirmation — Required Before Writing thesis.md
+
+Before producing `thesis.md`, present the following to the user and wait for explicit confirmation or correction. Do not write thesis.md until the user responds.
+
+**Present:**
+
+1. **Thesis type** — the selected category and a one-sentence rationale for why this project fits it. If two categories were closely matched, name both and explain what tipped the decision.
+2. **Decision anchor** — the anchor type (`entry_capital` / `asset_price` / `yield_return`) and the specific number from project-data.md that will serve as the decision signal.
+3. **Key assumption** — the single most important condition that must be true for this thesis to hold.
+4. **Anti-collect guidance** — what you intend to exclude from visual assets (so Adva can flag mismatches before content generation begins, not after).
+
+Then ask: **"Does this classification match your read of this project? Correct or confirm and I'll write thesis.md."**
+
+Only proceed once Adva has explicitly confirmed or corrected the classification. If she corrects it, update all four points above before writing thesis.md.
+
+---
+
 ## Required Output — `thesis.md`
 
-After confirming positioning, produce `output/[project-slug]/thesis.md` before starting any content generation.
+After positioning is confirmed by the user, produce `output/[project-slug]/thesis.md` before starting any content generation.
 
 This file is consumed by: reel scripts (insight segment, reality check, voice style), Visual Evidence Plans (anti-collect), carousel (Slides 2, 3, 4), and Investor Summary (key numbers, risk note).
 
