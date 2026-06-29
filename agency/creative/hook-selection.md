@@ -108,7 +108,7 @@ Read `output/history/hook-log.md`. Filter to PUBLISHED rows only — SCRIPTED an
 - **Hook family:** If a Tier 1 candidate appears in the last 2 PUBLISHED channel-level reels, prefer an alternative. Same override rule.
 - **Brand/perf balance:** If the last 2 PUBLISHED channel-level reels both used brand hooks, prefer a performance candidate from the list; vice versa. Override if no performance candidate is Tier 1/2 for this thesis type.
 - **Rhetorical freshness:** Identify the likely opening cadence for each candidate (Pattern D). If a cadence appears in the last 5 PUBLISHED channel-level reels, prefer a candidate that opens with a different cadence. Override if no alternative cadence is available at Tier 1/2.
-- **Brand frame drift:** Scan the `Brand Frames` column of the last 5 PUBLISHED rows. If "Thesis" does not appear in any of them, flag it and note it in the "Next reel recommendation" block — prioritize a reel format and hook where naming "Thesis" feels natural in the script. Do not force it if the script doesn't support it cleanly.
+- **Thesis invocation:** Scan the `Thesis Invoked` column of the last 5 PUBLISHED rows. If ✓ does not appear in any of them, flag it and note it in the "Next reel recommendation" block — prioritize a reel format and hook where naming "Thesis" feels natural in the script. Do not force it if the script doesn't support it cleanly.
 
 **Step 4 — Pick and log**
 Rank remaining candidates by (thesis tier → format fit). Pick the top. After scripting, append a row to `output/history/hook-log.md` and recompute the "Next reel recommendation" block for this project in that file.
@@ -126,9 +126,9 @@ Single file. Append one row per reel, across all projects. Project-level history
 ```markdown
 # Channel Hook Log
 
-| Scripted | Published | Project | Reel | Hook Family | Rhetorical Pattern | Brand/Perf | Platforms | Brand Frames | Status |
-|----------|-----------|---------|------|-------------|-------------------|------------|-----------|--------------|--------|
-| YYYY-MM-DD | YYYY-MM-DD | [project-slug] | reel_01 | H8 — Hidden Opportunity | INVERSION | Brand | Instagram, TikTok | Thesis | PUBLISHED |
+| Scripted | Published | Project | Reel | Hook Family | Rhetorical Pattern | Brand/Perf | Platforms | Thesis Invoked | Status |
+|----------|-----------|---------|------|-------------|-------------------|------------|-----------|----------------|--------|
+| YYYY-MM-DD | YYYY-MM-DD | [project-slug] | reel_01 | H8 — Hidden Opportunity | INVERSION | Brand | Instagram, TikTok | ✓ | PUBLISHED |
 
 ---
 
@@ -147,7 +147,7 @@ Add one "Next reel recommendation" section per active project. Recompute after e
 
 **Status values:** `SCRIPTED` (default at log time) → `NATURALIZER` (after retention + naturalizer pass) → `APPROVED` (user approved, paid APIs unlocked) → `PUBLISHED` (flip when the reel goes live) → `SKIPPED` (scripted but not published).
 
-**Brand Frames column:** Leave `—` at log time. Fill in after the retention layer pass (Step 2.4b) using the "Framework terms named" field from the post-retention integrity block. Values are comma-separated framework terms explicitly named in the script (e.g., `Thesis`, `Thesis, Risk`). Diversity lookback (Step E, Step 3) uses PUBLISHED rows only.
+**Thesis Invoked column:** Leave `—` at log time. Fill in after the retention pass (Step 2.4b) using the "Thesis invoked" field from the post-retention integrity block. Value is boolean: `✓` if the word "Thesis" was explicitly used in the script, `—` otherwise. Diversity lookback (Step E, Step 3) uses PUBLISHED rows only.
 
 **Diversity lookback uses PUBLISHED rows only.** SCRIPTED and SKIPPED rows are ignored when applying soft penalties in Step E. This ensures the diversity logic reflects what the audience actually heard, not what was drafted.
 

@@ -16,6 +16,36 @@ Operational workflows and automated infrastructure are not modeled as roles.
 
 ---
 
+## Production Stage Lifecycle
+
+Every production stage — current and future — follows the same lifecycle:
+
+```
+Produce
+↓
+Self Review        ← internal to the role; no user involved
+↓
+Approval Gate      ← ownership temporarily shifts to user
+↓
+Revision (0..N)    ← system response to external feedback; can repeat
+↓
+Approved
+↓
+Hand-off to next role
+```
+
+**Produce** — the role generates its output using its playbooks and reference documents.
+
+**Self Review** — the role evaluates its own output against its quality standards and corrects before presenting. Not a user-facing approval step. It may appear in the workflow as a named internal sub-step when it has a distinct owner, status transition, or required document.
+
+**Approval Gate** — the only user-facing approval moment. The user explicitly approves or requests revision. Revision can follow any gate, for any reason, and loops back into the same stage.
+
+**Hand-off** — once Approved, the next role begins. The previous role's output is locked at that status.
+
+The implementation of this lifecycle is `agency/production/content-generation-workflow.md`.
+
+---
+
 ## Organizational Roles
 
 ---
@@ -42,6 +72,18 @@ Operational workflows and automated infrastructure are not modeled as roles.
 
 ---
 
+### Attention Strategist
+
+**Decisions owned:** None numbered. The Attention Strategist's judgment is psychological — which patterns, applied to this thesis, create the strongest curiosity gap for a cold audience.
+
+**Position in the chain:** After the Investment Analyst produces `thesis.md`, before the Creative Director writes the Creative Brief. Enriches `thesis.md` with `## Attention Angles` — 4–5 psychological entry points the Creative Director draws from, one per reel.
+
+**Does not own:** Investment analysis (Investment Analyst), hook selection or format (Creative Director), copy (Copywriter), visual specification (Art Director).
+
+**Role definition:** `agency/creative/attention-strategist.md`
+
+---
+
 ### Creative Director
 
 **Decisions owned:** 8, 9, 10, 11, 12, 13, 14
@@ -54,7 +96,7 @@ Operational workflows and automated infrastructure are not modeled as roles.
 
 **Does not own:** Writing the copy, editorial compression, Hebrew naturalness, visual specification, asset sourcing
 
-**Role definition:** `agency/creative/creative-direction.md`
+**Role definition:** `agency/creative/creative-director.md`
 
 **Current implementation:**
 - Phase 1 — `agency/creative/hook-selection.md`, `agency/creative/reel-formats.md`
@@ -68,6 +110,8 @@ Operational workflows and automated infrastructure are not modeled as roles.
 **Decisions owned:** None numbered. The Copywriter's judgment is craft judgment — which words, in what order, create the intended effect within the brief's constraints.
 
 **Does not own:** Hook selection, format selection, cadence, visual direction, editorial compression, asset sourcing
+
+**Role definition:** `agency/creative/copywriter.md`
 
 **Current implementation:** `agency/production/templates/hook-template.md` (hook generation), `agency/production/content-generation-workflow.md` Steps 2–7 (reel scripts, carousel, LinkedIn, WhatsApp, investor summary, CTAs)
 
@@ -89,7 +133,23 @@ Operational workflows and automated infrastructure are not modeled as roles.
 
 ---
 
-## Workflow Role
+## Workflow Roles
+
+---
+
+### Retention Specialist
+
+**Current state:** Workflow Role — cold-audience retention craft, extracted from the Copy Editor and promoted to a named role. Lives in the creative department: the discipline is psychological, not editorial.
+
+**Discipline:** Stop-scrolling performance craft for short-form reels. Owns timing compression, scaffolding removal, open-loop mechanics, pattern interrupt, and oscillation. Local constraint: does not compress away thesis-critical logic. Receives the Copywriter's script after pre-flight and upgrades it for cold-audience completion rate.
+
+**Does not own:** Hook selection or format (Creative Director), script content and investment claims (Copywriter), language naturalness and TTS compliance (Copy Editor).
+
+**Role definition:** `agency/creative/retention-specialist.md`
+
+**Runs at:** Step 2.4b in `agency/production/content-generation-workflow.md`
+
+**Promotion criteria:** Promoted to Organizational Role when retention complexity grows — for example, if platform-specific retention strategies diverge, or if independent ownership demonstrably improves completion rates.
 
 ---
 
@@ -107,7 +167,6 @@ Operational workflows and automated infrastructure are not modeled as roles.
 
 **Current implementation:**
 - `agency/editorial/reel-preflight.md` (editorial checks — decisions 15, 16)
-- `agency/editorial/retention-layer.md` (timing compression — decisions 15, 16)
 - `agency/editorial/hebrew-naturalizer.md` (language naturalness — decisions 17, 18)
 
 **Promotion criteria:** Promoted to Organizational Role when editorial complexity grows or when independent ownership demonstrably improves output quality.
@@ -137,3 +196,66 @@ Operational workflows and automated infrastructure are not modeled as roles.
 **Pre-production Verification** — Operational workflow. Deterministic checklist. Verifies blueprint completeness before spend. Owned by Art Director (decisions 26–27). Could be fully automated with no quality loss.
 
 **Post-production Pipeline** — Automated infrastructure. ElevenLabs TTS, Kling generation, render.py, subtitle.py. Executes approved blueprints with no organizational decisions.
+
+---
+
+## Thesis Integrity
+
+No role may alter, weaken, remove, or distort the thesis, key numbers, evidence, reasoning, risk logic, or investment conclusion.
+
+`thesis.md` is the authoritative source of truth. Every role transforms how the thesis is expressed — not what it says.
+
+This applies at every stage: scripting, retention compression, language naturalizing, visual direction, and hook selection. A rewrite that changes the meaning of a claim, softens a risk, drops a number, or contradicts the investment conclusion violates this rule, regardless of which role made the change.
+
+Any role that creates, rewrites, adapts, compresses, naturalizes, or visually represents content must verify Thesis Integrity before handoff.
+
+---
+
+## Role Interface Contract
+
+**Downstream roles may consume upstream artifacts and shared quality standards. They must not consume upstream decision playbooks.**
+
+An **artifact** is the declared output of a role: a document, a section appended to an existing file, a field written into a blueprint. The artifact is the authoritative interface between roles.
+
+A **decision playbook** is how a role makes its decisions: selection logic, evaluation criteria, technique documentation. Playbooks are internal to the role that owns them.
+
+**A role's Load list may include:**
+- Its own playbook
+- Shared references explicitly declared below
+- The upstream artifact produced for this project (`thesis.md`, Creative Brief, `visual-direction.json`)
+
+**A role's Load list may not include:**
+- Another role's decision playbook — unless it is listed as a shared reference below
+
+**Why:** When a downstream role reads an upstream decision playbook, it either re-runs a decision already made (redundant) or applies the upstream role's logic independently (architectural drift). The upstream artifact should already encode every decision the downstream role needs.
+
+### Declared shared references
+
+These documents are consumed by roles other than their owner. Each is listed with the consuming role and the reason it qualifies as a shared reference rather than a playbook.
+
+| Document | Owner | Consuming role | Why it qualifies |
+|---|---|---|---|
+| `agency/production/templates/` (all) | Copywriter | All content roles | Format contracts — applied, not interpreted |
+| `agency/editorial/reel-preflight.md` | Creative Director | Copywriter (Step 2) | Quality standard — Copywriter reads it to write to the bar, not to make Creative Director decisions |
+| `agency/creative/retention-specialist.md § Timing constraint (hard)` | Retention Specialist | Art Director (`producibility-check.md`), directed-reel-workflow | Quality standard — timing formula used to verify scene fit before production spend |
+
+### Structural exception — directed-reel-workflow.md
+
+`agency/production/directed-reel-workflow.md` references Creative Director playbooks (`cadence-rules.md`, `reel-formats.md`) directly. This is a legitimate exception: the directed workflow intentionally bypasses the Creative Director (the user authors the script). There is no Creative Brief artifact to consume, so the playbooks serve as fallbacks. This exception does not apply to the full content generation workflow.
+
+---
+
+## Extending the System
+
+Any new capability must declare the following before implementation:
+
+| Field | Declare |
+|---|---|
+| **Owner role** | Which existing role owns this, or justify why a new role is needed |
+| **Document type** | Workflow / Playbook / Reference / Checkpoint / Configuration / Record |
+| **Artifact or field** | Which output document or blueprint field this capability writes to |
+| **Invocation point** | Which step in `content-generation-workflow.md` calls this capability |
+| **Downstream consumers** | Which roles or pipeline steps read this capability's output |
+| **Lifecycle stage** | Where in Produce / Self Review / Gate / Revision this capability runs |
+
+A capability that cannot fill all six fields is not ready to implement.

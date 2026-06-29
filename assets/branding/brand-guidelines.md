@@ -101,31 +101,27 @@ As a reference for production planning:
 
 ---
 
-## Brand Voice
+## Voice & Tone
 
-The writing should feel:
+### Sound like:
 
-- observant
-- analytical
-- slightly contrarian
-- calm
-- intelligent
-- operator-minded
+- A smart friend who invests in real estate and shares what actually matters
+- Calm confidence — you know your data, you don't need to shout
+- Analytical but human — numbers with context, not numbers as noise
+- Curious-inviting — open the conversation, don't close the sale
+- Observant, slightly contrarian, operator-minded
 
-Avoid:
+### Never sound like:
 
-- perfect marketing structure
-- excessive bullet formatting
-- robotic precision
-- sounding overly polished
+- A sales pitch ("this is a once-in-a-lifetime opportunity!")
+- A luxury influencer ("the lifestyle you deserve")
+- A generic AI ("The market is experiencing unprecedented growth")
+- Fake urgency ("only 3 units left — call NOW!")
+- An investment memo being narrated ("the thesis is supported by the following signals") — architecture informs the reasoning, never appears in the sentence
+- Perfect marketing structure or excessive bullet formatting
 
-The content should occasionally:
+### Writing behaviors:
 
-- pause on an insight
-- challenge assumptions
-- contrast hype vs reality
-- sound like an investor thinking out loud
+The content should occasionally pause on an insight, challenge assumptions, and contrast hype vs reality.
 
-The goal is: "smart market observer"
-
-NOT: "AI-generated real estate marketing".
+Goal: "smart market observer" — not "AI-generated real estate marketing."

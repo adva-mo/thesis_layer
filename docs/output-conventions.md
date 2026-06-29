@@ -70,4 +70,94 @@ Label each generated item clearly:
 ## Slide 1 — Hook
 ```
 
-For file frontmatter format and the extraction warning block, see the **File Header Template** and **Extraction Warning Block** sections in `agency/production/content-generation-workflow.md`.
+---
+
+## Writing Rules
+
+These apply to every content type, every language, every format.
+
+**Do not use "-" or "—" as a mid-sentence separator or thought-break.**
+
+Not allowed:
+```
+המחיר - לא מאומת
+היא — אחד הפרטים החשובים
+```
+
+Use "," or ":" instead:
+```
+המחיר: לא מאומת
+היא אחד הפרטים החשובים
+```
+
+"-" is allowed only in:
+- Hyphenated terms: re-branding, buy-to-let, off-plan
+- Dates: 12-12-2011, 2025-03-01
+- Markdown list bullets at the start of a line (- item)
+
+"—" is allowed only in:
+- The extraction warning block (metadata, not body content)
+
+If "-" or "—" appears mid-sentence: rewrite.
+
+---
+
+## File Header Template
+
+Every output file must start with this frontmatter:
+
+```markdown
+---
+project: [Project Name]
+developer: [Developer]
+language: [he | en]
+content-type: [hooks | reels | carousel | linkedin | whatsapp | summary | pdf]
+date: [YYYY-MM-DD]
+status: draft
+---
+```
+
+Change `status` to `ready` only after human review.
+
+---
+
+## Extraction Warning Block
+
+If any PROJECT DATA field was `[MISSING]`, add this block immediately after the frontmatter in every generated file:
+
+```markdown
+> EXTRACTION WARNING: The following fields were missing and may affect content accuracy: [list]. Review and fill in before publishing.
+```
+
+---
+
+## Publication Checklist
+
+**Pipeline note:** All content decisions must be finalized before the Hebrew Naturalizer runs. The Naturalizer is a language-only pass — it will not catch or fix content issues.
+
+Before marking any file `status: ready`, check:
+
+**Data integrity**
+- [ ] No `[MISSING]` fields in published content
+- [ ] No hallucinated data (prices, returns, percentages)
+- [ ] Every assertion is traceable to the PROJECT DATA block
+- [ ] Extraction warning present if data was partial
+
+**Tone and trust**
+- [ ] No urgency language without a specific, verifiable trigger — banned phrases: "לפני שזה יעלה", "הזדמנות", "כניסה מוקדמת", "לא יחזור", "פספסת", "נגמר מהר"
+- [ ] No scarcity claims unless unit count is confirmed and sourced
+- [ ] No "Dubai is booming" or equivalent clichés
+- [ ] Tone is calm and analytical — not broker-urgent
+- [ ] Final Impression Rule: no content piece ends on unresolved negativity — last emotional note is clarity, curiosity, or informed conviction (CLAUDE.md §13)
+
+**Naturalizer**
+- [ ] Every Hebrew file has a naturalizer sign-off at the bottom
+- [ ] Sign-off was written after an explicit pass — not assumed during writing
+
+**Structure**
+- [ ] No "-" used as a mid-sentence separator — use "," or ":" instead (see §Writing Rules above)
+- [ ] Each piece has exactly one CTA
+- [ ] CTA tier matches the platform
+- [ ] Investor summary is under 200 words
+- [ ] LinkedIn post is 700–1000 characters
+- [ ] Each hook is under 280 characters

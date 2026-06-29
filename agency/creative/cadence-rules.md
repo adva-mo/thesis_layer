@@ -7,7 +7,7 @@ Runtime file. Tells the reel generation process what we are optimizing for **rig
 
 Read this alongside `agency/production/templates/reel-template.md` (formats) and `agency/editorial/reel-preflight.md` (quality gate).
 
-**Scope note:** This file is currently wired to the reel pipeline only. It is read by `agency/production/content-generation-workflow.md` (Step 2), `agency/editorial/reel-preflight.md`, and `docs/reel-pipeline.md`. Hook selection and positioning decisions do not reference it yet. If cadence state becomes relevant cross-system (hook selection, analysis framing, positioning), move this file to `strategy/current-mode.md` and update the referencing files. No move during this sprint.
+**Scope note:** This file is currently wired to the reel pipeline only. It is read by `agency/editorial/reel-preflight.md` and `docs/reel-pipeline.md`. Hook selection and positioning decisions do not reference it yet. If cadence state becomes relevant cross-system (hook selection, analysis framing, positioning), move this file to `strategy/current-mode.md` and update the referencing files. No move during this sprint.
 
 ---
 
@@ -32,8 +32,6 @@ The first published reel (Club Place at Dubai Hills, Reel 1 — Format 2, 45s) w
 ## Audience Stage
 
 Account stage and goal type: see `market.md § Channel State`.
-
-**Brand Frame Enforcement (this sprint):** Brand Frame minimum applies — definition and examples in `retention-layer.md`. Explicit naming of framework terms — "Thesis", "Assumption", "Signal" — is optional per reel; tracking happens at channel level via `hook-log.md` `brand_frames` column.
 
 ---
 

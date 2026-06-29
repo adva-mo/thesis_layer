@@ -38,14 +38,15 @@ The three-pass sequence is one discipline's workflow, not three independent syst
 
 ---
 
-## The Three-Pass Sequence
+## The Two-Pass Sequence
 
 | Pass | Decisions | Reference |
 |---|---|---|
 | Pre-flight editorial checks | 15, 16 (partial) | `agency/editorial/reel-preflight.md` — checks marked `[Copy Editor]` |
-| Retention optimization | 15, 16 | `agency/editorial/retention-layer.md` |
 | Hebrew naturalizer | 17, 18 | `agency/editorial/hebrew-naturalizer.md` |
 
+Timing compression and retention craft (Step 2.4b) are owned by the Retention Specialist — see `agency/creative/retention-specialist.md`.
+
 **Where it runs in the workflow:**
-- Step 2.4b (Retention) and Step 2.4c (Naturalizer) in `agency/production/content-generation-workflow.md`
+- Step 2.4c (Naturalizer) in `agency/production/content-generation-workflow.md`
 - Step 8 (Hebrew Naturalizer Pass for all non-reel outputs) in `agency/production/content-generation-workflow.md`

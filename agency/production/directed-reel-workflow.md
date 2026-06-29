@@ -40,10 +40,10 @@ Apply the tag vocabulary from `reel-template.md § Script Conventions`:
 Fill the Per-Reel Header Block (see `reel-template.md § Creative Brief (Per-Reel Header Block)`). Set `**Status:** DRAFT`.
 
 **5. Timing estimate**
-For each scene, count characters in the `[TTS:]` block and estimate duration. Full formula: `agency/editorial/retention-layer.md § Timing Constraint`. Flag any scene that exceeds its beat's natural slot.
+For each scene, count characters in the `[TTS:]` block and estimate duration. Full formula: `agency/creative/retention-specialist.md § Timing constraint (hard)`. Flag any scene that exceeds its beat's natural slot.
 
 **Optional passes (not required — invoke on request):**
-- Timing compression: `retention-layer.md`
+- Timing compression: `agency/creative/retention-specialist.md`
 - Language naturalness: `agency/editorial/hebrew-naturalizer.md`
 - Full visual direction: `agency/art/visuals-layer.md`
 

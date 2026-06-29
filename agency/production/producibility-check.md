@@ -47,7 +47,7 @@ For every scene in the blueprint:
 | CTA beat present | At least one scene has `[BEAT: cta]` |
 | Timing sum | Scene durations sum to within ±1s of the declared reel duration in the heading |
 
-To verify timing: count characters in each `[TTS:]` block and apply the formula in `retention-layer.md § Timing Constraint`. If no explicit duration is declared, compare against the sprint mode's target range in `cadence-rules.md`.
+To verify timing: count characters in each `[TTS:]` block and apply the formula in `agency/creative/retention-specialist.md § Timing constraint (hard)`. If no explicit duration is declared, compare against the sprint mode's target range in `cadence-rules.md`.
 
 ### Group 4 — VEP Completeness
 
