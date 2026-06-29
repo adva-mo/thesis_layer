@@ -7,7 +7,7 @@ Runtime file. Tells the reel generation process what we are optimizing for **rig
 
 Read this alongside `agency/production/templates/reel-template.md` (formats) and `agency/editorial/reel-preflight.md` (quality gate).
 
-**Scope note:** This file is currently wired to the reel pipeline only. It is read by `agency/production/content-generation-workflow.md` (Step 2), `agency/editorial/reel-preflight.md`, and `docs/reel-pipeline.md`. Hook selection and positioning decisions do not reference it yet. If cadence state becomes relevant cross-system (hook selection, analysis framing, positioning), move this file to `strategy/current-mode.md` and update the referencing files. No move during this sprint.
+**Scope note:** This file is currently wired to the reel pipeline only. It is read by `agency/editorial/reel-preflight.md` and `docs/reel-pipeline.md`. Hook selection and positioning decisions do not reference it yet. If cadence state becomes relevant cross-system (hook selection, analysis framing, positioning), move this file to `strategy/current-mode.md` and update the referencing files. No move during this sprint.
 
 ---
 

@@ -211,7 +211,7 @@ This applies at every stage: scripting, retention compression, language naturali
 
 ## Role Interface Contract
 
-**Downstream roles consume upstream artifacts, not upstream decision playbooks.**
+**Downstream roles may consume upstream artifacts and shared quality standards. They must not consume upstream decision playbooks.**
 
 An **artifact** is the declared output of a role: a document, a section appended to an existing file, a field written into a blueprint. The artifact is the authoritative interface between roles.
 
@@ -235,6 +235,7 @@ These documents are consumed by roles other than their owner. Each is listed wit
 |---|---|---|---|
 | `agency/production/templates/` (all) | Copywriter | All content roles | Format contracts — applied, not interpreted |
 | `agency/editorial/reel-preflight.md` | Creative Director | Copywriter (Step 2) | Quality standard — Copywriter reads it to write to the bar, not to make Creative Director decisions |
+| `agency/creative/retention-specialist.md § Timing constraint (hard)` | Retention Specialist | Art Director (`producibility-check.md`), directed-reel-workflow | Quality standard — timing formula used to verify scene fit before production spend |
 
 ### Structural exception — directed-reel-workflow.md
 
