@@ -12,6 +12,7 @@ For output file naming, folder structure, writing rules, and publication checkli
 Before starting:
 - [ ] PROJECT DATA block is complete (or has documented `[MISSING]` fields)
 - [ ] `market.md`, `docs/voice-examples.md`, and `primary_language.md` loaded at session init
+- [ ] `docs/output-conventions.md` loaded — writing rules, file header template, extraction warning, publication checklist
 - [ ] `output/[project-slug]/thesis.md` exists and is loaded — produced by `agency/research/positioning-framework.md`
 - [ ] `output/[project-slug]/project-data.md` exists (if missing, note it; do not re-run extraction)
 - [ ] For reel sessions: `output/history/hook-log.md` and `docs/reel-pipeline.md` loaded at session init (CLAUDE.md §1.5)
@@ -108,7 +109,7 @@ Run reel-preflight.md against each script. If flagged `revise`, fix per reel-pre
 | **Output** | Timing-compressed scripts; status → RETENTION |
 | **Next** | Step 2.4c |
 
-Run retention-layer.md against the full script. Produce a per-beat diff. Run the post-retention integrity check (5 checks: new claims, hook promise, risk placement, ending momentum, brand frames). If `revert-beat`: restore the flagged beat and re-run integrity on that beat only. Copy the `Framework terms named` field — you'll add this to hook-log.md when logging the reel.
+Run `agency/creative/retention-specialist.md` against the full script. Produce a per-beat diff. Run the post-retention integrity check (5 checks: new claims, hook promise, risk placement, ending momentum, brand frames). If `revert-beat`: restore the flagged beat and re-run integrity on that beat only. Copy the `Framework terms named` field — you'll add this to hook-log.md when logging the reel.
 
 ---
 

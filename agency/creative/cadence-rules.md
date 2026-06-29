@@ -33,7 +33,7 @@ The first published reel (Club Place at Dubai Hills, Reel 1 — Format 2, 45s) w
 
 Account stage and goal type: see `market.md § Channel State`.
 
-**Brand Frame Enforcement (this sprint):** Brand Frame minimum applies — definition and examples in `retention-layer.md`. Explicit naming of framework terms — "Thesis", "Assumption", "Signal" — is optional per reel; tracking happens at channel level via `hook-log.md` `brand_frames` column.
+**Brand Frame Enforcement (this sprint):** Brand Frame minimum applies — definition and examples in `agency/creative/retention-specialist.md § Brand frame minimum`. Explicit naming of framework terms — "Thesis", "Assumption", "Signal" — is optional per reel; tracking happens at channel level via `hook-log.md` `brand_frames` column.
 
 ---
 
