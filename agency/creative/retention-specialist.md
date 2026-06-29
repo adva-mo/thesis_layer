@@ -172,8 +172,6 @@ New claims introduced: [none / FLAG — beat: specific claim]
 Hook promise satisfied: [yes / FLAG — explain]
 Risk placement: [correct / FLAG — explain]
 Ending momentum: [strong / weak — closing mechanism used]
-Thesis integrity: [PASS / FLAG — what was removed or distorted]
-Thesis invoked (for channel log): [✓ / —]
 Verdict: [accepted / revert-beat:[beat-name] — reason]
 ```
 
