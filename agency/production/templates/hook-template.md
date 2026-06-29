@@ -15,6 +15,7 @@ These apply to every hook regardless of category:
 - Never start with "Are you looking for..." or "Do you want..."
 - One specific number per hook (price, %, timeframe, or ratio) when possible
 - Test: if the hook could work for any project, rewrite it — it must be specific to this one
+- Do not blend more than two categories in a single hook
 
 ---
 
