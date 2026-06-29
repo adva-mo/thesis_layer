@@ -109,7 +109,7 @@ Run reel-preflight.md against each script. If flagged `revise`, fix per reel-pre
 | **Output** | Timing-compressed scripts; status → RETENTION |
 | **Next** | Step 2.4c |
 
-Run `agency/creative/retention-specialist.md` against the full script. Produce a per-beat diff. Run the post-retention integrity check (5 checks: new claims, hook promise, risk placement, ending momentum, brand frames). If `revert-beat`: restore the flagged beat and re-run integrity on that beat only. Copy the `Framework terms named` field — you'll add this to hook-log.md when logging the reel.
+Run `agency/creative/retention-specialist.md` against the full script. Produce a per-beat diff. Run the post-retention integrity check (4 checks: new claims, hook promise, risk placement, ending momentum). If `revert-beat`: restore the flagged beat and re-run integrity on that beat only. Note the `Thesis invoked` field — update the `thesis_invoked` column in hook-log.md (✓ or —) when logging the reel.
 
 ---
 

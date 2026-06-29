@@ -116,26 +116,6 @@ These cannot change. Any rewrite must leave them unchanged or compress the scaff
 | Hook family and cadence label | Already logged to hook-log.md. Tighten delivery, not classification. |
 | CTA text and tier | Set by thesis.md CTA Keyword |
 | Risk/challenge beat position | Cannot be moved to the final beat or removed |
-| Brand Frame minimum | See below |
-
----
-
-### Brand frame minimum
-
-Every reel must contain:
-
-**1. A directional claim** (mandatory) — a position, not just a fact. "X is worth paying attention to because Y." The thesis frame, even when the word "Thesis" doesn't appear.
-
-**2. At least one of:** Risk / Assumption / Signal
-
-- **Risk:** "this only works if", "the risk here", "what breaks this", "the scenario where this fails"
-- **Assumption:** "this depends on", "we're assuming", "the condition is", "this works if"
-- **Signal:** "this number matters because", "the data point here is", "most investors focus on X — the actual signal is Y"
-
-The directional claim cannot be compressed away. The reel cannot be left with no secondary frame. Which secondary frame appears — and how explicitly it is named — is not prescribed.
-
-**Naming:** Framework terms (Thesis, Risk, Assumption, Signal) do not need to appear in every reel. Frames can be present without being named. Channel-level tracking via the `brand_frames` column in `output/history/hook-log.md` ensures the vocabulary appears regularly.
-
 ---
 
 ### Permitted rewrites
@@ -164,8 +144,6 @@ Hard stops. If a proposed rewrite touches any of these, revert that beat.
 | Adding new facts, claims, or causal links | Original: "50% post-handover." → Retention: "50% post-handover — the developer is betting on long-term demand." The causal link is new. |
 | Changing certainty labels | "This may indicate demand saturation." → "This shows demand saturation." |
 | Introducing urgency language | "now is the time", "before this changes", "act fast", "don't miss" — even when the original didn't include them |
-| Removing the directional claim | The reel cannot end as information only. It must hold a position. |
-| Leaving no secondary frame | If Risk, Assumption, and Signal are all absent after the rewrite, revert the beat that removed the last one. |
 | Moving risk to the final beat | Risk can be anywhere in the body. The final beat must be thesis return, reframe, investor question, or curiosity. |
 | Rewriting the CTA intent or tier | Rhythm-tightening of the exact words is allowed. Changing the tier or intent is not. |
 
@@ -194,8 +172,8 @@ New claims introduced: [none / FLAG — beat: specific claim]
 Hook promise satisfied: [yes / FLAG — explain]
 Risk placement: [correct / FLAG — explain]
 Ending momentum: [strong / weak — closing mechanism used]
-Brand frames: directional claim [present / FLAG] | secondary frame [Risk / Assumption / Signal / FLAG—none]
-Framework terms named (for channel log): [Thesis / Risk / Assumption / Signal — or —]
+Thesis integrity: [PASS / FLAG — what was removed or distorted]
+Thesis invoked (for channel log): [✓ / —]
 Verdict: [accepted / revert-beat:[beat-name] — reason]
 ```
 

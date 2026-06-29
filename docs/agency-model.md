@@ -141,7 +141,7 @@ The implementation of this lifecycle is `agency/production/content-generation-wo
 
 **Current state:** Workflow Role — cold-audience retention craft, extracted from the Copy Editor and promoted to a named role. Lives in the creative department: the discipline is psychological, not editorial.
 
-**Discipline:** Stop-scrolling performance craft for short-form reels. Owns timing compression, scaffolding removal, open-loop mechanics, pattern interrupt, oscillation, and brand frame integrity. Receives the Copywriter's script after pre-flight and upgrades it for cold-audience completion rate.
+**Discipline:** Stop-scrolling performance craft for short-form reels. Owns timing compression, scaffolding removal, open-loop mechanics, pattern interrupt, and oscillation. Local constraint: does not compress away thesis-critical logic. Receives the Copywriter's script after pre-flight and upgrades it for cold-audience completion rate.
 
 **Does not own:** Hook selection or format (Creative Director), script content and investment claims (Copywriter), language naturalness and TTS compliance (Copy Editor).
 
@@ -196,6 +196,16 @@ The implementation of this lifecycle is `agency/production/content-generation-wo
 **Pre-production Verification** — Operational workflow. Deterministic checklist. Verifies blueprint completeness before spend. Owned by Art Director (decisions 26–27). Could be fully automated with no quality loss.
 
 **Post-production Pipeline** — Automated infrastructure. ElevenLabs TTS, Kling generation, render.py, subtitle.py. Executes approved blueprints with no organizational decisions.
+
+---
+
+## Thesis Integrity
+
+No role may alter, weaken, remove, or distort the thesis, key numbers, evidence, reasoning, risk logic, or investment conclusion.
+
+`thesis.md` is the authoritative source of truth. Every role transforms how the thesis is expressed — not what it says.
+
+This applies at every stage: scripting, retention compression, language naturalizing, visual direction, and hook selection. A rewrite that changes the meaning of a claim, softens a risk, drops a number, or contradicts the investment conclusion violates this rule, regardless of which role made the change.
 
 ---
 
