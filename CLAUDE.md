@@ -61,15 +61,15 @@ At the start of every session, before doing anything else, read these files:
 
 If a project is already active (e.g., resuming work), also read:
 
-4. `output/[project-slug]/thesis.md` — thesis statement, key numbers, risk register, CTA keyword
-5. `output/[project-slug]/project-data.md` — extracted project data (if exists; skip if not yet produced)
+5. `output/[project-slug]/thesis.md` — thesis statement, key numbers, risk register, CTA keyword
+6. `output/[project-slug]/project-data.md` — extracted project data (if exists; skip if not yet produced)
 
 If the session involves reel generation (rendering, scripting, or pipeline work), also read:
 
-6. `agency/production/templates/reel-template.md` — **script format spec** (required before writing any scene: VISUAL_TYPE values, VISUAL_INTENT keyword contract for generated scenes, MOTION_STYLE tokens, VEP table format, TTS rules)
-7. `agency/creative/reel-formats.md` — **format library** (all 11 format definitions: beat patterns, scaffolds, account stage fit, goal types — required before selecting a format or writing a script)
-8. `docs/reel-pipeline.md` — full technical reference for the reel generation pipeline (scripts, workflow, commands)
-9. `output/history/hook-log.md` — hook history for all projects (create if missing)
+7. `agency/production/templates/reel-template.md` — **script format spec** (required before writing any scene: VISUAL_TYPE values, VISUAL_INTENT keyword contract for generated scenes, MOTION_STYLE tokens, VEP table format, TTS rules)
+8. `agency/creative/reel-formats.md` — **format library** (all 11 format definitions: beat patterns, scaffolds, account stage fit, goal types — required before selecting a format or writing a script)
+9. `docs/reel-pipeline.md` — full technical reference for the reel generation pipeline (scripts, workflow, commands)
+10. `output/history/hook-log.md` — hook history for all projects (create if missing)
 
 These files are referenced throughout the system from multiple templates. Reading them once here eliminates per-template re-reads and prevents "see market.md" pointers from triggering repeated loads of the same file during CTA, hashtag, and language sections.
 
