@@ -75,7 +75,7 @@ Apply the 4-step selection rule from hook-selection.md §E for each reel. One re
 |---|---|
 | **Owner** | Copywriter |
 | **Inputs** | Creative Brief (Step 1.5 output), `thesis.md` |
-| **Load** | `agency/creative/cadence-rules.md`, `agency/production/templates/reel-template.md`, `agency/editorial/reel-preflight.md` |
+| **Load** | `agency/production/templates/reel-template.md`, `agency/editorial/reel-preflight.md` |
 | **Output** | Reel blueprints in `output/[slug]/[lang]/reels/` |
 | **Next** | Step 2.4a |
 

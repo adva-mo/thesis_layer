@@ -199,6 +199,39 @@ The implementation of this lifecycle is `agency/production/content-generation-wo
 
 ---
 
+## Role Interface Contract
+
+**Downstream roles consume upstream artifacts, not upstream decision playbooks.**
+
+An **artifact** is the declared output of a role: a document, a section appended to an existing file, a field written into a blueprint. The artifact is the authoritative interface between roles.
+
+A **decision playbook** is how a role makes its decisions: selection logic, evaluation criteria, technique documentation. Playbooks are internal to the role that owns them.
+
+**A role's Load list may include:**
+- Its own playbook
+- Shared references explicitly declared below
+- The upstream artifact produced for this project (`thesis.md`, Creative Brief, `visual-direction.json`)
+
+**A role's Load list may not include:**
+- Another role's decision playbook — unless it is listed as a shared reference below
+
+**Why:** When a downstream role reads an upstream decision playbook, it either re-runs a decision already made (redundant) or applies the upstream role's logic independently (architectural drift). The upstream artifact should already encode every decision the downstream role needs.
+
+### Declared shared references
+
+These documents are consumed by roles other than their owner. Each is listed with the consuming role and the reason it qualifies as a shared reference rather than a playbook.
+
+| Document | Owner | Consuming role | Why it qualifies |
+|---|---|---|---|
+| `agency/production/templates/` (all) | Copywriter | All content roles | Format contracts — applied, not interpreted |
+| `agency/editorial/reel-preflight.md` | Creative Director | Copywriter (Step 2) | Quality standard — Copywriter reads it to write to the bar, not to make Creative Director decisions |
+
+### Structural exception — directed-reel-workflow.md
+
+`agency/production/directed-reel-workflow.md` references Creative Director playbooks (`cadence-rules.md`, `reel-formats.md`) directly. This is a legitimate exception: the directed workflow intentionally bypasses the Creative Director (the user authors the script). There is no Creative Brief artifact to consume, so the playbooks serve as fallbacks. This exception does not apply to the full content generation workflow.
+
+---
+
 ## Extending the System
 
 Any new capability must declare the following before implementation:
