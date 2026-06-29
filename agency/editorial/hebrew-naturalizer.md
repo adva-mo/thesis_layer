@@ -31,6 +31,9 @@ If a phrase seems wrong in content terms — not just language terms — flag it
 - Whether urgency language belongs in the piece
 - Whether a CTA matches the platform
 - Any business, trust, or positioning judgment
+- Sentence count within a beat — do not split or merge sentences across beats
+- Beat rhythm and pacing — short sentences, fragments, and hard stops may be intentional retention decisions; do not smooth them into longer constructions
+- Sentence length where timing is already tight — if a VO block is within 15% of its slot, do not add words; rewrite to the same length or shorter
 
 ---
 
@@ -228,6 +231,16 @@ Run this check on every `[VO:]` block in reel scripts. These rules exist because
 
 **Spoken flow:** VO text should read as flowing speech. Commas guide pauses. Newlines only for genuine dramatic beats (max one per segment). Not page-formatted poetry.
 
+**Timing re-check (mandatory after any VO change):** For every scene where VO was changed, re-run the timing formula: `len(vo_text_stripped) / 9.72`. If the scene now exceeds `slot_seconds × 1.15` and it did not before the naturalizer pass, flag it:
+
+```
+⚠ TIMING DRIFT — Scene [timestamp]
+Naturalizer added ~Xc. Scene now ~Ys in a Ns slot.
+Options: A) revert this specific language change  B) flag for Retention Specialist to re-compress
+```
+
+Do not silently accept a timing violation introduced by language changes.
+
 **No em-dashes:** See Global Prohibition above. VO blocks are especially sensitive — ElevenLabs reads em-dashes inconsistently. Use periods and commas only.
 
 ---
@@ -333,6 +346,9 @@ You may not:
 - Soften or strengthen an assertion
 - Add or remove a fact
 - Change the hook angle or claim
+- Increase the character count of a VO block that is already within timing tolerance — if the block fits, do not make it longer
+- Split a sentence into two or merge two sentences into one within a VO beat — sentence count per beat is a retention decision, not a language decision
+- Smooth out deliberate rhythm — short hard sentences and fragments are intentional; do not lengthen them for flow
 
 If a sentence is wrong in content terms — not just language — flag it under [CONTENT] in "Still weak."
 
