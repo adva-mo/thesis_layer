@@ -207,6 +207,8 @@ No role may alter, weaken, remove, or distort the thesis, key numbers, evidence,
 
 This applies at every stage: scripting, retention compression, language naturalizing, visual direction, and hook selection. A rewrite that changes the meaning of a claim, softens a risk, drops a number, or contradicts the investment conclusion violates this rule, regardless of which role made the change.
 
+Any role that creates, rewrites, adapts, compresses, naturalizes, or visually represents content must verify Thesis Integrity before handoff.
+
 ---
 
 ## Role Interface Contract
