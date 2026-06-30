@@ -96,7 +96,6 @@ Append to `thesis.md` under `## Attention Angles`. Repeat for each selected patt
 **Angle:** [one sentence — the specific tension or reframe applied to this thesis.
            Not a hook. Not a headline. The underlying idea that makes a cold audience stop.]
 **Why they stop:** [what cognitive mechanism fires? what does the viewer's brain do?]
-**Content directions:** [3–5 specific directions this angle generates across content types]
 **Creative constraints:** [what this angle closes off — topics, claims, or framings
                           that would undermine it]
 ```

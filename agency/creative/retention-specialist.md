@@ -81,21 +81,29 @@ What works:
 
 Before any narrative work, check every scene for timing fit.
 
-**Formula:** `estimated_seconds = len(vo_text_stripped) / 9.72`
-(Source: `config/voice-settings.json` → `chars_per_second_he` × `video_speed`. Strip punctuation, quote marks, bracketed tags before counting.)
+**Method:** Look up the slot duration in the word budget table (`reel-template.md` §TTS Rules, Rule 0). Count the words in the VO. If word count exceeds the table max for that slot → compress.
 
-**Rule:** if `estimated > slot_seconds × 1.15`, the scene overruns — compress to fit.
+| Slot duration | Max words |
+|---|---|
+| 3–5s | 12 |
+| 6–10s | 22 |
+| 10–15s | 32 |
+| 13–18s | 40 |
+| 8–12s | 26 |
+| 5–7s | 14 |
 
-**How to compress:** treat the Copywriter's VO as content direction, not final words. Rewrite to the same meaning in fewer characters. Priority order: transitions first, explanatory scaffolding second, the lowest-narrative-value claim third.
+Word count is O(1) — no arithmetic, no character stripping. Count the words, compare to the column.
+
+**How to compress:** treat the Copywriter's VO as content direction, not final words. Rewrite to the same meaning in fewer words. Priority order: transitions first, explanatory scaffolding second, the lowest-narrative-value claim third.
 
 **Escalation — only when compression would destroy load-bearing content:**
 
 ```
 ⚠ TIMING ESCALATION — Scene [timestamp]
-Slot: Ns | Est.: ~Xs | Over by: Ys
+Slot: Ns | Word count: N (max: N)
 Cannot fit without removing a load-bearing point. Choose:
-  Option A: [keep X, remove Y] → ~Zs
-  Option B: [keep Y, remove X] → ~Zs
+  Option A: [keep X, remove Y] → ~N words
+  Option B: [keep Y, remove X] → ~N words
   Option C: expand slot — split into [ts1] / [ts2], director assigns two visual scenes
 ```
 
@@ -105,13 +113,19 @@ Present to the user. Do not proceed on that scene until they choose. All other s
 
 ---
 
+### Evidence selection principle
+
+Any fact or number that appears in the artifact must remain faithful to `thesis.md`. The system is not required to express every thesis element in every artifact. Each artifact may select the subset of thesis evidence that best serves its communication objective.
+
+This means the Retention Specialist may remove a number or fact if it does not serve the reel's retention objective — but may never alter a value, soften a risk label, or introduce a claim not supported by `thesis.md`.
+
 ### Frozen elements
 
 These cannot change. Any rewrite must leave them unchanged or compress the scaffolding around them.
 
 | Frozen | Notes |
 |---|---|
-| Every specific number | May be reformatted ("600,000 דירהם" → "600K") but not changed |
+| Value of any number that appears | May be reformatted ("600,000 דירהם" → "600K") but not altered. Whether a number appears at all is a selection decision, not a frozen constraint. |
 | Certainty labels | "may indicate", "one reading of this is", "this suggests" — cannot be strengthened or removed |
 | Hook family and cadence label | Already logged to hook-log.md. Tighten delivery, not classification. |
 | CTA text and tier | Set by thesis.md CTA Keyword |

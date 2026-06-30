@@ -4,22 +4,17 @@ Mandatory quality gate. Run after a reel script is drafted, before Visual Eviden
 
 **What this catches:** a script can be analytically correct — sound thesis, accurate numbers, correct risk disclosure — and still be weak for cold-audience retention. Correctness is necessary, not sufficient. This gate checks the part the format scaffolds don't check: whether a cold scroller actually stops, stays, and reaches the payoff.
 
+**Governing principle:** Creative Pre-flight exists only to detect defects that cannot be repaired by downstream optimization. Any defect the Retention Specialist can resolve — evidence selection, information density, number budget, ordering, rhythm — does not belong here. Pre-flight catches structural failures that require rewriting: absent hook tension, a body that cannot answer its hook promise, a cadence mismatch. The Retention Specialist handles the rest.
+
 ---
 
 ## Preflight Questions
 
 1. Why would someone stop scrolling?
 2. Does the hook create cold-audience tension?
-3. Is the payoff clear by second 5–7?
-4. Are there too many numbers too early?
-5. Is there only one core investment idea?
-6. Is risk included?
-7. Is risk not the final emotional impression?
-8. Is the CTA clear?
-9. Can this be shorter?
-10. Would a cold viewer understand why this matters?
-11. Have we explained more than the audience has earned?
-12. Can one sentence be removed without weakening the thesis?
+3. Does the body deliver on what the hook promises before the CTA?
+4. Is the CTA clear?
+5. Would a cold viewer understand why this matters?
 
 ---
 
@@ -130,68 +125,6 @@ A hook is strong only if it creates **at least one** of:
 
 **Analytical or authority-toned hooks are weak if they create none of the above — even when factually accurate.** "X works differently than most projects" is correct but not automatically tension-creating; it only counts as strong if the contrast itself is sharp enough to feel like a contradiction.
 
----
-
-## Payoff Timing [Creative Director]
-
-The hook creates a question. The insight is the first beat of the answer. Evaluate where the central investment signal first appears.
-
-**GOOD** — the core number or insight arrives within the first 7 seconds of body content (before the midpoint of a 15–25s reel; before second 15 in a longer reel).
-
-**DELAYED** — the viewer sits through more than half the reel before the payoff. Acceptable only if the format is explicitly designed as a slow build (Formats 2, 4) and the thesis complexity justifies it.
-
----
-
-## Risk Placement [Creative Director]
-
-Two conditions must both hold:
-
-1. **Risk is present.** A reel with no risk disclosure fails. Risk is required for credibility.
-2. **Risk is not the terminal beat.** The last content beat before CTA must be a reframe, a thesis return, or an investor question — never a risk statement.
-
-**CORRECT** — risk appears in the body, and the beat immediately before CTA is one of the five allowed closing mechanisms (see reel-template.md § Final Impression Rule).
-
-**INCORRECT** — risk is the final emotional impression before the CTA, or risk is absent entirely.
-
----
-
-## Ending Momentum [Creative Director]
-
-The final emotional note must be clarity, curiosity, or informed conviction. Never unresolved doubt, fear, or paralysis.
-
-**Test:** read the last sentence. If the natural viewer response is "this sounds risky" or "maybe I shouldn't" — fail. If the natural response is "interesting — I want to understand the answer" — pass.
-
-**STRONG** — the reel ends on one of the five allowed closing mechanisms: return to thesis, reframe the risk, surface the real investor question, compare tradeoffs, or create curiosity (CLAUDE.md §13 — Final Impression Rule).
-
-**WEAK** — the reel ends on unresolved negativity, anxiety, or paralysis.
-
----
-
-## Cognitive Load [Copy Editor]
-
-Evaluate the number budget and idea density per segment.
-
-**Number budget:** 1–3 high-leverage numbers per reel. A number earns its place only if removing it weakens the investment logic, timing, or risk profile. Apply the test from reel-template.md § Numbers Must Earn Their Place.
-
-**Idea density:** one core investment idea per segment. Two competing ideas in one scene lose both.
-
-**LOW** — ≤3 numbers, one idea per segment throughout.  
-**MEDIUM** — 3–4 numbers, or one segment carries two ideas that are closely related.  
-**HIGH** — more than 4 numbers, or multiple competing ideas compete for attention in the same segment.
-
----
-
-## Overexplaining [Copy Editor]
-
-Apply the Q12 compression test to every sentence: *"Can this sentence be removed without weakening the thesis?"*
-
-If yes: remove it. The idea must still land complete — never cut mid-sentence or trim arbitrarily. If a sentence cannot be removed without weakening the thesis, it stays.
-
-**CLEAN** — no sentence survives the Q12 test as removable.  
-**TRIM NEEDED** — at least one sentence can be removed without weakening the thesis. Identify and cut before proceeding.
-
----
-
 ## Check Ownership
 
 | Check | Owner |
@@ -200,11 +133,6 @@ If yes: remove it. The idea must still land complete — never cut mid-sentence 
 | Cadence Label | Creative Director |
 | Hook-Insight Integrity | Creative Director |
 | Hook Strength | Creative Director |
-| Payoff Timing | Creative Director |
-| Risk Placement | Creative Director |
-| Ending Momentum | Creative Director |
-| Cognitive Load | Copy Editor *(Workflow Role)* |
-| Overexplaining | Copy Editor *(Workflow Role)* |
 
 ---
 
@@ -217,19 +145,14 @@ PRE-FLIGHT REVIEW
 
 Scene Type Validation: [pass / fail]
 Hook Strength: [weak / medium / strong]
-Payoff Timing: [good / delayed]
-Cognitive Load: [low / medium / high]
-Risk Placement: [correct / incorrect]
-Ending Momentum: [strong / weak]
-Overexplaining: [clean / trim needed]
 Cadence Label: [match / mismatch]
 Hook-Insight Integrity: [pass / fail]
 Recommendation: [revise / approved]
 ```
 
 **Recommendation logic:**
-- `revise` if Scene Type Validation is `fail`, OR Hook Strength is `weak`, OR Payoff Timing is `delayed`, OR Ending Momentum is `weak`, OR Risk Placement is `incorrect`, OR Cadence Label is `mismatch`, OR Hook-Insight Integrity is `fail`.
-- `approved` only if none of the above trigger and Overexplaining is `clean` (or any flagged sentence has already been cut).
+- `revise` if Scene Type Validation is `fail`, OR Hook Strength is `weak`, OR Cadence Label is `mismatch`, OR Hook-Insight Integrity is `fail`.
+- `approved` if none of the above trigger.
 
 ---
 
@@ -260,10 +183,5 @@ Runs during Step 2.4a when `Recommendation: revise`. Fix the flagged category, t
 | Flag | Fix |
 |---|---|
 | Hook Strength: weak/medium | Rewrite the hook to create curiosity, contradiction, mistake framing, money tension, myth bust, or wrong-question framing (see §Hook Strength Test above). If the current hook family can't be made strong for this thesis, pick a different family from `hook-selection.md`. |
-| Payoff Timing: delayed | Move the core number/insight earlier; cut setup that precedes it. |
-| Cognitive Load: high | Cut numbers to the 1–3 budget (reel-template.md — Numbers Must Earn Their Place); reduce to one idea per segment. |
-| Risk Placement: incorrect | Move risk earlier; the last beat before CTA must be a reframe, thesis return, or investor question (reel-template.md — Final Impression Rule). |
-| Ending Momentum: weak | Apply one allowed closing mechanism: return to thesis, reframe the risk, surface the investor question, compare tradeoffs, or create curiosity. |
-| Overexplaining: trim needed | Apply the Q12 compression test — remove any sentence where the answer is "yes, this can go" — until clean. |
 | Cadence Label: mismatch | Read the hook VO and identify its actual rhetorical structure. Either rewrite the hook VO to match the declared cadence, or relabel. Then re-run Hook-Insight Integrity against the correct cadence label. |
 | Hook-Insight Integrity: fail | Identify which violation triggered the fail (promise deferred to CTA, or claim presented as fact without evidence). If deferred: rewrite the Insight segment to answer the hook before the CTA, or change the hook cadence to CONTRAST. If unsupported fact: relabel the claim as inference ("this may indicate...", "one reading of this is...") or remove it. |

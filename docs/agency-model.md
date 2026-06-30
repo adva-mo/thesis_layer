@@ -92,7 +92,7 @@ The implementation of this lifecycle is `agency/production/content-generation-wo
 
 **Phase 1 — Creative Brief** (decisions 8, 9): Sets hook family, format, and cadence before the Copywriter writes. Primary output is the Creative Brief — the per-reel artifact that records all creative direction decisions. Hook, format, and cadence are components of the brief, not independent outputs. New creative concepts become additional sections of the brief rather than new roles or artifacts.
 
-**Phase 2 — Creative Review** (decisions 10–14): Evaluates whether the Copywriter executed the brief. Reviews hook tension, body payoff, ending momentum, cadence label, and risk placement. The reviewer is the same authority who set the brief.
+**Phase 2 — Creative Review** (decisions 10–14): Evaluates whether the Copywriter executed the brief. Reviews hook tension, cadence label, and body payoff integrity. The reviewer is the same authority who set the brief. Checks that can be repaired by downstream optimization (timing, density, ordering, rhythm) are not run here — they belong to the Retention Specialist.
 
 **Does not own:** Writing the copy, editorial compression, Hebrew naturalness, visual specification, asset sourcing
 
@@ -141,7 +141,9 @@ The implementation of this lifecycle is `agency/production/content-generation-wo
 
 **Current state:** Workflow Role — cold-audience retention craft, extracted from the Copy Editor and promoted to a named role. Lives in the creative department: the discipline is psychological, not editorial.
 
-**Discipline:** Stop-scrolling performance craft for short-form reels. Owns timing compression, scaffolding removal, open-loop mechanics, pattern interrupt, and oscillation. Local constraint: does not compress away thesis-critical logic. Receives the Copywriter's script after pre-flight and upgrades it for cold-audience completion rate.
+**Discipline:** Stop-scrolling performance craft for short-form reels. Owns timing compression, scaffolding removal, open-loop mechanics, pattern interrupt, oscillation, evidence selection, information density, and number budget. Local constraint: does not compress away thesis-critical logic; any fact or number that appears must remain faithful to `thesis.md`, but the artifact is not required to express every thesis element. Receives the Copywriter's script after pre-flight and upgrades it for cold-audience completion rate.
+
+**Scope boundary:** Creative Pre-flight exists only to detect defects that cannot be repaired by downstream optimization. Anything the Retention Specialist can resolve does not belong in pre-flight.
 
 **Does not own:** Hook selection or format (Creative Director), script content and investment claims (Copywriter), language naturalness and TTS compliance (Copy Editor).
 
