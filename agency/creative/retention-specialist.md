@@ -113,13 +113,19 @@ Present to the user. Do not proceed on that scene until they choose. All other s
 
 ---
 
+### Evidence selection principle
+
+Any fact or number that appears in the artifact must remain faithful to `thesis.md`. The system is not required to express every thesis element in every artifact. Each artifact may select the subset of thesis evidence that best serves its communication objective.
+
+This means the Retention Specialist may remove a number or fact if it does not serve the reel's retention objective — but may never alter a value, soften a risk label, or introduce a claim not supported by `thesis.md`.
+
 ### Frozen elements
 
 These cannot change. Any rewrite must leave them unchanged or compress the scaffolding around them.
 
 | Frozen | Notes |
 |---|---|
-| Every specific number | May be reformatted ("600,000 דירהם" → "600K") but not changed |
+| Value of any number that appears | May be reformatted ("600,000 דירהם" → "600K") but not altered. Whether a number appears at all is a selection decision, not a frozen constraint. |
 | Certainty labels | "may indicate", "one reading of this is", "this suggests" — cannot be strengthened or removed |
 | Hook family and cadence label | Already logged to hook-log.md. Tighten delivery, not classification. |
 | CTA text and tier | Set by thesis.md CTA Keyword |
