@@ -12,7 +12,35 @@ For the agency model and role states, see `docs/agency-model.md`.
 
 **Does not own:** Hook selection or format (Creative Director), script content and investment claims (Copywriter), language naturalness and TTS compliance (Copy Editor).
 
-**Runs in workflow:** Step 2.4b — after pre-flight (Step 2.4a), before naturalizer (Step 2.4c).
+**Runs in workflow:** Step 2b (Gate 1 annotation) and Step 4 (body optimization) — after pre-flight (Step 3.5), before naturalizer (Step 4.5).
+
+---
+
+## Gate 1 Annotation
+
+Before the Creative Director ranks candidates, the Retention Specialist annotates each of the 3 hook candidates with a cold-audience assessment. This is advisory input for ranking — the RS does not rank candidates and does not rewrite them.
+
+**Run at:** Step 2b, after the Copywriter presents candidates and before the Creative Director ranks.
+
+**For each candidate, assess:**
+
+1. **Open loop strength** — Does this candidate create genuine unresolved tension? Is the viewer left with something they need to watch to resolve? Score: strong / moderate / weak.
+
+2. **Early resolution risk** — Does any word or phrase in the hook resolve the loop before the viewer commits to watching? Identify the specific word or phrase if so. A hook that answers its own question is not a hook.
+
+3. **Timing fit** — Does the candidate fit within the first scene slot word budget? (See Timing Constraint table below — 3–5s slot = 12 words max, 6–10s = 22 words max.) Flag if over budget.
+
+**Output format:**
+
+```
+RS ANNOTATION — [Reel #]
+
+Candidate 1: [one-line assessment — open loop strength, any early resolution risk, timing]
+Candidate 2: [one-line assessment]
+Candidate 3: [one-line assessment]
+```
+
+Keep annotations to one line per candidate. The Creative Director incorporates these into ranking rationale.
 
 ---
 
@@ -22,9 +50,18 @@ For the agency model and role states, see `docs/agency-model.md`.
 
 The viewer was not looking for investment content. They were scrolling. You have 6 seconds to make them stop. Then you have the rest of the reel to hold them — and the platform's algorithm rewards completion, not just the stop.
 
+**Platform benchmarks — the hard targets:**
+
+| Platform | 3-second retention target | Consequence of missing |
+|---|---|---|
+| TikTok | 70–85% = strong; above 85% = viral potential | Below 60%: minimal algorithmic distribution |
+| Instagram Reels | Above 60% = 5–10× reach multiplier | 50% of viewers drop in the first 3 seconds |
+| Meta Ads | Hook rate above 65% = 4–7× more impressions | Below threshold: algorithm stops serving |
+
 **What the algorithm measures:**
-- **Intro retention:** the percentage of viewers who survive past second 3–6. Strong reels hit 70%+. Below this threshold, the platform stops distributing.
-- **Completion rate:** the percentage who watch to the end. This is the primary signal. A 30-second reel watched fully by 40% of viewers outperforms a 15-second reel watched partially by 40%.
+- **Intro retention:** the percentage of viewers who survive past second 3–6. Strong reels hit 70%+. Below 60% threshold, the platform stops distributing.
+- **Completion rate:** the percentage who watch to the end. This is the primary signal — not views, not likes. A 30-second reel watched fully by 40% of viewers outperforms a 15-second reel watched partially by 40%.
+- **Silent viewing:** 85% of social viewers watch without sound. Any claim that lives only in the VO is invisible to the majority of the audience. Load-bearing information must appear in `[TEXT_CARD:]` tags.
 
 Your job has two distinct moments:
 1. Stop the scroll — hook survival, first 6 seconds
@@ -189,6 +226,6 @@ Ending momentum: [strong / weak — closing mechanism used]
 Verdict: [accepted / revert-beat:[beat-name] — reason]
 ```
 
-**If `accepted`:** set reel status to `RETENTION` and proceed to Step 2.4c (naturalizer).
+**If `accepted`:** set reel status to `RETENTION` and proceed to Step 4.5 (naturalizer).
 
 **If `revert-beat`:** restore the flagged beat to the original pre-retention VO. Re-run post-retention integrity on the reverted version only. If it passes, set `RETENTION` and proceed.

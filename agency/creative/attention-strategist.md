@@ -38,6 +38,8 @@ Israeli scrollers on Instagram or TikTok. They were not looking for investment c
 | **Hidden Variable** | There's a signal nobody is tracking that explains everything. The obvious metric is a distraction. |
 | **Expertise Reveal** | After [credibility signal], here's the one thing that actually predicts the outcome. Creates authority and curiosity simultaneously. |
 
+**Why epistemic patterns stop attention:** The brain is a prediction engine built on a library of existing beliefs. When content names one of those beliefs and challenges it, the brain cannot suppress the signal — the cognitive system responsible for belief maintenance forces high-priority processing. The viewer did not choose to engage; the challenge to their mental model made engagement involuntary.
+
 ### Contrast — difference that forces a reaction
 
 | Pattern | Definition |
@@ -49,6 +51,8 @@ Israeli scrollers on Instagram or TikTok. They were not looking for investment c
 | **Unexpected Comparison** | This is exactly like [unrelated thing] — and that reframes everything. |
 | **The Exception** | Every rule in this market has one exception. The exception is the signal. |
 
+**Why contrast patterns stop attention:** The brain's threat-detection system prioritizes difference over sameness — detecting anomalies in the environment is an evolutionary survival mechanism. When content breaks an expected pattern, the attention system re-engages at full capacity involuntarily. The viewer didn't choose to notice; the deviation made noticing automatic.
+
 ### Causal and temporal — time, cause, and consequence
 
 | Pattern | Definition |
@@ -57,6 +61,8 @@ Israeli scrollers on Instagram or TikTok. They were not looking for investment c
 | **Timing Mismatch** | The market hasn't priced this yet. The window between signal and correction is the opportunity. |
 | **Loss Frame** | Reframe from gain to avoidance. What is the viewer actively losing by not knowing this? Not urgency — ongoing loss. |
 | **False Trade-off** | Everyone acts like you must choose between X and Y. The trade-off isn't real — but only if you know where to look. |
+
+**Why causal/temporal patterns stop attention:** Loss aversion is neurologically asymmetric — the pain of losing something is approximately twice as intense as the pleasure of gaining the equivalent (Kahneman). Loss Frame exploits this directly. Timing Mismatch exploits it indirectly by implying an ongoing loss (the window is closing). Second-order Effect and False Trade-off create curiosity by disrupting the viewer's assumed causal model of the world.
 
 ### Cognitive engagement — how attention is triggered
 
@@ -67,6 +73,18 @@ Israeli scrollers on Instagram or TikTok. They were not looking for investment c
 | **Identity Threat** | Challenge the viewer's self-image as a smart, informed person. They engage to prove you wrong or learn what they've been missing. |
 | **Specificity Shock** | A number or fact so precise it signals insider knowledge — creating credibility and curiosity simultaneously. |
 | **Hidden Mechanism** | The thing that actually drives [outcome] isn't what people think. The visible driver is a red herring. |
+
+**Why each mechanism works:**
+
+- **Zeigarnik Loop:** The brain experiences mild psychological discomfort when a started task or information loop is not completed. This discomfort is involuntary — the cognitive system pulls toward closure. A hook that opens a loop without resolving it creates a pull the viewer cannot simply scroll past without a felt sense of incompletion.
+
+- **Pattern Interrupt:** The brain suppresses processing of predictable inputs as an efficiency mechanism — filtering out the expected is energy-saving. When content deviates sharply from the expected feed pattern (unexpected opening word, unexpected juxtaposition, unexpected register), the attention system re-engages at full capacity. The deviation forces processing.
+
+- **Identity Threat:** The brain's self-concept maintenance system treats challenges to identity as high-priority threats. A viewer who sees themselves as an informed, smart investor cannot easily dismiss content that implies they may not be — the threat to self-concept demands engagement to resolve (confirm or refute).
+
+- **Specificity Shock:** Unexpected precision signals non-obvious knowledge. The brain interprets very specific numbers or facts as evidence that the source has access to information it doesn't — which creates both credibility and curiosity about the source of that knowledge.
+
+- **Self-Reference Effect (underlying Identity Threat and Specificity Shock):** Information perceived as directly relevant to the self is processed more deeply and retained longer. The most powerful word in any language is "you" — it triggers the brain's self-relevance network automatically, forcing deeper processing regardless of conscious intent.
 
 ---
 

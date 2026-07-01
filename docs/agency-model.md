@@ -88,32 +88,41 @@ The implementation of this lifecycle is `agency/production/content-generation-wo
 
 **Decisions owned:** 8, 9, 10, 11, 12, 13, 14
 
-**Two phases, one role:**
+**Three moments, one role:**
 
-**Phase 1 — Creative Brief** (decisions 8, 9): Sets hook family, format, and cadence before the Copywriter writes. Primary output is the Creative Brief — the per-reel artifact that records all creative direction decisions. Hook, format, and cadence are components of the brief, not independent outputs. New creative concepts become additional sections of the brief rather than new roles or artifacts.
+**Moment 1 — Production Constraint Set** (decisions 8, 9): Before the Copywriter generates hook candidates. Sets the architectural boundaries per reel: format, reel goal (scroll-stop / conversion / brand-building), emotional register, audience signal (one sentence — who self-selects into this content via the algorithm), and hard constraints. Does not specify hook family, cadence, or angle — those emerge from candidate exploration.
 
-**Phase 2 — Creative Review** (decisions 10–14): Evaluates whether the Copywriter executed the brief. Reviews hook tension, cadence label, and body payoff integrity. The reviewer is the same authority who set the brief. Checks that can be repaired by downstream optimization (timing, density, ordering, rhythm) are not run here — they belong to the Retention Specialist.
+**Moment 2 — Ranking + Gate 1 Support**: After the Copywriter generates 3 candidates and the Retention Specialist annotates them. Ranks candidates 1–3 with one-line rationale for the top pick, incorporating RS annotation and diversity checks. Presents ranked candidates to the human for Gate 1 selection. Brief documentation written after the human selects — recording the chosen hook, hook family, cadence, and angle. Hook-log.md updated at this point.
 
-**Does not own:** Writing the copy, editorial compression, Hebrew naturalness, visual specification, asset sourcing
+**Moment 3 — Creative Review** (decisions 10–14): After the Copywriter writes the full body. Evaluates hook-body integrity (does the body deliver the hook's promise?), risk placement, thesis integrity, and timing feasibility. Hook-level checks (strength, cadence fit, family fit) are resolved at Gate 1 — not re-run here.
+
+**Does not own:** Writing the copy, generating hook candidates, editorial compression, Hebrew naturalness, visual specification, asset sourcing
 
 **Role definition:** `agency/creative/creative-director.md`
 
 **Current implementation:**
-- Phase 1 — `agency/creative/hook-selection.md`, `agency/creative/reel-formats.md`
-- Phase 2 — `agency/editorial/reel-preflight.md` (creative review checks)
-- Brief artifact — Per-Reel Header Block in every reel blueprint
+- Moment 1 — `agency/creative/hook-selection.md` §A, `agency/creative/reel-formats.md`
+- Moment 2 — `agency/creative/hook-selection.md` §B–D (ranking criteria, diversity reference, Gate 1 format)
+- Moment 3 — `agency/editorial/reel-preflight.md` (hook-body integrity, thesis integrity checks)
+- Brief artifact — Per-Reel Header Block in every reel blueprint (written after Gate 1)
 
 ---
 
 ### Copywriter
 
-**Decisions owned:** None numbered. The Copywriter's judgment is craft judgment — which words, in what order, create the intended effect within the brief's constraints.
+**Decisions owned:** None numbered. The Copywriter's judgment is craft judgment — which words, in what order, create the intended effect within the constraint set's boundaries.
 
-**Does not own:** Hook selection, format selection, cadence, visual direction, editorial compression, asset sourcing
+**Does not own:** Hook selection, format selection, cadence, audience signal, visual direction, editorial compression, asset sourcing
+
+**Two moments, one role:**
+
+**Moment 1 — Hook Candidate Generation**: Produces 3 hook candidates per reel, each drawing from one Attention Angle as its psychological foundation. Each candidate is written in final-quality language and labeled with mechanism, hook family, and cadence. Does not rank — the Creative Director ranks, the human selects.
+
+**Moment 2 — Body Production**: Writes the complete script body, CTA, and VEP after the hook is locked at Gate 1. Knows the exact hook, the psychological state it creates, and the exact promise the body must keep.
 
 **Role definition:** `agency/creative/copywriter.md`
 
-**Current implementation:** `agency/production/templates/hook-template.md` (hook generation), `agency/production/content-generation-workflow.md` Steps 2–7 (reel scripts, carousel, LinkedIn, WhatsApp, investor summary, CTAs)
+**Current implementation:** `agency/production/templates/hook-template.md` (craft library for candidate generation), `agency/production/content-generation-workflow.md` Steps 2a, 3 (candidates, body), Steps 4–8 (carousel, LinkedIn, WhatsApp, investor summary, CTAs)
 
 ---
 
@@ -141,7 +150,7 @@ The implementation of this lifecycle is `agency/production/content-generation-wo
 
 **Current state:** Workflow Role — cold-audience retention craft, extracted from the Copy Editor and promoted to a named role. Lives in the creative department: the discipline is psychological, not editorial.
 
-**Discipline:** Stop-scrolling performance craft for short-form reels. Owns timing compression, scaffolding removal, open-loop mechanics, pattern interrupt, oscillation, evidence selection, information density, and number budget. Local constraint: does not compress away thesis-critical logic; any fact or number that appears must remain faithful to `thesis.md`, but the artifact is not required to express every thesis element. Receives the Copywriter's script after pre-flight and upgrades it for cold-audience completion rate.
+**Discipline:** Stop-scrolling performance craft for short-form reels. Two moments: (1) At Gate 1 — annotates hook candidates with cold-audience assessment (open loop strength, early resolution risk, timing fit for first scene slot) before Creative Director ranking; does not rank or rewrite candidates. (2) At body optimization — owns timing compression, scaffolding removal, open-loop mechanics, pattern interrupt, oscillation, evidence selection, information density, and number budget. Hook arrives locked at body optimization — RS does not touch it. Local constraint: does not compress away thesis-critical logic; any fact or number that appears must remain faithful to `thesis.md`, but the artifact is not required to express every thesis element.
 
 **Scope boundary:** Creative Pre-flight exists only to detect defects that cannot be repaired by downstream optimization. Anything the Retention Specialist can resolve does not belong in pre-flight.
 
@@ -149,7 +158,7 @@ The implementation of this lifecycle is `agency/production/content-generation-wo
 
 **Role definition:** `agency/creative/retention-specialist.md`
 
-**Runs at:** Step 2.4b in `agency/production/content-generation-workflow.md`
+**Runs at:** Step 2b (Gate 1 annotation) and Step 4 (body optimization) in `agency/production/content-generation-workflow.md`
 
 **Promotion criteria:** Promoted to Organizational Role when retention complexity grows — for example, if platform-specific retention strategies diverge, or if independent ownership demonstrably improves completion rates.
 
@@ -172,6 +181,33 @@ The implementation of this lifecycle is `agency/production/content-generation-wo
 - `agency/editorial/hebrew-naturalizer.md` (language naturalness — decisions 17, 18)
 
 **Promotion criteria:** Promoted to Organizational Role when editorial complexity grows or when independent ownership demonstrably improves output quality.
+
+---
+
+## Creative Doctrine
+
+Foundational beliefs about the medium. Not a role. Not a playbook. Set by the human operator. Applied by every creative role at every decision point without exception.
+
+**Attention is scarce.**
+The viewer was not looking for this content. Every word, scene, and beat competes against the scroll. There is no neutral moment — every element either earns attention or loses it.
+
+**Curiosity beats explanation.**
+Withholding the answer holds attention. Delivering it ends the reason to stay. Explain only after the viewer has committed to watching.
+
+**Open loops must close.**
+A loop that closes only at the CTA is not retention — it is frustration. Every tension introduced must resolve before the reel ends.
+
+**Stop-scrolling ≠ conversion.**
+The hook that stops the scroll and the hook that produces action are different instruments. Know which job this reel is doing before writing a word.
+
+**One mechanism per hook.**
+Two mechanisms produce zero focus. The viewer's brain needs a single signal to follow. Hooks that blend curiosity gap + social proof + question are not stronger — they are noisier.
+
+**Price numbers feel like ads.**
+Behavior numbers, structure numbers, and ratios create curiosity. Price numbers activate ad resistance. The same investment can be expressed as information or as a pitch — the number type determines which.
+
+**Behavior numbers create curiosity.**
+"50% post-handover" is information. "AED 850,000" is a pitch. The difference is what the viewer does next: one creates a question, the other creates resistance.
 
 ---
 

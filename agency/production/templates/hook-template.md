@@ -1,249 +1,227 @@
-# Hook Template
+# Hook Craft Library
 
-10 hook frameworks. Generate one per category for every project. Each hook should use specific data from the PROJECT DATA block.
+The Copywriter's reference for generating hook candidates. This is not a generation checklist — it is a craft library. Read the techniques, understand what each one does, and draw from them freely when generating 3 candidates for a given reel's Attention Angles and constraint set.
 
-**Language note (primary language):** Apply naturalizer inline while writing. `primary_language.md` is loaded at session init — no re-read needed here.
+**Language note:** Apply naturalizer inline while writing. `primary_language.md` is loaded at session init — no re-read needed here.
 
 ---
 
 ## Cross-Cutting Rules
 
-These apply to every hook regardless of category:
+These apply to every hook candidate regardless of technique:
 
-- First 3 words must create tension, curiosity, or surprise
-- Max 2 sentences for social media hooks
-- Never start with "Are you looking for..." or "Do you want..."
-- One specific number per hook (price, %, timeframe, or ratio) when possible
-- Test: if the hook could work for any project, rewrite it — it must be specific to this one
-- Do not blend more than two categories in a single hook
+- **First 3 words must create tension, curiosity, or surprise.** The scroll decision fires in under 2 seconds — before a second sentence is processed.
+- **Maximum 2 sentences.** Longer hooks give the viewer time to decide they're not interested before the hook lands.
+- **One mechanism per hook.** Pick one technique. Blending two produces noise, not power.
+- **Never start with "Are you looking for..." or "Do you want..."** These are opt-in frames. Cold audiences don't opt in.
+- **Take a position on a fact — don't describe it.** "Dubai appreciation is strong" is a description. "The reason most investors underestimate Dubai appreciation has nothing to do with the market" is a position. Positions create curiosity; descriptions end it.
+- **Behavior and structure numbers over price numbers.** "50% post-handover" creates curiosity. "AED 850,000" activates ad resistance. Use structure, timing, ratio, and behavior numbers in scroll-stop hooks — not entry prices.
+- **The hook creates a promise the body must keep.** Label what open loop each candidate creates and what the body must resolve. A hook whose promise the body cannot keep fails pre-flight.
+- **Test: if this hook could work for any project, rewrite it.** It must be specific to this thesis, these numbers, this angle.
 
 ---
 
-## H1 — Curiosity Gap
+## The Techniques
 
-**Psychological lever:** Information asymmetry — reader feels they're getting insider knowledge before others.
+---
 
-**Formula:**
-> "[Surprising or counterintuitive fact about the project or area]. Most people haven't caught on yet."
+### Curiosity Gap
 
-**Hebrew example:**
-> "דובאי הילס אסטייט מייצרת תשואות שכירות גבוהות מתל אביב, ועם שליש ממחיר הכניסה. רוב הישראלים עדיין לא מסתכלים לשם."
+**Mechanism:** Opens a Zeigarnik loop — the brain registers an incomplete information state and creates mild cognitive tension demanding resolution. The viewer cannot comfortably scroll away from a question they sense they should know the answer to.
 
-**English example:**
-> "Dubai Hills Estate generates higher rental yields than most Tel Aviv neighborhoods. At a third of the entry price. Most investors aren't looking there yet."
+**Use when:** The Attention Angle contains something true and non-obvious that the audience doesn't know. The angle has a resolution the body can deliver before the CTA.
 
-**Rules:**
-- Must include a specific comparison or contrast
-- Do not use "incredible" or "amazing"
-- The "most people" framing is optional — use only if it's true
+**Craft principle:** Withhold the resolution. The hook signals that knowledge exists without sharing it. Every word that moves toward answering the question weakens the hook. The tension lives in the gap, not the reveal.
 
-**Additional Hebrew examples (cold-audience sprint — short reels):**
-> "למה משקיעים אוהבים נדל״ן מוכן בדובאי?"
+**Common failure:** Resolving the loop inside the hook itself ("Dubai Hills generates higher yields than Tel Aviv — here's why"). Tension collapses before the viewer commits to watching.
+
+**Examples:**
+> "Dubai Hills Estate מייצרת תשואות שכירות גבוהות מתל אביב. רוב המשקיעים לא מסתכלים לשם."
+> "The number serious Dubai investors check first. It's not yield."
 > "עסקה אחת. שתי תוצאות שונות לגמרי."
 
 ---
 
-## H2 — Price Anchor
+### Price Anchor
 
-**Psychological lever:** Reframes the price relative to something the audience already knows and can evaluate.
+**Mechanism:** The brain evaluates price in relative terms, not absolute. Anchoring the price against something familiar reframes the cost through comparison — the juxtaposition does the work without commentary.
 
-**Formula:**
-> "AED [X]. That's [relatable comparison in Israeli terms]. For a [property type] in [desirable area]."
+**Use when:** The reel goal is **conversion** or warm-audience engagement. The entry price is meaningfully lower than a reference the audience can immediately evaluate. Do not use for cold scroll-stop — price numbers activate ad resistance in cold audiences.
 
-**Hebrew example:**
-> "850,000 AED. זה בערך כמו חניה בתל אביב. בשביל זה אתה מקבל דירה ב-Dubai Hills Estate עם 60/40 תשלומים."
+**Craft principle:** Deadpan register. No superlatives, no excitement. State the price, state the comparison, stop. The juxtaposition is self-sufficient.
 
-**English example:**
-> "AED 850,000. That's less than a parking spot in central London. For a 1BR in a master-planned Emaar community with a 60/40 payment plan."
+**Comparison must be:** Real, verifiable, drawn from the audience's own market context.
 
-**Rules:**
-- Comparison must be real and verifiable — don't make up the reference price
-- Keep it deadpan — let the comparison do the work
-
-**Additional Hebrew example (cold-audience sprint — short reels):**
-> "150 אלף דירהאם זה מחיר כניסה. לא מחיר דירה."
+**Examples:**
+> "850,000 AED. פחות מחניה בתל אביב. בשביל זה אתה מקבל דירה ב-Dubai Hills Estate עם 60/40 תשלומים."
+> "150 אלף דירהם זה מחיר כניסה. לא מחיר דירה."
 
 ---
 
-## H3 — Payment Plan Math
+### Payment Structure
 
-**Psychological lever:** Makes abstract investment feel concrete, affordable, and actionable.
+**Mechanism:** Makes an abstract investment concrete and actionable. Reveals that the barrier to entry is lower than assumed — expanding the audience to people who had ruled themselves out.
 
-**Formula:**
-> "AED [monthly or down payment amount]. That's [what it buys in familiar terms]. And you own a Dubai property."
+**Use when:** The Attention Angle is capital efficiency and the payment structure is genuinely accessible. The body can explain the structure honestly without oversimplifying. Reel goal should be **conversion** or **scroll-stop** with capital-efficiency thesis.
 
-**Hebrew example:**
-> "20% ברגע החתימה. ואז 1% לחודש. זה פחות מהשכירות שאתה משלם עכשיו. ובסוף אתה הבעלים."
+**Craft principle:** Do the arithmetic for the viewer. State the structure as observable behavior, not marketing language. "20% ברגע החתימה. ואז 1% לחודש." — not "flexible payments available."
 
-**English example:**
-> "20% down. Then 1% per month through construction. You're building equity while the developer builds the property. You own it outright at handover."
+**Hard rules:** Never imply monthly payments equal rent (structurally different). Never make it sound risk-free. Do not claim the structure removes risk.
 
-**Rules:**
-- Do the math for the reader — don't make them calculate
-- Always clarify what "down payment" actually means (not the full purchase price)
-- Never imply monthly payments = rent (they're structurally different — explain honestly)
-
-**Additional Hebrew example (cold-audience sprint — short reels):**
+**Examples:**
+> "20% down. Then 1% per month through construction. You're building equity while the developer builds the property."
 > "מה אם השכירות לא מכסה את מה שנשאר לשלם?"
 
 ---
 
-## H4 — Infrastructure Growth
+### Infrastructure Signal
 
-**Psychological lever:** Smart investors buy before infrastructure arrives, not after. Creates forward-looking FOMO grounded in real development data.
+**Mechanism:** Smart money buys before infrastructure arrives, not after. Creates forward-looking attention grounded in real development data — the viewer feels they're getting information before it's priced in.
 
-**Formula:**
-> "[Specific infrastructure development] is [coming to / already in] [area]. Here's what that did to prices in [comparable area]."
+**Use when:** Confirmed, verifiable infrastructure is coming (or already present), and a comparable area where this pattern already played out exists. Never use for speculative or unconfirmed infrastructure.
 
-**Hebrew example:**
-> "דובאי הילס בית חולים, קניון ופארק לאומי. הכל בהליכה מהפרויקט. זה לא עוד פרויקט ב'סביבת המדבר'. הייטה זה כבר קרה בארבע שכונות אחרות של Emaar."
+**Craft principle:** The proof is historical precedent in a comparable area. Without a comparable area where this already happened, this technique is a marketing claim, not an investment signal.
 
-**English example:**
-> "Mediclinic City Hospital, Dubai Hills Mall, and a championship golf course. All within the same master community. Infrastructure that typically drives 15-25% premium to surrounding areas post-completion."
+**Note:** Weak as a cold-audience opener on its own. Strongest as a supporting beat inside the body after a curiosity gap or contrarian opening hook. Consider this a body technique more than a hook technique.
 
-**Rules:**
-- Must reference real, confirmed infrastructure — not planned/speculative unless clearly labeled
-- Reference a comparable area where this already happened if possible
-- Never quote specific appreciation percentages without a source
-
-**Preflight note:** Weak alone for cold tension. Use H1 (curiosity) or H8 (contrarian) as the opening beat; H4 works as the supporting proof, not the hook line.
+**Examples:**
+> "Mediclinic City Hospital, Dubai Hills Mall, championship golf course. Infrastructure that typically drives 15–25% premium post-completion."
+> "Emaar delivered 12,400 units in 2023. And sold more than that."
 
 ---
 
-## H5 — Beginner Accessibility
+### Barrier Removal
 
-**Psychological lever:** Lowers the perceived barrier. Expands the audience to first-time investors who ruled themselves out.
+**Mechanism:** Lowers the perceived barrier to entry, expanding the audience to first-time investors who had ruled themselves out based on a false assumption about minimum capital or residency requirements.
 
-**Formula:**
-> "You don't need [thing people assume you need] to invest in Dubai. The real entry point is [specific accessible fact]."
+**Use when:** The Attention Angle is capital efficiency and the audience's false assumption is "I can't afford this" or "this requires moving to Dubai." The body can explain the real entry requirements honestly.
 
-**Hebrew example:**
-> "לא צריך 2 מיליון שקל ולא צריך להיות מיליונר. ה-downpayment על פרויקטים של Emaar מתחיל ב-20%. ואפשר לשלם את השאר בזמן הבנייה."
+**Craft principle:** Be specific about what's accessible. "It's easy" is useless. "20% down, rest follows construction" is a hook.
 
-**English example:**
-> "You don't need to move to Dubai to own property there. You don't need a UAE bank account to start. The entry point for an Emaar off-plan unit is 20% down. The rest follows the construction schedule."
+**Note:** Weak for cold scroll-stop on its own. Strongest as a secondary beat after a stronger opener. Not a standalone reel hook for cold audiences.
 
-**Rules:**
-- Be specific about what's accessible — "it's easy" is useless
-- Don't oversimplify — acknowledge that there's still due diligence required
-- Do not make it sound risk-free
+**Hard rule:** Do not make it sound risk-free. Cold audience skepticism is healthy — don't try to erase it.
 
-**Preflight note:** Accessibility framing doesn't create scroll-stopping tension on its own. Best as a secondary beat after H1, H2, or H7, not the cold-audience opener.
+**Examples:**
+> "לא צריך 2 מיליון שקל. ה-downpayment על פרויקטים של Emaar מתחיל ב-20%."
+> "You don't need a UAE bank account. You don't need to move. The entry point is 20% down."
 
 ---
 
-## H6 — FOMO (use sparingly — must be factually grounded)
+### Closing Window
 
-**Psychological lever:** Genuine scarcity or trend momentum. Only use when the data supports it.
+**Mechanism:** Genuine scarcity or trend momentum activates loss aversion — the pain of missing out is neurologically approximately twice as intense as the pleasure of gaining the equivalent. A specific, verifiable closing window creates urgency without manufactured pressure.
 
-**Formula:**
-> "[Specific data point showing momentum or closing window]. The math changes [specific trigger]."
+**Use when:** There is a real, factually supported event or pricing window. Every data point must be verifiable and current. "Pre-launch" must be true at time of publication.
 
-**Hebrew example:**
-> "דובאי הילס אסטייט עלתה 18% ב-2023. לא כי מישהו הבטיח את זה. הביקוש מהגירת אקספטים הוביל אותה. הפרויקט הזה עדיין ב-pre-launch."
+**Craft principle:** Specificity is the credibility signal. A vague urgency claim destroys trust. A specific, sourced data point builds it.
 
-**English example:**
-> "Emaar delivered 12,400 units in 2023. And sold more than that. The demand-supply gap is real, and this community is still in pre-launch pricing."
+**Hard rules:** Never write "only X units left" unless verified. Never use urgency language without a named, specific trigger. This is the most abuse-prone technique — one unverifiable claim destroys credibility irreversibly with this audience.
 
-**Rules:**
-- Every data point must be real — cite source in the extraction notes
-- "Pre-launch" must be true at time of publication
-- Never write "only X units left" unless you can verify it
-- This is the most abuse-prone hook type — use it last, not first
-
-**Preflight note:** FOMO doesn't map cleanly to any of the six Hook Strength Test categories (reel-preflight.md). Strongest when it doubles as money tension (pair with H2 or H3) or curiosity (pair with H1).
+**Examples:**
+> "דובאי הילס אסטייט עלתה 18% ב-2023. הפרויקט הזה עדיין ב-pre-launch."
+> "Emaar pre-launch pricing closes at [specific milestone]. The math changes then."
 
 ---
 
-## H7 — Investment Psychology
+### Wrong Question Frame
 
-**Psychological lever:** Identity play. Positions the reader as potentially smarter than average investors.
+**Mechanism:** Identity play — the viewer wants to be the investor who asks the right questions, not the one asking the wrong ones. Creates mild identity threat combined with curiosity about what the right question actually is.
 
-**Formula:**
-> "Most investors focus on [wrong/incomplete thing]. The ones who do well focus on [better thing]."
+**Use when:** The Attention Angle is epistemic and specifically about investor behavior — the audience is genuinely asking the wrong question, not just holding a wrong belief.
 
-**Hebrew example:**
-> "רוב האנשים שואלים 'כמה זה עולה?'. המשקיעים שמרוויחים שואלים 'מה תשואת השכירות ביחס למחיר הכניסה?' ובדובאי הילס התשובה מעניינת."
+**Distinction from Wrong Belief:** Wrong Question Frame attacks what investors *ask* (behavior). Wrong Belief attacks what investors *believe* to be true about the market (knowledge). Wrong Question creates identity threat; Wrong Belief creates cognitive dissonance. These are different mechanisms.
 
-**English example:**
-> "Most buyers ask: 'What's the price?' Experienced investors ask: 'What's the gross yield at entry, and what does the payment plan do to my effective cost of capital?' Those are different questions."
+**Craft principle:** The "wrong thing" must be what people genuinely focus on — not a straw man. The "right thing" must be answerable in the body before the CTA.
 
-**Rules:**
-- The "wrong thing" must be something people genuinely focus on — not a straw man
-- The "right thing" must be answerable — don't set up a question you can't answer
-- Don't make the reader feel stupid — make them feel like they're leveling up
-
-**Additional Hebrew examples (cold-audience sprint — short reels, wrong-question / mistake framing):**
-> "למה תשואה היא לא הדבר הראשון שאני בודקת?"
-> "רוב מפתחי ה-off-plan רוצים את הכסף שלכם בזמן הבנייה. אז למה החברה הזאת מוכנה לחכות שנתיים בשביל לקבל חצי ממנו?"
+**Examples:**
+> "רוב האנשים שואלים 'כמה זה עולה?' המשקיעים שמרוויחים שואלים 'מה תשואת השכירות ביחס למחיר הכניסה?'"
 > "כולם מסתכלים על תשואה. זאת לא תמיד השאלה."
+> "למה תשואה היא לא הדבר הראשון שאני בודקת?"
 
 ---
 
-## H8 — Hidden Opportunity
+### Hidden Opportunity
 
-**Psychological lever:** Contrarian framing. Insider positioning. The reader is getting information others aren't looking for.
+**Mechanism:** Curiosity combined with mild identity threat. The viewer is told that the informed minority is looking somewhere different from where they are looking — creating the feeling of being on the wrong side of an information gap.
 
-**Formula:**
-> "Everyone's focused on [obvious thing]. Almost nobody is looking at [less obvious, more interesting angle]."
+**Use when:** The Attention Angle is One vs. Many or Social Proof Inversion. There is a genuine, specific, non-obvious opportunity that contrasts with the obvious one the audience already knows about.
 
-**Hebrew example:**
-> "כולם מדברים על דאון-טאון דובאי. כמעט אף אחד לא מסתכל על הצד השני של המשוואה: הקהילות המתוכננות שמציעות את אותה איכות חיים עם פחות תחרות על הנכסים."
+**Distinction from Counterintuitive Claim:** Hidden Opportunity says "others miss this" — an information gap, an insider feel. Counterintuitive Claim says "the consensus is actively wrong" — a direct contradiction. Different emotional register: insider positioning vs. direct challenge.
 
-**English example:**
-> "Everyone's looking at Downtown Dubai and Marina. The investors getting the best entry points right now are looking at master communities where the infrastructure is already in. The price still hasn't caught up."
+**Craft principle:** Don't attack the "obvious" option — reframe attention toward the less obvious one. The insider positioning must be real and backed by thesis evidence.
 
-**Rules:**
-- Don't trash the "obvious" thing — just reframe it
-- The hidden opportunity must be real and specific
-- This hook builds authority — make sure you can back up the framing
-
-**Additional Hebrew examples (cold-audience sprint — short reels, contrarian / contradiction):**
-> "למה לוקיישן טוב לא תמיד מספיק?"
+**Examples:**
+> "כולם מדברים על דאון-טאון דובאי. כמעט אף אחד לא מסתכל על הצד השני של המשוואה."
+> "Everyone's looking at Downtown and Marina. The best entry points right now are in master communities where infrastructure is already in."
 > "לא כל פרויקט בדובאי הוא השקעה."
-> "לא כל לוקיישן טוב הוא השקעה טובה."
-> "הרבה אנשים קונים פרויקט. מעט אנשים בודקים את התזה."
 
 ---
 
-## H9 — Smart Investor Frame
+### Smart Investor Criteria
 
-**Psychological lever:** Aspirational identity. Reader wants to think and act like the investor in the hook.
+**Mechanism:** Aspirational identity — the viewer wants to think and behave like the investor described in the hook. Creates engagement through the desire to access the criteria that define that investor.
 
-**Formula:**
-> "What [specific type of smart investor] checks before committing to any Dubai off-plan project."
+**Use when:** The body has a genuine, valuable criteria list or structured checklist the viewer would find useful. The aspiration must feel accessible, not exclusive.
 
-**Hebrew example:**
-> "מה שמשקיעים מנוסים בודקים לפני שהם חותמים על כל פרויקט אוף-פלאן בדובאי. Sky Gardens עובר את הרשימה."
+**Note:** Weak on its own for cold scroll-stop tension. Strongest when the criteria is framed as a wrong-question reveal (pair with Wrong Question Frame spirit), so the checklist carries tension rather than aspiration alone.
 
-**English example:**
-> "Three things experienced Dubai investors check before signing any off-plan contract. And why Sky Gardens clears all three."
-
-**Rules:**
-- The checklist or criteria referenced must be real (covered in the content)
-- "Experienced investors" = aspirational but accessible — not exclusive
-- Don't promise "guaranteed" results from the checklist
-
-**Preflight note:** Aspirational identity framing is weak alone for cold tension. Works best when the checklist is framed as a wrong-question reveal (H7) so the criteria carries the tension, not the aspiration.
+**Examples:**
+> "מה שמשקיעים מנוסים בודקים לפני שהם חותמים על כל פרויקט אוף-פלאן בדובאי."
+> "Three things experienced Dubai investors verify before signing any off-plan contract. And why this project clears all three."
 
 ---
 
-## H10 — Social Proof Reframe
+### Credible Peer Behavior
 
-**Psychological lever:** Validation through credible peer behavior. Not celebrity hype — institutional or demographic credibility.
+**Mechanism:** Conformity instinct — the viewer wants to know what informed peers are doing and what they know that the viewer doesn't. Curiosity about the knowledge gap drives engagement.
 
-**Formula:**
-> "Why [credible, relatable group] is allocating to Dubai right now. What they're looking at specifically."
+**Use when:** There is verifiable behavioral data from a group the audience identifies with. The group must be demographic or institutionally credible — not celebrities or "billionaires."
 
-**Hebrew example:**
-> "עסקאות הנדל"ן של ישראלים בדובאי עלו ב-340% מ-2021 ל-2023. זה לא אופנה. זה מספרים של DLD. השאלה היא איפה בתוך השוק הזה הכסף הטוב נמצא."
+**Craft principle:** Frame the statistic as a curiosity or contradiction rather than a straight social proof claim. Pair with the spirit of Hidden Opportunity to create tension — not just "people are doing this" but "here's what they know that most people don't."
 
-**English example:**
-> "Israeli investors completed 340% more Dubai property transactions in 2023 vs. 2021. Per DLD data. The smart question isn't 'should I look at Dubai?' It's: 'which projects are worth the due diligence?'"
+**Hard rules:** Cite a real source for any statistic. Do not name specific individuals. The group must be one the audience genuinely identifies with, not aspirationally admires from a distance.
 
-**Rules:**
-- Must cite a real source for any statistic
-- Do not name specific individuals as social proof
-- The group must be one the target audience identifies with — not "billionaires" or "the ultra-wealthy"
+**Note:** Not the strongest technique for most thesis types. Confirm this is the right choice before using.
 
-**Preflight note:** H10 is not Tier 1 or Tier 2 for any thesis type in hook-selection.md's affinity matrix. Confirm this is the right choice before drafting. When used, frame the statistic as a contradiction (pair with H8) rather than relying on social proof alone to create tension.
+**Examples:**
+> "עסקאות הנדל"ן של ישראלים בדובאי עלו ב-340% מ-2021 ל-2023. זה לא אופנה. זה מספרים של DLD."
+> "Israeli investors completed 340% more Dubai property transactions in 2023 vs. 2021. The smart question isn't 'should I look at Dubai?' — it's 'where inside the market?'"
+
+---
+
+### Wrong Belief
+
+**Mechanism:** Cognitive dissonance. The viewer holds a belief about the market that is silently incorrect. When that belief is named and challenged, the brain must engage to resolve the contradiction — it cannot suppress the signal.
+
+**Distinction from Wrong Question Frame:** Wrong Question attacks what investors *ask* (behavior — identity mechanism). Wrong Belief attacks what investors *believe* to be true about the market (knowledge — cognitive dissonance mechanism). These require different execution.
+
+**Use when:** The Attention Angle is False Assumption or Attribution Error. The belief is genuinely and widely held — not a straw man. The correction is verifiable and the body can support it with evidence from `thesis.md`.
+
+**Craft principle:** Name the false belief specifically. The more precisely the viewer recognizes their own belief in the hook, the stronger the cognitive dissonance. "Most people think X" followed by a vague generality is weak. Naming the specific, recognizable belief is strong.
+
+**Common failure:** Attacking a belief nobody actually holds, or attacking a belief that is partially correct. The dissonance only fires if the belief named is genuinely the viewer's own.
+
+**Examples:**
+> "רוב המשקיעים חושבים שהביקוש בדובאי מגיע מתיירים. המספרים אומרים משהו אחר לגמרי."
+> "The assumption is that Dubai prices track oil. The data says something different."
+> "כולם בטוחים שה-ROI האמיתי הוא בתשואת השכירות. זו לא המשוואה."
+
+---
+
+### Counterintuitive Claim
+
+**Mechanism:** Surprise combined with mild threat. The consensus view is presented as actively wrong — not just incomplete. The viewer's existing framework for understanding the market is directly challenged. Higher disruption than Hidden Opportunity; higher risk, higher reward.
+
+**Distinction from Hidden Opportunity:** Hidden Opportunity creates an information gap ("you're not looking at the right thing"). Counterintuitive Claim creates a contradiction ("what you believe is wrong"). Different emotional register: Hidden Opportunity has insider warmth; Counterintuitive Claim is confrontational.
+
+**Use when:** The Attention Angle is Contrarian Truth or Reversal. The claim is genuinely counterintuitive — not just unfamiliar. The body can fully support it with evidence from `thesis.md`. This technique stakes credibility on the claim being provably true.
+
+**Test before using:** Would a well-informed person in this market be surprised by this claim, or would they just find it interesting? If they'd want to argue with it, this is the right technique. If they'd just nod, use Hidden Opportunity instead.
+
+**Common failure:** Claiming something is counterintuitive when it's merely unusual. The claim must feel wrong before the body explains why it's right.
+
+**Examples:**
+> "גבוהה יותר? פחות. למה המחירים הגבוהים יותר בדובאי הילס הם דווקא סימן טוב."
+> "Higher demand in this area actually predicts lower rental returns. Here's the data."
+> "הפרויקט שנראה הכי יקר בשוק הוא לפעמים הכי זול ביחס למה שאתה מקבל."

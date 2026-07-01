@@ -41,65 +41,97 @@ Identify which patterns from the library have the strongest natural fit for this
 
 ---
 
-### Step 1 — Generate Hooks [Copywriter]
+### Step 1 — Production Constraint Set [Creative Director]
+
+| | |
+|---|---|
+| **Owner** | Creative Director (Moment 1) |
+| **Inputs** | `thesis.md` (including `## Attention Angles`), `output/history/hook-log.md` |
+| **Load** | `agency/creative/hook-selection.md` §A, `agency/creative/reel-formats.md` |
+| **Output** | Constraint block written into each reel's header: format, reel goal, emotional register, audience signal, hard constraints |
+| **Next** | Step 2a |
+
+Write one constraint block per reel. Do not specify hook family, cadence, or angle — those emerge from candidate generation in Step 2a.
+
+---
+
+### Step 2a — Hook Candidates [Copywriter]
 
 | | |
 |---|---|
 | **Owner** | Copywriter |
-| **Inputs** | PROJECT DATA block, `thesis.md` |
+| **Inputs** | `thesis.md` (Attention Angles), constraint block (Step 1), `output/history/hook-log.md` |
 | **Load** | `agency/production/templates/hook-template.md` |
-| **Output** | 10 hooks (H1–H10), Hebrew + English, saved to `output/[slug]/[lang]/hooks/` |
-| **Next** | Step 1.5 |
+| **Output** | 3 hook candidates per reel — final-quality language, each labeled with Attention Angle, mechanism, hook family, cadence |
+| **Next** | Step 2b |
 
-Produce one hook per category. Each hook uses specific data from PROJECT DATA, is labeled `[HOOK TYPE]`, is under 280 characters, and works standalone.
+Draw each candidate from a different Attention Angle. Each candidate fits the constraint set. Do not rank — ranking belongs to the Creative Director.
 
 ---
 
-### Step 1.5 — Creative Brief [Creative Director]
+### Step 2b — Gate 1 Annotation [Retention Specialist]
 
 | | |
 |---|---|
-| **Owner** | Creative Director (Phase 1) |
-| **Inputs** | Hooks from Step 1, `thesis.md` (including `## Attention Angles`), `output/history/hook-log.md` |
-| **Load** | `agency/creative/hook-selection.md`, `agency/creative/cadence-rules.md`, `agency/creative/reel-formats.md` |
-| **Output** | Per-reel Creative Brief — hook family, format, cadence — written into each reel's header block |
-| **Next** | Step 2 |
+| **Owner** | Retention Specialist |
+| **Inputs** | 3 hook candidates per reel, `thesis.md` |
+| **Load** | `agency/creative/retention-specialist.md` § Gate 1 Annotation |
+| **Output** | RS ANNOTATION block per reel — one-line cold-audience assessment per candidate |
+| **Next** | Step 2c |
 
-Apply the 4-step selection rule from hook-selection.md §E for each reel. One reel = one hook family.
+Assess open loop strength, early resolution risk, and timing fit per candidate. Do not rank. Do not rewrite.
 
 ---
 
-### Step 2 — Generate Reel Scripts [Copywriter]
+### Step 2c — Ranking [Creative Director]
+
+| | |
+|---|---|
+| **Owner** | Creative Director (Moment 2) |
+| **Inputs** | Hook candidates (Step 2a), RS annotations (Step 2b), `output/history/hook-log.md` |
+| **Load** | `agency/creative/hook-selection.md` §B–D |
+| **Output** | Candidates ranked 1–3 with one-line rationale — presented to human for Gate 1 |
+| **Next** | Gate 1 |
+
+Apply ranking criteria in priority order per `hook-selection.md` §B. Format output per `hook-selection.md` §D.
+
+---
+
+> **Gate 1 — Hook Selection:** Present ranked candidates. Human confirms top-ranked pick or selects alternative.
+> On selection: write locked hook into reel header. Log to `output/history/hook-log.md`: hook family, cadence, angle, mechanism, AI Rank vs. Human Selected. Status: **HOOK_APPROVED**.
+> If human overrides AI ranking, note override in log. Recompute "Next reel recommendation" block for this project.
+
+---
+
+### Step 3 — Generate Reel Scripts [Copywriter]
 
 | | |
 |---|---|
 | **Owner** | Copywriter |
-| **Inputs** | Creative Brief (Step 1.5 output), `thesis.md` |
+| **Inputs** | Locked hook (from Gate 1 reel header), `thesis.md`, constraint block |
 | **Load** | `agency/production/templates/reel-template.md`, `agency/editorial/reel-preflight.md` |
 | **Output** | Reel blueprints in `output/[slug]/[lang]/reels/` |
-| **Next** | Step 2.4a |
+| **Next** | Step 3.5 |
 
-Write each script to already pass reel-preflight.md — Step 2.4a is a verification pass, not first exposure to the bar. Use thesis.md Thesis Statement as the source for Insight segments; use thesis.md Risk Register for Reality Check segments. Do not fill visual fields (`[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`) — those are filled by the Art Director at Step 2.5.
-
-After scripting each reel: append a row to `output/history/hook-log.md` and recompute the "Next reel recommendation" block.
+Write the body, CTA, and VEP knowing the exact hook and the promise it creates. The hook VO appears verbatim in the script — do not modify it. Write each script to already pass reel-preflight.md — Step 3.5 is a verification pass. Use `thesis.md` Thesis Statement for Insight segments; Risk Register for Reality Check segments. Do not fill visual fields (`[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`) — those are filled by the Art Director at Step 5.
 
 ---
 
-### Step 2.4a — Self Review: Creative [Creative Director]
+### Step 3.5 — Self Review: Creative [Creative Director]
 
 | | |
 |---|---|
-| **Owner** | Creative Director (Phase 2) |
-| **Inputs** | Reel scripts from Step 2 |
-| **Load** | Already in session context from Step 2 — no re-read needed |
+| **Owner** | Creative Director (Moment 3) |
+| **Inputs** | Reel scripts from Step 3 |
+| **Load** | Already in session context — no re-read needed |
 | **Output** | PRE-FLIGHT REVIEW block per reel; revisions applied if needed; status → SCRIPTED |
-| **Next** | Step 2.4b |
+| **Next** | Step 4 |
 
-Run reel-preflight.md against each script. If flagged `revise`, fix per reel-preflight.md §Self Review: Repair and re-run. Cap: 2 attempts — escalate to user with both PRE-FLIGHT REVIEW blocks if still failing after the 2nd pass. Do not proceed to Step 2.4b on a script still flagged `revise`.
+Run `agency/editorial/reel-preflight.md` against each script. Hook Lock: verify hook VO matches Gate 1 locked hook exactly. Hook-Insight Integrity: verify body delivers the hook's promise before the CTA. If flagged `revise`, fix and re-run. Cap: 2 attempts — escalate to user with both PRE-FLIGHT REVIEW blocks if still failing after 2nd pass. Do not proceed to Step 4 on a script still flagged `revise`.
 
 ---
 
-### Step 2.4b — Self Review: Retention [Retention Specialist]
+### Step 4 — Self Review: Retention [Retention Specialist]
 
 | | |
 |---|---|
@@ -107,59 +139,59 @@ Run reel-preflight.md against each script. If flagged `revise`, fix per reel-pre
 | **Inputs** | SCRIPTED reel scripts |
 | **Load** | `agency/creative/retention-specialist.md` |
 | **Output** | Timing-compressed scripts; status → RETENTION |
-| **Next** | Step 2.4c |
+| **Next** | Step 4.5 |
 
-Run `agency/creative/retention-specialist.md` against the full script. Produce a per-beat diff. Run the post-retention integrity check (4 checks: new claims, hook promise, risk placement, ending momentum). If `revert-beat`: restore the flagged beat and re-run integrity on that beat only. Note the `Thesis invoked` field — update the `thesis_invoked` column in hook-log.md (✓ or —) when logging the reel.
+Run `agency/creative/retention-specialist.md` against the full script body. Hook is locked — do not touch it. Produce a per-beat diff. Run the post-retention integrity check (4 checks: new claims, hook promise, risk placement, ending momentum). If `revert-beat`: restore the flagged beat and re-run integrity on that beat only. Note the `Thesis invoked` field — update the `thesis_invoked` column in hook-log.md (✓ or —).
 
 ---
 
-### Step 2.4c — Self Review: Naturalizer [Copy Editor]
+### Step 4.5 — Self Review: Naturalizer [Copy Editor]
 
 | | |
 |---|---|
 | **Owner** | Copy Editor |
 | **Inputs** | RETENTION scripts |
 | **Load** | `agency/editorial/hebrew-naturalizer.md` |
-| **Output** | Naturalized VO; naturalizer sign-off written in reel file; status → NATURALIZER |
-| **Next** | Gate 1 |
+| **Output** | Naturalized VO; naturalizer sign-off written in reel file; status → SCRIPTED (ready for Gate 2) |
+| **Next** | Gate 2 |
 
-Apply the naturalizer to all `[VO:]` blocks. Write the sign-off. Present the script to the user together with the VO Timing Confirmation table. Formula: `len(vo_text_stripped) / 9.72` (source: `config/voice-settings.json` — `chars_per_second_he × video_speed`). Strip punctuation, quote marks, and bracketed tags before counting. If any scene shows ⚠, retention did not complete timing compression — re-run Step 2.4b before proceeding.
-
----
-
-> **Gate 1 — Script Approval:** Present the NATURALIZER-status script and VO Timing Confirmation table. Wait for explicit user approval.
-> Status advances to APPROVED. Revision is possible here — if requested, return to Step 2 and re-present. Do not proceed to Step 2.5 or any paid API call until Approved.
+Apply the naturalizer to all `[VO:]` blocks. Write the sign-off. Present the script to the user together with the VO Timing Confirmation table. Formula: `len(vo_text_stripped) / 9.72` (source: `config/voice-settings.json` — `chars_per_second_he × video_speed`). Strip punctuation, quote marks, and bracketed tags before counting. If any scene shows ⚠, retention did not complete timing compression — re-run Step 4 before proceeding.
 
 ---
 
-### Step 2.5 — Visual Direction [Art Director]
+> **Gate 2 — Script Approval:** Present the naturalized script and VO Timing Confirmation table. Wait for explicit user approval.
+> Status advances to **SCRIPT_APPROVED**. Revision is possible here — if requested, return to Step 3 and re-present. Do not proceed to Step 5 or any paid API call until SCRIPT_APPROVED.
+
+---
+
+### Step 5 — Visual Direction [Art Director]
 
 | | |
 |---|---|
 | **Owner** | Art Director |
-| **Inputs** | APPROVED reel scripts, `assets/[slug]/manifest.md` |
+| **Inputs** | SCRIPT_APPROVED reel scripts, `assets/[slug]/manifest.md` |
 | **Load** | `agency/art/visuals-layer.md`, `agency/production/producibility-check.md` |
 | **Output** | Visual execution table, VEP rows, `visual-direction.json` written into blueprint; status → VISUAL-DIRECTED |
-| **Next** | Gate 2 |
+| **Next** | Gate 3 |
 
 Fill `[VISUAL_TYPE:]`, `[VISUAL_INTENT:]`, `[MOTION_STYLE:]`, and `[KLING_AVOID:]` directly in the blueprint for every scene. Append the VEP section. Write Vision Flags for segments requiring new assets. Present the visual plan to the user: execution table, arc summary, and VEP rows.
 
 ---
 
-> **Gate 2 — Visual Approval:** Present the VISUAL-DIRECTED visual plan. Wait for explicit user approval.
-> Run `agency/production/producibility-check.md` — must return READY TO PRODUCE before continuing. Status advances to VISUAL-APPROVED. Revision is possible here. Do not proceed to Step 2.6 or any paid API call until VISUAL-APPROVED.
+> **Gate 3 — Visual Approval:** Present the VISUAL-DIRECTED visual plan. Wait for explicit user approval.
+> Run `agency/production/producibility-check.md` — must return READY TO PRODUCE before continuing. Status advances to DIRECTIONS_APPROVED. Revision is possible here. Do not proceed to Step 6 or any paid API call until DIRECTIONS_APPROVED.
 
 ---
 
-### Step 2.6 — Asset Collection [Art Director]
+### Step 6 — Asset Collection [Art Director]
 
 | | |
 |---|---|
 | **Owner** | Art Director |
-| **Inputs** | VISUAL-APPROVED blueprints with VEP rows, `thesis.md` Anti-Collect Guidance |
+| **Inputs** | DIRECTIONS_APPROVED blueprints with VEP rows, `thesis.md` Anti-Collect Guidance |
 | **Load** | `agency/art/asset-collection.md` |
 | **Output** | Canonical assets in `assets/[slug]/canonical/`, manifest updated, Collection Status Report appended to reel file |
-| **Next** | **Reel-only run:** continue to `docs/reel-pipeline.md`. **Full content run:** continue to Step 3. |
+| **Next** | **Reel-only run:** continue to `docs/reel-pipeline.md`. **Full content run:** continue to Step 7. |
 
 Anti-collect list from `thesis.md` — do not re-derive per reel. Save validated assets to canonical; move rejected assets to `raw/rejected/`. Skip for PDF-only or LinkedIn-only projects.
 
@@ -167,7 +199,7 @@ If API keys are absent: generate search terms from Vision Flags only, notify the
 
 ---
 
-### Step 3 — Generate Carousel [Copywriter]
+### Step 7 — Generate Carousel [Copywriter]
 
 | | |
 |---|---|
@@ -175,13 +207,13 @@ If API keys are absent: generate search terms from Vision Flags only, notify the
 | **Inputs** | `thesis.md` |
 | **Load** | `agency/production/templates/carousel-template.md` |
 | **Output** | 7-slide carousel saved to `output/[slug]/[lang]/carousel/` |
-| **Next** | Step 4 |
+| **Next** | Step 8 |
 
 Slide sourcing: Slides 2 and 4 from thesis.md Thesis Statement (different angles). Slide 3 from Key Numbers block verbatim. Slide 6 from Risk Register. Slide 7 uses CTA Keyword.
 
 ---
 
-### Step 4 — Generate LinkedIn Post [Copywriter]
+### Step 8 — Generate LinkedIn Post [Copywriter]
 
 | | |
 |---|---|
@@ -189,13 +221,13 @@ Slide sourcing: Slides 2 and 4 from thesis.md Thesis Statement (different angles
 | **Inputs** | `thesis.md` |
 | **Load** | `agency/production/templates/linkedin-template.md` |
 | **Output** | Per-language post saved to `output/[slug]/[lang]/linkedin/[slug]-[lang]-linkedin.md`; Hebrew file includes a **Pitch Block** at the bottom |
-| **Next** | Step 5 |
+| **Next** | Step 9 |
 
 Each language gets its own file. Append a Pitch Block to the Hebrew file: 3–5 sentence spoken Hebrew paragraph (project, price, structure, investment angle).
 
 ---
 
-### Step 5 — Generate WhatsApp Messages [Copywriter]
+### Step 9 — Generate WhatsApp Messages [Copywriter]
 
 | | |
 |---|---|
@@ -203,13 +235,13 @@ Each language gets its own file. Append a Pitch Block to the Hebrew file: 3–5 
 | **Inputs** | `thesis.md` |
 | **Load** | `agency/production/templates/whatsapp-template.md` |
 | **Output** | 3 variants (cold / warm / re-engagement) saved to `output/[slug]/hebrew/whatsapp/` |
-| **Next** | Step 6 |
+| **Next** | Step 10 |
 
 Generate each variant independently from `thesis.md`. Adapt the greeting, relationship framing, and closing question per variant.
 
 ---
 
-### Step 6 — Generate Investor Summary [Copywriter]
+### Step 10 — Generate Investor Summary [Copywriter]
 
 | | |
 |---|---|
@@ -217,13 +249,13 @@ Generate each variant independently from `thesis.md`. Adapt the greeting, relati
 | **Inputs** | `thesis.md` |
 | **Load** | None (thesis.md already in context) |
 | **Output** | 150–200 word summary appended to each language's LinkedIn file |
-| **Next** | Step 7 |
+| **Next** | Step 11 |
 
 Key Numbers from thesis.md Key Numbers block verbatim. Risk Note from Risk Register (2–3 risks).
 
 ---
 
-### Step 7 — Generate CTA Variations [Copywriter]
+### Step 11 — Generate CTA Variations [Copywriter]
 
 | | |
 |---|---|
@@ -231,23 +263,23 @@ Key Numbers from thesis.md Key Numbers block verbatim. Risk Note from Risk Regis
 | **Inputs** | `thesis.md` CTA Keyword |
 | **Load** | None |
 | **Output** | 3 CTAs (Soft / Medium / Direct) appended to each language's LinkedIn file |
-| **Next** | Step 8 |
+| **Next** | Step 12 |
 
 ---
 
-### Step 8 — Hebrew Naturalizer [Copy Editor]
+### Step 12 — Hebrew Naturalizer [Copy Editor]
 
 | | |
 |---|---|
 | **Owner** | Copy Editor |
-| **Inputs** | All Hebrew public-facing files from Steps 1–7 |
+| **Inputs** | All Hebrew public-facing files from Steps 7–11 |
 | **Load** | `agency/editorial/hebrew-naturalizer.md` |
 | **Output** | Naturalizer sign-off appended to each Hebrew file |
 | **Next** | Done |
 
-Verification and sign-off pass. Prevention rules (em-dash, register, TTS patterns) should have been applied inline during Steps 1–7 per `agency/editorial/hebrew-naturalizer.md`. This step catches and fixes anything missed and provides the formal sign-off. No Hebrew file is complete without it.
+Verification and sign-off pass. Prevention rules (em-dash, register, TTS patterns) should have been applied inline during Steps 7–11 per `agency/editorial/hebrew-naturalizer.md`. This step catches and fixes anything missed and provides the formal sign-off. No Hebrew file is complete without it.
 
-Applies to: hooks, carousel, LinkedIn, WhatsApp. Does not apply to: English files, Analysis Mode outputs, or reel VO (handled at Step 2.4c).
+Applies to: hooks, carousel, LinkedIn, WhatsApp. Does not apply to: English files, Analysis Mode outputs, or reel VO (handled at Step 4.5).
 
 ---
 

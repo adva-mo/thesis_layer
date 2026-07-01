@@ -10,11 +10,10 @@ Mandatory quality gate. Run after a reel script is drafted, before Visual Eviden
 
 ## Preflight Questions
 
-1. Why would someone stop scrolling?
-2. Does the hook create cold-audience tension?
-3. Does the body deliver on what the hook promises before the CTA?
-4. Is the CTA clear?
-5. Would a cold viewer understand why this matters?
+1. Does the hook VO in the script exactly match the hook locked at Gate 1?
+2. Does the body deliver on what the hook promises before the CTA?
+3. Is the CTA clear?
+4. Would a cold viewer feel informed, not teased, by the end of the reel?
 
 ---
 
@@ -44,24 +43,15 @@ A scene type failure is a hard stop — do not proceed to cadence or content che
 
 ---
 
-## Cadence Label Verification [Creative Director]
+## Hook Lock Verification [Creative Director]
 
-Read the hook VO text directly. Verify the rhetorical structure matches the cadence label declared in the script metadata. This check runs before Hook-Insight Integrity — a mismatch means the wrong obligation check would be applied.
+The hook was locked at Gate 1, human-approved, and recorded in the reel header. The Copywriter writes the full body at Step 3. Verify that the hook VO in the script exactly matches the hook locked at Gate 1.
 
-| Label | VO must... |
-|---|---|
-| QUESTION | End with "?" or use "למה / איך / מה" as the operative final element |
-| CONTRAST | State a norm, then state the exception as a fact — no question |
-| INVERSION | State a norm, then explicitly flip it ("הפוך", negative construction, reversal) |
-| NUMBER DROP | Open with a specific number, no preamble before it |
-| CONDITION | Open with "אם / if" |
-| SURPRISE | Juxtapose two unexpected facts without transition |
+**FAIL (mismatch)** if the hook VO in the script differs in any word, phrase, or structure from the Gate 1 locked hook. Any change — including apparent improvements — is unauthorized. The hook was approved as written; it cannot be modified without returning to Gate 1.
 
-**FAIL (mismatch)** if the hook VO's rhetorical structure contradicts the label — e.g., label says CONTRAST but hook ends with "למה...?", or label says NUMBER DROP but hook opens with a sentence before the number.
+**PASS (verified)** if the hook VO in the script exactly matches the Gate 1 locked hook.
 
-**PASS (match)** if the hook VO's structure is consistent with the label.
-
-A cadence mismatch is a hard fail. It means either the label is wrong or the hook was not written to the intended cadence. Fix by rewriting the hook to match the label, or relabeling — then re-run Hook-Insight Integrity against the correct cadence.
+A Hook Lock mismatch is a hard stop. Restore the exact locked hook from the reel header and re-run pre-flight. Do not attempt to judge which version is stronger — the approved version is the only valid version.
 
 ---
 
@@ -112,27 +102,13 @@ Every hook creates a psychological obligation. The reel body must satisfy that c
 
 ---
 
-## Hook Strength Test [Creative Director] (objective, not a vibe check)
-
-A hook is strong only if it creates **at least one** of:
-
-- curiosity
-- contradiction
-- mistake framing
-- money tension
-- myth bust
-- wrong-question framing
-
-**Analytical or authority-toned hooks are weak if they create none of the above — even when factually accurate.** "X works differently than most projects" is correct but not automatically tension-creating; it only counts as strong if the contrast itself is sharp enough to feel like a contradiction.
-
 ## Check Ownership
 
 | Check | Owner |
 |---|---|
 | Scene Type Validation | Copywriter |
-| Cadence Label | Creative Director |
+| Hook Lock | Creative Director |
 | Hook-Insight Integrity | Creative Director |
-| Hook Strength | Creative Director |
 
 ---
 
@@ -144,21 +120,20 @@ Run this against the full script (all segments, hook through CTA) and output exa
 PRE-FLIGHT REVIEW
 
 Scene Type Validation: [pass / fail]
-Hook Strength: [weak / medium / strong]
-Cadence Label: [match / mismatch]
+Hook Lock: [verified / mismatch]
 Hook-Insight Integrity: [pass / fail]
 Recommendation: [revise / approved]
 ```
 
 **Recommendation logic:**
-- `revise` if Scene Type Validation is `fail`, OR Hook Strength is `weak`, OR Cadence Label is `mismatch`, OR Hook-Insight Integrity is `fail`.
+- `revise` if Scene Type Validation is `fail`, OR Hook Lock is `mismatch`, OR Hook-Insight Integrity is `fail`.
 - `approved` if none of the above trigger.
 
 ---
 
 ## When to Run This
 
-Step 2.4a in the content generation workflow. After scripting, before the Retention Specialist (Step 2.4b). If `Recommendation: revise`, fix the script and re-run before moving on to retention optimization or asset collection or VO generation. Do not generate paid assets (Kling clips, ElevenLabs VO) against a script that hasn't passed this gate.
+Step 3.5 in the content generation workflow. After the Copywriter writes the full body (Step 3), before the Retention Specialist (Step 4). If `Recommendation: revise`, fix the script and re-run before moving on to retention optimization or asset collection or VO generation. Do not generate paid assets (Kling clips, ElevenLabs VO) against a script that hasn't passed this gate.
 
 **Max 2 reviews per reel.** If still `revise` after the 2nd pass, stop and escalate to the user instead of re-running again — a 3rd failure usually signals a thesis or format mismatch, not a wording fix.
 
@@ -168,20 +143,19 @@ Step 2.4a in the content generation workflow. After scripting, before the Retent
 
 `Recommendation: approved` above is a **content-quality** verdict — it means the script itself is epistemologically sound. It is not the user's sign-off to spend money, and it is not the end of the scripting pipeline.
 
-Every reel's metadata block carries a separate `**Status:**` field with this progression: `SCRIPTED` → `RETENTION` → `NATURALIZER` → `APPROVED`.
+Every reel's metadata block carries a separate `**Status:**` field. Once pre-flight returns `Recommendation: approved`, set status to `SCRIPTED`. Then proceed to Step 4 (Retention Specialist) and Step 4.5 (Naturalizer). The user reviews and approves at Gate 2 — not the pre-retention version.
 
-Set it to `SCRIPTED` once preflight returns `Recommendation: approved`. Then proceed to Step 2.4b (Retention Specialist) and Step 2.4c (Naturalizer for Reel VO). The user reviews and approves the `NATURALIZER` script — not the pre-retention version.
+Status progression: `HOOK_APPROVED` → `SCRIPTED` (after pre-flight passes) → `SCRIPT_APPROVED` (after Gate 2) → `DIRECTED` → `DIRECTIONS_APPROVED` → `RENDERED` → `PUBLISHED`.
 
-**Do not flip status to `APPROVED`, and do not run any paid API call (`vo_combined.py --confirm-paid-api-call`, `kling_batch.py`/`kling.py --confirm-paid-api-call`) until the user explicitly approves the naturalizer-signed script in conversation.** Once they do, update the field to `**Status:** APPROVED` before proceeding to VO/Kling generation.
+**Do not flip status to `SCRIPT_APPROVED`, and do not run any paid API call (`vo_combined.py --confirm-paid-api-call`, `kling_batch.py`/`kling.py --confirm-paid-api-call`) until the user explicitly approves at Gate 2.** Once they do, update the field to `**Status:** SCRIPT_APPROVED` before proceeding to visual direction.
 
 ---
 
 ## Self Review: Repair
 
-Runs during Step 2.4a when `Recommendation: revise`. Fix the flagged category, then re-run the full preflight. Cap: 2 attempts per reel — escalate to the user with both PRE-FLIGHT REVIEW blocks if still `revise` after the 2nd pass.
+Runs during Step 3.5 when `Recommendation: revise`. Fix the flagged category, then re-run the full preflight. Cap: 2 attempts per reel — escalate to the user with both PRE-FLIGHT REVIEW blocks if still `revise` after the 2nd pass.
 
 | Flag | Fix |
 |---|---|
-| Hook Strength: weak/medium | Rewrite the hook to create curiosity, contradiction, mistake framing, money tension, myth bust, or wrong-question framing (see §Hook Strength Test above). If the current hook family can't be made strong for this thesis, pick a different family from `hook-selection.md`. |
-| Cadence Label: mismatch | Read the hook VO and identify its actual rhetorical structure. Either rewrite the hook VO to match the declared cadence, or relabel. Then re-run Hook-Insight Integrity against the correct cadence label. |
-| Hook-Insight Integrity: fail | Identify which violation triggered the fail (promise deferred to CTA, or claim presented as fact without evidence). If deferred: rewrite the Insight segment to answer the hook before the CTA, or change the hook cadence to CONTRAST. If unsupported fact: relabel the claim as inference ("this may indicate...", "one reading of this is...") or remove it. |
+| Hook Lock: mismatch | Restore the exact hook VO from the Gate 1 record in the reel header. Do not attempt to improve or adapt — the hook was human-approved as written. If the hook is genuinely unworkable, escalate to the user rather than modifying it. |
+| Hook-Insight Integrity: fail | Identify which violation triggered the fail. If promise deferred to CTA: rewrite the Insight segment to answer the hook before the CTA. If unsupported causal claim: relabel as inference ("this may indicate...", "one reading of this is...") or remove it. |
